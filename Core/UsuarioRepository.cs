@@ -7,7 +7,7 @@ using Dapper;
 using System.Data;
 using System.Globalization;
 
-//LISTED 18_8_2023 16:56 
+//LISTED 18_8_2023 16:56  
 
 public class UsuarioRepository : IUsuarioRepository
 {
@@ -83,7 +83,7 @@ public class UsuarioRepository : IUsuarioRepository
         }
     }
 
-    public async Task<IEnumerable<UsuarioVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<UsuarioVista>> GetAllVistaAsync()
     {
         try
         {

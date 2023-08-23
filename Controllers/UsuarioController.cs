@@ -114,13 +114,13 @@ public class UsuarioController : ControllerBase
         }
     }
 
-    [HttpGet("pais/")]
+    [HttpGet("vista/")]
     //[Authorize("put:sample-role-admin-messages")]
-    public async Task<IEnumerable<UsuarioVista>> GetAllPais()
+    public async Task<IEnumerable<UsuarioVista>> GetAllVista()
     {
         try
         {
-            return await _unitOfWork.Usuarios.GetAllPaisAsync();
+            return await _unitOfWork.Usuarios.GetAllVistaAsync();
         }catch (Exception ex)
         {
             throw new Exception(ex.Message);

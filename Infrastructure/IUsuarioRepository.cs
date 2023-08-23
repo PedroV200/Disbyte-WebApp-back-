@@ -4,6 +4,6 @@ namespace WebApiSample.Infrastructure
 {
     public interface IUsuarioRepository : IGenericRepository<Usuario>
     {
-        public Task<IEnumerable<UsuarioVista>> GetAllPaisAsync();
+        public Task<IEnumerable<UsuarioVista>> GetAllVistaAsync();
     }
 }

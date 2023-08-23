@@ -62,7 +62,7 @@ public class TruckSemiRepository : ITruckSemiRepository
             }
         }
 
-    public async Task<IEnumerable<TruckSemiVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<TruckSemiVista>> GetAllVistaAsync()
     {
         try
         {

@@ -44,7 +44,7 @@ namespace WebApiSample.Core
                 return await connection.QueryAsync<Empresa>(sql);
             }
         }
-        public async Task<IEnumerable<EmpresaVista>> GetAllPaisAsync()
+        public async Task<IEnumerable<EmpresaVista>> GetAllVistaAsync()
         {
             try
             {

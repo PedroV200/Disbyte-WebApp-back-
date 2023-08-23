@@ -4,5 +4,5 @@ namespace WebApiSample.Infrastructure;
 
 public interface ITerminalRepository:IGenericRepository<Terminal>
 {
-     public Task<IEnumerable<TerminalVista>> GetAllPaisAsync();
+     public Task<IEnumerable<TerminalVista>> GetAllVistaAsync();
 }

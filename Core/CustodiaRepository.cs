@@ -49,7 +49,7 @@ public class CustodiaRepository : ICustodiaRepository
         }
     }
 
-    public async Task<IEnumerable<CustodiaVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<CustodiaVista>> GetAllVistaAsync()
     {
         try
         {

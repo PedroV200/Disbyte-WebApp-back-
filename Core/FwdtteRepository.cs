@@ -47,7 +47,7 @@ public class FwdtteRepository : IFwdtteRepository
         }
     }
 
-    public async Task<IEnumerable<FwdtteVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<FwdtteVista>> GetAllVistaAsync()
     {
         try
         {

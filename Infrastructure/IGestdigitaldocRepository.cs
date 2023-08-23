@@ -4,5 +4,5 @@ namespace WebApiSample.Infrastructure;
 
 public interface IGestDigitalDocRepository : IGenericRepository<GestDigitalDoc>
 {
-     public Task<IEnumerable<GestDigitalDocVista>> GetAllPaisAsync();
+     public Task<IEnumerable<GestDigitalDocVista>> GetAllVistaAsync();
 }

@@ -68,7 +68,7 @@ public class DespachanteRepository : IDespachanteRepository
         }
     }
 
-    public async Task<IEnumerable<DespachanteVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<DespachanteVista>> GetAllVistaAsync()
     {
         try
         {

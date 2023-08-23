@@ -4,5 +4,5 @@ namespace WebApiSample.Infrastructure;
 
 public interface IPolizaRepository : IGenericRepository<Poliza>
 {
-     public Task<IEnumerable<PolizaVista>> GetAllPaisAsync();
+     public Task<IEnumerable<PolizaVista>> GetAllVistaAsync();
 }

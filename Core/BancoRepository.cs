@@ -69,7 +69,7 @@ public class BancoRepository : IBancoRepository
     }
 
 
-    public async Task<IEnumerable<BancoVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<BancoVista>> GetAllVistaAsync()
     {
         try
         {
@@ -126,7 +126,7 @@ public class BancoRepository : IBancoRepository
         //entity.ModifiedOn=DateTime.Now;
         //entity.ModifiedOn=DateTime.Now;
         //var sql = $"UPDATE Products SET Name = '{entity.Name}', Description = '{entity.Description}', Barcode = '{entity.Barcode}', Rate = {entity.Rate}, ModifiedOn = {entity.ModifiedOn}, AddedOn = {entity.AddedOn}  WHERE Id = {entity.Id}";
-        var sql = @"UPDATE banco SET description = @description, paisregion_id = @paisregionid WHERE id = @id";
+        var sql = @"UPDATE banco SET description = @description, paisregion_id = @paisregion_id WHERE id = @id";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();

@@ -130,4 +130,18 @@ public class TarifasFleteController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("vista/")]
+    public async Task<IEnumerable<TarifasFleteVista>> GetAllVista()
+    {
+        try
+        {
+            return await _unitOfWork.TarifFlete.GetAllVistaAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    
 }

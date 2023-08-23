@@ -47,7 +47,7 @@ public class DepositoRepository : IDepositoRepository
         }
     }
 
-    public async Task<IEnumerable<DepositoVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<DepositoVista>> GetAllVistaAsync()
     {
         try
         {

@@ -50,7 +50,7 @@ public class TerminalRepository : ITerminalRepository
         }
     }
 
-    public async Task<IEnumerable<TerminalVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<TerminalVista>> GetAllVistaAsync()
     {
         try
         {
