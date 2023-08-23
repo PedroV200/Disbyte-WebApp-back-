@@ -47,7 +47,7 @@ public class PolizaRepository : IPolizaRepository
         }
     }
 
-    public async Task<IEnumerable<PolizaVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<PolizaVista>> GetAllVistaAsync()
     {
         try
         {

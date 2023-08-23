@@ -118,13 +118,13 @@ public class GestDigitalDocController : ControllerBase
         }
     }
 
-    [HttpGet("pais/")]
+    [HttpGet("vista/")]
     //[Authorize("put:sample-role-admin-messages")]
     public async Task<IEnumerable<GestDigitalDocVista>> GetAllPais()
     {
         try
         {
-            return await _unitOfWork.GestDigDoc.GetAllPaisAsync();
+            return await _unitOfWork.GestDigDoc.GetAllVistaAsync();
         }catch (Exception ex)
         {
             throw new Exception(ex.Message);

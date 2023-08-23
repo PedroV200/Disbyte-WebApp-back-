@@ -47,7 +47,7 @@ public class FleteRepository : IFleteRepository
         }
     }
 
-    public async Task<IEnumerable<FleteVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<FleteVista>> GetAllVistaAsync()
     {
         try
         {

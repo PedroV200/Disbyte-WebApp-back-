@@ -4,5 +4,5 @@ namespace WebApiSample.Infrastructure;
 
 public interface ICustodiaRepository : IGenericRepository<Custodia>
 {
-     public Task<IEnumerable<CustodiaVista>> GetAllPaisAsync();
+     public Task<IEnumerable<CustodiaVista>> GetAllVistaAsync();
 }

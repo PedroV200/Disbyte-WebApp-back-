@@ -4,5 +4,5 @@ namespace WebApiSample.Infrastructure;
 
 public interface IFwdtteRepository:IGenericRepository<Fwdtte>
 {
-    public Task<IEnumerable<FwdtteVista>> GetAllPaisAsync();
+    public Task<IEnumerable<FwdtteVista>> GetAllVistaAsync();
 }

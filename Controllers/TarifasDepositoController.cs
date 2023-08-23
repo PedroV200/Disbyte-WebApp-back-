@@ -124,4 +124,17 @@ public class TarifasDepositoController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("vista/")]
+    public async Task<IEnumerable<TarifasDepositoVista>>GetAllVista()
+    {
+        try
+        {
+            return await _unitOfWork.TarifasDepositos.GetAllVistaAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

@@ -132,13 +132,13 @@ public class BancoController : ControllerBase
         }
     }
 
-    [HttpGet("pais/")]
+    [HttpGet("vista/")]
     //[Authorize("put:sample-role-admin-messages")]
     public async Task<IEnumerable<BancoVista>> GetAllPais()
     {
         try
         {
-            return await _unitOfWork.Bancos.GetAllPaisAsync();
+            return await _unitOfWork.Bancos.GetAllVistaAsync();
         }catch (Exception ex)
         {
             throw new Exception(ex.Message);

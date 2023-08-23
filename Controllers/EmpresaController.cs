@@ -118,13 +118,13 @@ namespace WebApiSample.Controllers
             }
         }
 
-        [HttpGet("pais/")]
+        [HttpGet("vista/")]
         //[Authorize("put:sample-role-admin-messages")]
-        public async Task<IEnumerable<EmpresaVista>> GetAllPais()
+        public async Task<IEnumerable<EmpresaVista>>GetAllVista()
         {
             try
             {
-                return await _unitOfWork.Empresas.GetAllPaisAsync();
+                return await _unitOfWork.Empresas.GetAllVistaAsync();
             }
             catch (Exception ex)
             {

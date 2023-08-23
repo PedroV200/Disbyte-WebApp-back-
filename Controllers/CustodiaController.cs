@@ -115,13 +115,13 @@ public class CustodiaController : ControllerBase
         }
     }
 
-    [HttpGet("pais/")]
+    [HttpGet("vista/")]
     //[Authorize("put:sample-role-admin-messages")]
-    public async Task<IEnumerable<CustodiaVista>> GetAllPais()
+    public async Task<IEnumerable<CustodiaVista>>GetAllVista()
     {
         try
         {
-            return await _unitOfWork.Custodias.GetAllPaisAsync();
+            return await _unitOfWork.Custodias.GetAllVistaAsync();
         }catch (Exception ex)
         {
             throw new Exception(ex.Message);

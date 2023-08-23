@@ -47,7 +47,7 @@ public class GestDigitalDocRepository : IGestDigitalDocRepository
         }
     }
 
-    public async Task<IEnumerable<GestDigitalDocVista>> GetAllPaisAsync()
+    public async Task<IEnumerable<GestDigitalDocVista>> GetAllVistaAsync()
     {
         try
         {
