@@ -115,4 +115,17 @@ public class DespachanteController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("pais/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<DespachanteVista>> GetAllPais()
+    {
+        try
+        {
+            return await _unitOfWork.Despachantes.GetAllPaisAsync();
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

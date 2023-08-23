@@ -46,6 +46,23 @@ public class PolizaRepository : IPolizaRepository
             return await connection.QueryAsync<Poliza>(sql);
         }
     }
+
+    public async Task<IEnumerable<PolizaVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select polizas.*,paisregion.description as pais from polizas inner join paisregion on polizas.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<PolizaVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     public async Task<Poliza> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM polizas WHERE id = {id}";

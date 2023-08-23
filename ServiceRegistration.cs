@@ -14,7 +14,7 @@ public static class ServiceRegistration
         services.AddTransient<ITerminalRepository, TerminalRepository>();
         services.AddTransient<IFleteRepository, FleteRepository>();
         services.AddTransient<ICustodiaRepository, CustodiaRepository>();
-        services.AddTransient<IGestdigitaldocRepository, GestdigitaldocRepository>();
+        services.AddTransient<IGestDigitalDocRepository, GestDigitalDocRepository>();
         services.AddTransient<IEmpresaRepository, EmpresaRepository>();
         services.AddTransient<ITruckSemiRepository, TruckSemiRepository>();
         services.AddTransient<ICanalRepository, CanalRepository>();

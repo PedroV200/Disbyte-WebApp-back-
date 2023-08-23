@@ -115,4 +115,17 @@ public class FwdtteController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("pais/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<FwdtteVista>> GetAllPais()
+    {
+        try
+        {
+            return await _unitOfWork.Fwds.GetAllPaisAsync();
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

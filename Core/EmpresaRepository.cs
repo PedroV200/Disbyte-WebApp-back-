@@ -44,6 +44,23 @@ namespace WebApiSample.Core
                 return await connection.QueryAsync<Empresa>(sql);
             }
         }
+        public async Task<IEnumerable<EmpresaVista>> GetAllPaisAsync()
+        {
+            try
+            {
+                var sql = "select empresas.*,paisregion.description as pais from empresas inner join paisregion on empresas.paisregion_id=paisregion.id";
+                using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+                {
+                    connection.Open();
+                    return await connection.QueryAsync<EmpresaVista>(sql);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+    }
+
         public async Task<Empresa> GetByIdAsync(int id)
         {
             var sql = $"SELECT * FROM empresas WHERE id = {id}";

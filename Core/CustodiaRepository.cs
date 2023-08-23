@@ -48,6 +48,23 @@ public class CustodiaRepository : ICustodiaRepository
             return await connection.QueryAsync<Custodia>(sql);
         }
     }
+
+    public async Task<IEnumerable<CustodiaVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select custodia.*,paisregion.description as pais from custodia inner join paisregion on custodia.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<CustodiaVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     public async Task<Custodia> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM custodia WHERE id = {id}";

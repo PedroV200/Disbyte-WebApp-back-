@@ -13,7 +13,7 @@ public class UnitOfWork : IUnitOfWork
                       ITerminalRepository TermimalRepository,
                       IFleteRepository FleteRepository,
                       ICustodiaRepository CustodiaRepository,
-                      IGestdigitaldocRepository GestDigDocRepository,
+                      IGestDigitalDocRepository GestDigDocRepository,
                       IEmpresaRepository EmpresaRepository,
                       ITruckSemiRepository TruckSemiRepo,
                       IDepositoRepository DepositoRepository,
@@ -92,7 +92,7 @@ public class UnitOfWork : IUnitOfWork
     public ITerminalRepository Terminales {get; }
     public IFleteRepository Fletes {get; }
     public ICustodiaRepository Custodias {get; }
-    public IGestdigitaldocRepository GestDigDoc {get; }
+    public IGestDigitalDocRepository GestDigDoc {get; }
     public IEmpresaRepository Empresas { get; }
     public ITruckSemiRepository Camiones { get; }
     public IDepositoRepository Depositos { get; }

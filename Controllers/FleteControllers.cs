@@ -117,4 +117,17 @@ public class FleteController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("pais/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<FleteVista>> GetAllPais()
+    {
+        try
+        {
+            return await _unitOfWork.Fletes.GetAllPaisAsync();
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

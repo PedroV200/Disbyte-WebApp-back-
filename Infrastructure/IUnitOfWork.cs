@@ -12,7 +12,7 @@ public interface IUnitOfWork
     ITerminalRepository Terminales {get; }
     IFleteRepository    Fletes {get; }
     ICustodiaRepository Custodias {get; }
-    IGestdigitaldocRepository GestDigDoc {get; }
+    IGestDigitalDocRepository GestDigDoc {get; }
     IEmpresaRepository Empresas { get; }
     ITruckSemiRepository Camiones { get; }
 

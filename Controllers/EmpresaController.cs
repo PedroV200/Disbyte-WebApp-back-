@@ -117,5 +117,19 @@ namespace WebApiSample.Controllers
                 throw new Exception(ex.Message);
             }
         }
+
+        [HttpGet("pais/")]
+        //[Authorize("put:sample-role-admin-messages")]
+        public async Task<IEnumerable<EmpresaVista>> GetAllPais()
+        {
+            try
+            {
+                return await _unitOfWork.Empresas.GetAllPaisAsync();
+            }
+            catch (Exception ex)
+            {
+            throw new Exception(ex.Message);
+            }
+    }
     }
 }

@@ -46,6 +46,23 @@ public class FleteRepository : IFleteRepository
             return await connection.QueryAsync<Flete>(sql);
         }
     }
+
+    public async Task<IEnumerable<FleteVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select flete.*,paisregion.description as pais from flete inner join paisregion on flete.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<FleteVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     public async Task<Flete> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM flete WHERE id = {id}";

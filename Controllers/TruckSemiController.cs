@@ -114,6 +114,19 @@ namespace WebApiSample.Controllers
                 throw new Exception(ex.Message);
             }
         }
+        [HttpGet("pais/")]
+        //[Authorize("put:sample-role-admin-messages")]
+        public async Task<IEnumerable<TruckSemiVista>> GetAllPais()
+        {
+            try
+            {
+                return await _unitOfWork.Camiones.GetAllPaisAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
     }
 }

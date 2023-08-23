@@ -113,4 +113,17 @@ public class UsuarioController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("pais/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<UsuarioVista>> GetAllPais()
+    {
+        try
+        {
+            return await _unitOfWork.Usuarios.GetAllPaisAsync();
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

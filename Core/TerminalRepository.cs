@@ -7,6 +7,9 @@ using Dapper;
 using System.Data;
 using System.Globalization;
 
+// LISTED 23_8_2023 11:26AM. Todos los controllers devuelven el pais (nombre) añadido a la tabla
+// via un endpoint. 
+
 public class TerminalRepository : ITerminalRepository
 {
  private readonly IConfiguration configuration;
@@ -44,6 +47,23 @@ public class TerminalRepository : ITerminalRepository
             connection.Open();
 
             return await connection.QueryAsync<Terminal>(sql);
+        }
+    }
+
+    public async Task<IEnumerable<TerminalVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select terminal.*,paisregion.description as pais from terminal inner join paisregion on terminal.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<TerminalVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
         }
     }
     public async Task<Terminal> GetByIdAsync(int id)

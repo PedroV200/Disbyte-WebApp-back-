@@ -61,6 +61,23 @@ public class TruckSemiRepository : ITruckSemiRepository
                 return await connection.QueryAsync<TruckSemi>(sql);
             }
         }
+
+    public async Task<IEnumerable<TruckSemiVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select trucksemi.*,paisregion.description as pais from trucksemi inner join paisregion on trucksemi.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<TruckSemiVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
         public async Task<TruckSemi> GetByIdAsync(int id)
         {
             var sql = $"SELECT * FROM trucksemi WHERE id = {id}";

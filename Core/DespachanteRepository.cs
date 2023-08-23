@@ -67,6 +67,23 @@ public class DespachanteRepository : IDespachanteRepository
             throw new Exception(ex.Message);
         }
     }
+
+    public async Task<IEnumerable<DespachanteVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select despachantes.*,paisregion.description as pais from despachantes inner join paisregion on despachantes.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<DespachanteVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     public async Task<Despachante> GetByIdAsync(int id)
     {
         try

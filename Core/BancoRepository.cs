@@ -67,6 +67,24 @@ public class BancoRepository : IBancoRepository
             throw new Exception(ex.Message);
         }
     }
+
+
+    public async Task<IEnumerable<BancoVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select banco.*,paisregion.description as pais from banco inner join paisregion on banco.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<BancoVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     public async Task<Banco> GetByIdAsync(int id)
     {
         try
