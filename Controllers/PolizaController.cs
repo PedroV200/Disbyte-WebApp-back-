@@ -116,4 +116,17 @@ public class PolizaController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("pais/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<PolizaVista>> GetAllPais()
+    {
+        try
+        {
+            return await _unitOfWork.Polizas.GetAllPaisAsync();
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

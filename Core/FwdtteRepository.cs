@@ -46,6 +46,23 @@ public class FwdtteRepository : IFwdtteRepository
             return await connection.QueryAsync<Fwdtte>(sql);
         }
     }
+
+    public async Task<IEnumerable<FwdtteVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select fwdtte.*,paisregion.description as pais from fwdtte inner join paisregion on fwdtte.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<FwdtteVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     public async Task<Fwdtte> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM fwdtte WHERE id = {id}";

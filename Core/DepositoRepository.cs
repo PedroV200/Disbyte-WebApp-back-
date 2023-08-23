@@ -46,6 +46,23 @@ public class DepositoRepository : IDepositoRepository
             return await connection.QueryAsync<Deposito>(sql);
         }
     }
+
+    public async Task<IEnumerable<DepositoVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select depositos.*,paisregion.description as pais from depositos inner join paisregion on depositos.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<DepositoVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     public async Task<Deposito> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM depositos WHERE id = {id}";

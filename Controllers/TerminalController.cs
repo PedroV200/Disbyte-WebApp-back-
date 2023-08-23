@@ -114,4 +114,17 @@ public class TerminalController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("pais/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<TerminalVista>> GetAllPais()
+    {
+        try
+        {
+            return await _unitOfWork.Terminales.GetAllPaisAsync();
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

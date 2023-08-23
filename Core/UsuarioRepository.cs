@@ -82,6 +82,23 @@ public class UsuarioRepository : IUsuarioRepository
             throw new Exception(ex.Message);
         }
     }
+
+    public async Task<IEnumerable<UsuarioVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select usuarios.*,paisregion.description as pais from usuarios inner join paisregion on usuarios.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<UsuarioVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     public async Task<Usuario> GetByIdAsync(int id)
     {
         try

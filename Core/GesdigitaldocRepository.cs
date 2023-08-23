@@ -7,14 +7,14 @@ using Dapper;
 using System.Data;
 using System.Globalization;
 
-public class GestdigitaldocRepository : IGestdigitaldocRepository
+public class GestDigitalDocRepository : IGestDigitalDocRepository
 {
  private readonly IConfiguration configuration;
-    public GestdigitaldocRepository(IConfiguration configuration)
+    public GestDigitalDocRepository(IConfiguration configuration)
     {
         this.configuration = configuration;
     }
-    public async Task<int> AddAsync(Gestdigitaldoc entity)
+    public async Task<int> AddAsync(GestDigitalDoc entity)
     {
         var sql = $"INSERT INTO gestdigdoc (description,paisregion_id) VALUES ('{entity.description}',{entity.paisregion_id})";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
@@ -36,27 +36,44 @@ public class GestdigitaldocRepository : IGestdigitaldocRepository
             return result;
         }
     }
-    public async Task<IEnumerable<Gestdigitaldoc>> GetAllAsync()
+    public async Task<IEnumerable<GestDigitalDoc>> GetAllAsync()
     {
         var sql = "SELECT * FROM gestdigdoc";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();
 
-            return await connection.QueryAsync<Gestdigitaldoc>(sql);
+            return await connection.QueryAsync<GestDigitalDoc>(sql);
         }
     }
-    public async Task<Gestdigitaldoc> GetByIdAsync(int id)
+
+    public async Task<IEnumerable<GestDigitalDocVista>> GetAllPaisAsync()
+    {
+        try
+        {
+            var sql = "select gestdigdoc.*,paisregion.description as pais from gestdigdoc inner join paisregion on gestdigdoc.paisregion_id=paisregion.id";
+            using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                connection.Open();
+
+                return await connection.QueryAsync<GestDigitalDocVista>(sql);
+            }
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<GestDigitalDoc> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM gestdigdoc WHERE id = {id}";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();
-            var result = await connection.QuerySingleOrDefaultAsync<Gestdigitaldoc>(sql);
+            var result = await connection.QuerySingleOrDefaultAsync<GestDigitalDoc>(sql);
             return result;
         }
     }
-    public async Task<int> UpdateAsync(Gestdigitaldoc entity)
+    public async Task<int> UpdateAsync(GestDigitalDoc entity)
     {
         //entity.ModifiedOn=DateTime.Now;
         //entity.ModifiedOn=DateTime.Now;

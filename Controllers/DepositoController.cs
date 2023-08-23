@@ -116,4 +116,17 @@ public class DepositoController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("pais/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<DepositoVista>> GetAllPais()
+    {
+        try
+        {
+            return await _unitOfWork.Depositos.GetAllPaisAsync();
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

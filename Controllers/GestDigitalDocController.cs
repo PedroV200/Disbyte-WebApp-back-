@@ -20,7 +20,7 @@ public class GestDigitalDocController : ControllerBase
     }
 
     [HttpPost(Name = "Post GestDigitalDoc")]
-    public async Task<IActionResult>Post(Gestdigitaldoc entity)
+    public async Task<IActionResult>Post(GestDigitalDoc entity)
     {
         try
         {
@@ -40,7 +40,7 @@ public class GestDigitalDocController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult>Put(int id,Gestdigitaldoc entity)
+    public async Task<IActionResult>Put(int id,GestDigitalDoc entity)
     {
         try
         {
@@ -85,7 +85,7 @@ public class GestDigitalDocController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Gestdigitaldoc>> Get(int id)
+    public async Task<ActionResult<GestDigitalDoc>> Get(int id)
     {
         try
         {
@@ -106,13 +106,26 @@ public class GestDigitalDocController : ControllerBase
     }
 
     [HttpGet(Name = "GetAll Gestdigitaldoc")]
-    public async Task<IEnumerable<Gestdigitaldoc>> GetAll()
+    public async Task<IEnumerable<GestDigitalDoc>> GetAll()
     {
         try
         {
             return await _unitOfWork.GestDigDoc.GetAllAsync();
         }
         catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    [HttpGet("pais/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<GestDigitalDocVista>> GetAllPais()
+    {
+        try
+        {
+            return await _unitOfWork.GestDigDoc.GetAllPaisAsync();
+        }catch (Exception ex)
         {
             throw new Exception(ex.Message);
         }
