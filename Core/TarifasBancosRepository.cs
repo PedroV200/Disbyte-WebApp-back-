@@ -71,6 +71,19 @@ public class TarifasBancoRepository : ITarifasBancoRepository
             return await connection.QueryAsync<TarifasBanco>(sql);
         }
     }
+
+    public async Task<IEnumerable<TarifasBancoVista>>GetAllVistaAsync()
+    {
+        var sql= @"select tarifasbancos.*, banco.description as banco, paisregion.description as pais
+                    from tarifasbancos
+                    inner join banco on tarifasbancos.banco_id=banco.id 
+                    inner join paisregion  on tarifasbancos.paisregion_id=paisregion.id ";
+        using(var connection =new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+            return await connection.QueryAsync<TarifasBancoVista>(sql);
+        }
+    }
     public async Task<TarifasBanco> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasbancos WHERE id = {id}";

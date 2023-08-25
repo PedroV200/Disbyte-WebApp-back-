@@ -29,7 +29,7 @@ public class EstimateDetailService: IEstimateDetailService
 
     public async Task<NCM> lookUp_NCM_Data(EstimateDetail estDetails)
     {
-        NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm); 
+        NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm_id); 
         if(myNCM!=null)
         {
             return myNCM;
@@ -39,7 +39,7 @@ public class EstimateDetailService: IEstimateDetailService
 
     public async Task<double> lookUpDie(EstimateDetail estDetails)
     {
-        NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm); 
+        NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm_id); 
         if(myNCM!=null)
         {
             return myNCM.die;
@@ -117,7 +117,7 @@ public class EstimateDetailService: IEstimateDetailService
 
     public double CalcDerechos(EstimateDetail est)
     {
-        return est.totalcif*est.ncm_arancelgrav;
+        return est.totalcif*est.ncm_arancel;
     }
     // Conforme COL V
     public double CalcTasaEstad061(EstimateDetail est)
@@ -157,7 +157,7 @@ public class EstimateDetailService: IEstimateDetailService
 
     public async Task<double> lookUpIVA(EstimateDetail estDetails)
     {
-            NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm); 
+            NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm_id); 
             // VER COLUMNA U (U15 en adelante).
             // Existe el te ?. No puedo tener un te "EN BLANCO" como el XLS. Lo ideal que x defecto tengan un valor negativo
             // como para indicar que esta "en blanco".
@@ -175,7 +175,7 @@ public class EstimateDetailService: IEstimateDetailService
 
     public async Task<double> lookUpIVAadic(EstimateDetail estDetails)
     {
-            NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm); 
+            NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm_id); 
             // VER COLUMNA U (U15 en adelante).
             // Existe el te ?. No puedo tener un te "EN BLANCO" como el XLS. Lo ideal que x defecto tengan un valor negativo
             // como para indicar que esta "en blanco".
@@ -263,9 +263,9 @@ public class EstimateDetailService: IEstimateDetailService
     }
     public double CalcOverHeadUnitUSS(EstimateDetail estD)
     {
-        if(estD.preciounit_uss!=0)
+        if(estD.precio_u!=0)
         {
-            return estD.totalgastosloc_uss/estD.preciounit_uss;
+            return estD.totalgastosloc_uss/estD.precio_u;
         }
         else
         {
@@ -275,11 +275,11 @@ public class EstimateDetailService: IEstimateDetailService
 
     public double CalcCostoUnitUSS(EstimateDetail estD)
     {
-        return estD.preciounit_uss+estD.totalgastosloc_uss;
+        return estD.precio_u+estD.totalgastosloc_uss;
     }
 
     public double CalcCostoUnit(EstimateDetail estD, double dolar)
     {
-        return estD.costounituss*dolar;
+        return estD.costo_u*dolar;
     }
 }

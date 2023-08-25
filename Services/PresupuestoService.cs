@@ -63,17 +63,11 @@ public class PresupuestoService:IPresupuestoService
         miEst.estHeaderDB.estvers=1;
 
         // Grabo la estampa de tiempo en el header
-        miEst.estHeaderDB.hTimeStamp=DateTime.Now;
-        // Preparo un string solo con la fecha para consultar a la DB
-        string fecha=miEst.estHeaderDB.hTimeStamp.ToString("yyyy-MM-dd");
-        // Busco la lista de tarifas mas cercana en fecha. La consulta es basicamente para obtener el id de la misma
-        // y cargarlo en el estHeader. Se maneja todo como FK. Es la uinica vez que se consultara por fecha
-        TarifasByDate myTar=await _unitOfWork.TarifasPorFecha.GetByNearestDateAsync(fecha);
-        if(myTar==null)
-        {
-            return null;
-        }
-        miEst.estHeaderDB.tarifasbydateid=myTar.id;
+        miEst.estHeaderDB.htimestamp=DateTime.Now;
+
+
+
+        //#-----ARREGLAR------##### => miEst.estHeaderDB.tarifasbydateid=myTar.id;
 
         // Cuando me pasan el presupuesto con dolar billete "-1" es por que debo extraerlo
         // desde la base TC-CDA. 
@@ -130,7 +124,7 @@ public class PresupuestoService:IPresupuestoService
         // Ahora si, inserto los detail uno a uno ne la base
         foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
         {
-            ed.estheaderid=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
+            ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
             result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
         }
         
@@ -142,9 +136,9 @@ public class PresupuestoService:IPresupuestoService
         dbutils dbhelper=new dbutils(_unitOfWork);
         EstimateV2 ret=new EstimateV2();
         // Grabo la estampa de tiempo en el header
-        miEst.estHeaderDB.hTimeStamp=DateTime.Now;
+        miEst.estHeaderDB.htimestamp=DateTime.Now;
         // Preparo un string solo con la fecha para consultar a la DB
-        string fecha=miEst.estHeaderDB.hTimeStamp.ToString("yyyy-MM-dd");
+        string fecha=miEst.estHeaderDB.htimestamp.ToString("yyyy-MM-dd");
         // Busco la lista de tarifas mas cercana en fecha. La consulta es basicamente para obtener el id de la misma
         // y cargarlo en el estHeader. Se maneja todo como FK. Es la uinica vez que se consultara por fecha
         TarifasByDate myTar=await _unitOfWork.TarifasPorFecha.GetByNearestDateAsync(fecha);
@@ -152,7 +146,7 @@ public class PresupuestoService:IPresupuestoService
         {
             return null;
         }
-        miEst.estHeaderDB.tarifasbydateid=myTar.id;
+        //#-----ARREGLAR------##### =>miEst.estHeaderDB.tarifasbydateid=myTar.id;
 
         // Cuando me pasan el presupuesto con dolar billete "-1" es por que debo extraerlo
         // desde la base TC-CDA. 
@@ -223,9 +217,9 @@ public class PresupuestoService:IPresupuestoService
         }
 
 // Grabo la estampa de tiempo en el header
-        miEst.estHeaderDB.hTimeStamp=DateTime.Now;
+        miEst.estHeaderDB.htimestamp=DateTime.Now;
         // Preparo un string solo con la fecha para consultar a la DB
-        string fecha=miEst.estHeaderDB.hTimeStamp.ToString("yyyy-MM-dd");
+        string fecha=miEst.estHeaderDB.htimestamp.ToString("yyyy-MM-dd");
         // Busco la lista de tarifas mas cercana en fecha. La consulta es basicamente para obtener el id de la misma
         // y cargarlo en el estHeader. Se maneja todo como FK. Es la uinica vez que se consultara por fecha
         TarifasByDate myTar=await _unitOfWork.TarifasPorFecha.GetByNearestDateAsync(fecha);
@@ -233,7 +227,7 @@ public class PresupuestoService:IPresupuestoService
         {
             return null;
         }
-        miEst.estHeaderDB.tarifasbydateid=myTar.id;
+        //#-----ARREGLAR------##### =>miEst.estHeaderDB.tarifasbydateid=myTar.id;
 
         // Cuando me pasan el presupuesto con dolar billete "-1" es por que debo extraerlo
         // desde la base TC-CDA. 
@@ -277,7 +271,7 @@ public class PresupuestoService:IPresupuestoService
         }
 
         // Le pongo la fecha / hora !!!!!!
-        ret.estHeader.hTimeStamp=DateTime.Now;
+        ret.estHeader.htimestamp=DateTime.Now;
 
         // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
         // En la base no se guardan calculos,  por lo que debi convertir el estimate V2 a estimate DB y guardarlo.
@@ -292,7 +286,7 @@ public class PresupuestoService:IPresupuestoService
         // Ahora si, inserto los detail uno a uno ne la base
         foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
         {
-            ed.estheaderid=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
+            ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
             result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
         }
         

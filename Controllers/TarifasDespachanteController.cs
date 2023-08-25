@@ -124,4 +124,17 @@ public class TarifasDespachanteController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("vista/")]
+    public async Task<IEnumerable<TarifasDespachanteVista>>GetAllVista()
+    {
+        try
+        {
+            return await _unitOfWork.TarifDespa.GetAllVistaAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

@@ -88,7 +88,7 @@ public class TarifasDepositoRepository : ITarifasDepositoRepository
         }
     }
 
-        public async Task<IEnumerable<TarifasDepositoVista>> GetAllVistaAsync()
+    public async Task<IEnumerable<TarifasDepositoVista>> GetAllVistaAsync()
     {
         var sql = @"select tarifasdepositos.*, depositos.description as deposito, cargas.description as freight, paisregion.description as pais,trucksemi.description as semi 
                     from tarifasdepositos 

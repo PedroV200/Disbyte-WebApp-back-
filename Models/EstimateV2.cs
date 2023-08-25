@@ -4,15 +4,20 @@ namespace WebApiSample.Models;
 public class EstimateV2
 {   
     public EstimateHeaderDB estHeader{get;set;}
-    public double totalfreight_cost{get;set;}
-    public CONSTANTES constantes{get;set;} 
+    public double totalfreight_cost;
+    public double freight_insurance_cost;
+    public Carga miCarga;
+    public Tarifas misTarifas;
+    
+    public CONSTANTES constantes;
     public List<EstimateDetail> estDetails {get; set;}
 
     public EstimateV2()
     {
         this.estDetails=new List<EstimateDetail>();
-
         this.estHeader=new EstimateHeaderDB();
         this.constantes=new CONSTANTES();
+        this.misTarifas=new Tarifas();
+        this.miCarga=new Carga();
     }
 }
