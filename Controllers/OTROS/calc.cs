@@ -53,7 +53,7 @@ public class calc
         }*/
 
         // Cargo la sumatoria de los factores de cada provincia segun lo requerido por los calculos 
-        myEstV2.estHeader.iibbtotal=await _unitOfWork.IIBBs.GetSumFactores();
+        myEstV2.estHeader.iibb_total=await _unitOfWork.IIBBs.GetSumFactores();
 
         // Hago algunas cuentas.
         // Calculo el peso total por articulo
@@ -64,7 +64,7 @@ public class calc
             haltError=_estService.getLastError();
             return null;
         }
-        myEstV2.estHeader.gw_grandtotal=_estService.sumPesoTotal(myEstV2);
+        myEstV2.estHeader.gw_grand_total=_estService.sumPesoTotal(myEstV2);
 
         // COL K
         myEstV2=_estService.CalcCbmTotal(myEstV2);
@@ -87,7 +87,7 @@ public class calc
         // COL L. Calculo el fob total por articulo
         myEstV2=_estService.CalcFobTotal(myEstV2);
         // CELDA L43. Sumo todos los fob totales. Sumatoria de L15-L41 que se copia en celda C3
-        myEstV2.estHeader.fob_grandtotal=_estService.sumFobTotal(myEstV2);
+        myEstV2.estHeader.fob_grand_total=_estService.sumFobTotal(myEstV2);
         // CELDA C5 que es funcion del valor FOB
         myEstV2=_estService.CalcSeguroTotal(myEstV2);
         // CELDA C4. Traigo la tarifa del flete desde BASE_TARIFAS por fowarder y tipo cont
@@ -304,7 +304,7 @@ public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
 
        // Proceso todos los gastos proyectados.
         myEstV2=await _estService.calcularGastosProyecto(myEstV2);
-        if(myEstV2.estHeader.totalgastosloc_uss<0)
+        if(myEstV2.estHeader.gastos_loc_total<0)
         {
             haltError=_estService.getLastError();
             return null;

@@ -23,7 +23,7 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
         var sql = $@"INSERT INTO tarifasdespachentes 
                 (  
                     description,
-                    depachantes_id,
+                    despachantes_id,
                     paisregion_id,
                     cargo_fijo,
                     cargo_variable,
@@ -36,7 +36,7 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
                     ) 
                             VALUES 
                                     ('{entity.description}',
-                                      {entity.depachantes_id},
+                                      {entity.despachantes_id},
                                       {entity.paisregion_id},
                                      '{entity.cargo_fijo.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                      '{entity.cargo_variable.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
@@ -78,6 +78,20 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
             return await connection.QueryAsync<TarifasDespachante>(sql);
         }
     }
+
+    public async Task<IEnumerable<TarifasDespachanteVista>> GetAllVistaAsync()
+    {
+        var sql = @"select tarifasdespachantes.*, despachantes.description as despachante, paisregion.description as pais
+                    from tarifasdespachantes
+                    inner join despachantes on tarifasdespachantes.despachantes_id=despachantes.id 
+                    inner join paisregion  on tarifasdespachantes.paisregion_id=paisregion.id ";
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasDespachanteVista>(sql);
+        }
+    }
     public async Task<TarifasDespachante> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasdespachantes WHERE id = {id}";
@@ -97,7 +111,7 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
         var sql = @"UPDATE tarifasdespachantes SET 
                                 
                                 description = @description,
-                                depachantes_id = @depachantes_id,
+                                despachantes_id = @despachantes_id,
                                 paisregion_id = @paisregion_id,
                                 cargo_fijo = @cargo_fijo,
                                 cargo_variable = @cargo_variable,

@@ -4,7 +4,7 @@ using WebApiSample.Infrastructure;
 using WebApiSample.Core;
 namespace WebApiSample.Controllers; 
 
-// LISTED 8/8/2023 10:14AM
+// LISTED 8/8/2023 10:14AM 
 
 [ApiController]
 [Route("[controller]")]
@@ -118,6 +118,19 @@ public class TarifasBancosController : ControllerBase
         try
         {
             return await _unitOfWork.TarifBancos.GetByNearestDateAsync(fechahora);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    [HttpGet("vista/")]
+    public async Task<IEnumerable<TarifasBancoVista>>GetallVista()
+    {
+        try
+        {
+            return await _unitOfWork.TarifBancos.GetAllVistaAsync();
         }
         catch (Exception ex)
         {

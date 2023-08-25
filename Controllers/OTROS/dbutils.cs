@@ -1,6 +1,8 @@
 using WebApiSample.Models;
 using WebApiSample.Infrastructure;
 
+// LISTED 25_8_2023 17:39 - cambios para Version 3C
+  
 public class dbutils
 {
     public IUnitOfWork _unitOfWork;
@@ -91,36 +93,67 @@ public class dbutils
         foreach(EstimateDetailDB edb in estimateDB.estDetailsDB)
         {
             EstimateDetail tmp=new EstimateDetail();
+
             tmp.id=edb.id;
-            tmp.modelo=edb.modelo;
-            tmp.oemprovee=edb.oemprovee;
+            tmp.estimateheader_id=edb.estimateheader_id;
+            tmp.proveedores_id=edb.proveedores_id;
             tmp.sku=edb.sku;
+            tmp.description=edb.description;
             tmp.imageurl=edb.imageurl;
-            tmp.ncm=edb.ncm;
             tmp.exw=edb.exw;
             tmp.fobunit=edb.fobunit;
+            tmp.fobunit_adj=edb.fobunit_adj;
+            tmp.fobunit_adj_description=edb.fobunit_adj_description;
             tmp.qty=edb.qty;
             tmp.pcsctn=edb.pcsctn;
             tmp.cbmctn=edb.cbmctn;
             tmp.gwctn=edb.gwctn;
-            tmp.str_sp1=edb.str_sp1;
-            tmp.str_sp2=edb.str_sp2;
-            tmp.val_sp1=edb.val_sp1;
-            tmp.val_sp2=edb.val_sp2;
-            tmp.val_sp3=edb.calc_sp3;
-            tmp.estheaderid=edb.estheaderid;
-            tmp.imp_sp1=edb.imp_sp1;
-            tmp.imp_sp2=edb.imp_sp2;
-            tmp.imp_sp3=edb.imp_sp3;
-            tmp.ncm_arancelgrav=edb.ncm_arancelgrav;
+            tmp.freight_charge_adj=edb.freight_charge_adj;
+            tmp.freight_insurance_adj=edb.freight_insurance_adj;
+            tmp.cif=edb.cif;
+            tmp.cif_adj=edb.cif_adj;
+            tmp.cif_adj_description=edb.cif_adj_description;
+            tmp.ncm_id=edb.ncm_id;
+            tmp.ncm_arancel=edb.ncm_arancel;
             tmp.ncm_te_dta_otro=edb.ncm_te_dta_otro;
             tmp.ncm_iva=edb.ncm_iva;
             tmp.ncm_ivaad=edb.ncm_ivaad;
             tmp.gcias=edb.gcias;
-            tmp.calc_sp1=edb.calc_sp1;
-            tmp.calc_sp2=edb.calc_sp2;
-            tmp.calc_sp3=edb.calc_sp3;
-
+            tmp.ncm_sp1=edb.ncm_sp1;
+            tmp.ncm_sp2=edb.ncm_sp2;
+            tmp.gloc_fwd_adj=edb.gloc_fwd_adj;
+            tmp.gloc_flete_adj=edb.gloc_flete_adj;
+            tmp.gloc_terminal_adj=edb.gloc_terminal_adj;
+            tmp.gloc_poliza_adj=edb.gloc_poliza_adj;
+            tmp.gloc_deposito_adj=edb.gloc_deposito_adj;
+            tmp.gloc_despachante_adj=edb.gloc_despachante_adj;
+            tmp.gloc_banco_adj=edb.gloc_banco_adj;
+            tmp.gloc_gestdigdoc_adj=edb.gloc_gestdigdoc_adj;
+            tmp.gasto_otro1_adj=edb.gasto_otro1_adj;
+            tmp.gasto_otro2_adj=edb.gasto_otro2_adj;
+            tmp.gasto_otro3_adj=edb.gasto_otro3_adj;
+            tmp.ajuste_expre1=edb.ajuste_expre1;
+            tmp.ajuste_expre2=edb.ajuste_expre2;
+            tmp.ajuste_expre3=edb.ajuste_expre3;
+            tmp.gloc_adj_description=edb.gloc_adj_description;
+            tmp.precio_u=edb.precio_u;
+            tmp.costo_u=edb.costo_u;
+            tmp.costo_u_provisorio=edb.costo_u_provisorio;
+            tmp.costo_u_provisorio_adj=edb.costo_u_provisorio_adj;
+            tmp.costo_u_financiero=edb.costo_u_financiero;
+            tmp.costo_u_financiero_adj=edb.costo_u_financiero_adj;
+            tmp.extra_gasto1=edb.extra_gasto1;
+            tmp.extra_gasto2=edb.extra_gasto2;
+            tmp.extra_gasto3=edb.extra_gasto3;
+            tmp.extra_gasto4=edb.extra_gasto4;
+            tmp.extra_gasto5=edb.extra_gasto5;
+            tmp.extra_gasto6=edb.extra_gasto6;
+            tmp.extra_gasto7=edb.extra_gasto7;
+            tmp.extra_gasto8=edb.extra_gasto8;
+            tmp.extra_gasto9=edb.extra_gasto9;
+            tmp.extra_gasto10=edb.extra_gasto10;
+            tmp.extra_gasto_expre=edb.extra_gasto_expre;
+                      
             myEstV2.estDetails.Add(tmp);
         }
         return myEstV2;
@@ -137,37 +170,68 @@ public class dbutils
         foreach(EstimateDetail ed in myEstV2.estDetails)
         {
             EstimateDetailDB tmp=new EstimateDetailDB();
-            
+
             tmp.id=ed.id;
-            tmp.modelo=ed.modelo;
-            tmp.oemprovee=ed.oemprovee;
+            tmp.estimateheader_id=ed.estimateheader_id;
+            tmp.proveedores_id=ed.proveedores_id;
             tmp.sku=ed.sku;
+            tmp.description=ed.description;
             tmp.imageurl=ed.imageurl;
-            tmp.ncm=ed.ncm;
             tmp.exw=ed.exw;
             tmp.fobunit=ed.fobunit;
+            tmp.fobunit_adj=ed.fobunit_adj;
+            tmp.fobunit_adj_description=ed.fobunit_adj_description;
             tmp.qty=ed.qty;
             tmp.pcsctn=ed.pcsctn;
             tmp.cbmctn=ed.cbmctn;
             tmp.gwctn=ed.gwctn;
-            tmp.str_sp1=ed.str_sp1;
-            tmp.str_sp2=ed.str_sp2;
-            tmp.val_sp1=ed.val_sp1;
-            tmp.val_sp2=ed.val_sp2;
-            tmp.val_sp3=ed.calc_sp3;
-            tmp.estheaderid=ed.estheaderid;
-            tmp.imp_sp1=ed.imp_sp1;
-            tmp.imp_sp2=ed.imp_sp2;
-            tmp.imp_sp3=ed.imp_sp3;
-            tmp.ncm_arancelgrav=ed.ncm_arancelgrav;
+            tmp.freight_charge_adj=ed.freight_charge_adj;
+            tmp.freight_insurance_adj=ed.freight_insurance_adj;
+            tmp.cif=ed.cif;
+            tmp.cif_adj=ed.cif_adj;
+            tmp.cif_adj_description=ed.cif_adj_description;
+            tmp.ncm_id=ed.ncm_id;
+            tmp.ncm_arancel=ed.ncm_arancel;
             tmp.ncm_te_dta_otro=ed.ncm_te_dta_otro;
             tmp.ncm_iva=ed.ncm_iva;
             tmp.ncm_ivaad=ed.ncm_ivaad;
             tmp.gcias=ed.gcias;
-            tmp.calc_sp1=ed.calc_sp1;
-            tmp.calc_sp2=ed.calc_sp2;
-            tmp.calc_sp3=ed.calc_sp3;
-
+            tmp.ncm_sp1=ed.ncm_sp1;
+            tmp.ncm_sp2=ed.ncm_sp2;
+            tmp.gloc_fwd_adj=ed.gloc_fwd_adj;
+            tmp.gloc_flete_adj=ed.gloc_flete_adj;
+            tmp.gloc_terminal_adj=ed.gloc_terminal_adj;
+            tmp.gloc_poliza_adj=ed.gloc_poliza_adj;
+            tmp.gloc_deposito_adj=ed.gloc_deposito_adj;
+            tmp.gloc_despachante_adj=ed.gloc_despachante_adj;
+            tmp.gloc_banco_adj=ed.gloc_banco_adj;
+            tmp.gloc_gestdigdoc_adj=ed.gloc_gestdigdoc_adj;
+            tmp.gasto_otro1_adj=ed.gasto_otro1_adj;
+            tmp.gasto_otro2_adj=ed.gasto_otro2_adj;
+            tmp.gasto_otro3_adj=ed.gasto_otro3_adj;
+            tmp.ajuste_expre1=ed.ajuste_expre1;
+            tmp.ajuste_expre2=ed.ajuste_expre2;
+            tmp.ajuste_expre3=ed.ajuste_expre3;
+            tmp.gloc_adj_description=ed.gloc_adj_description;
+            tmp.precio_u=ed.precio_u;
+            tmp.costo_u=ed.costo_u;
+            tmp.costo_u_provisorio=ed.costo_u_provisorio;
+            tmp.costo_u_provisorio_adj=ed.costo_u_provisorio_adj;
+            tmp.costo_u_financiero=ed.costo_u_financiero;
+            tmp.costo_u_financiero_adj=ed.costo_u_financiero_adj;
+            tmp.extra_gasto1=ed.extra_gasto1;
+            tmp.extra_gasto2=ed.extra_gasto2;
+            tmp.extra_gasto3=ed.extra_gasto3;
+            tmp.extra_gasto4=ed.extra_gasto4;
+            tmp.extra_gasto5=ed.extra_gasto5;
+            tmp.extra_gasto6=ed.extra_gasto6;
+            tmp.extra_gasto7=ed.extra_gasto7;
+            tmp.extra_gasto8=ed.extra_gasto8;
+            tmp.extra_gasto9=ed.extra_gasto9;
+            tmp.extra_gasto10=ed.extra_gasto10;
+            tmp.extra_gasto_expre=ed.extra_gasto_expre;
+            tmp.htimestamp=DateTime.Now;
+            //tmp.htimestamp=ed.htimestamp;
             estimateDB.estDetailsDB.Add(tmp);
         }
         return estimateDB;       
