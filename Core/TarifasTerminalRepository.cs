@@ -22,15 +22,15 @@ public class TarifasTerminalRepository : ITarifasTerminalRepository
         //var sql = $"INSERT INTO tarifasdepositos (depo, contype, descarga, ingreso, totingreso, carga, armado, egreso, totegreso) VALUES ('{entity.depo}','{entity.contype}','{entity.descarga.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.ingreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.totingreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.carga.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.armado.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.egreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.totegreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}')";
         var sql = $@"INSERT INTO tarifasterminales 
                 (  
-                    description
-                    terminal_id
-                    carga_id
-                    paisregion_id
-                    gasto_fijo
-                    gasto_variable
-                    gasto_otro1
-                    gasto_otro2
-                    notas
+                    description,
+                    terminal_id,
+                    carga_id,
+                    paisregion_id,
+                    gasto_fijo,
+                    gasto_variable,
+                    gasto_otro1,
+                    gasto_otro2,
+                    notas,
                     htimestamp
                     ) 
                             VALUES 
@@ -136,5 +136,5 @@ public class TarifasTerminalRepository : ITarifasTerminalRepository
             }
             return result;
         }
-    }
+    } 
 }
