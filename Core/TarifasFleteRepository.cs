@@ -95,7 +95,7 @@ public class TarifasFleteRepository : ITarifasFleteRepository
 
     public async Task<IEnumerable<TarifasFleteVista>> GetAllVistaAsync()
     {
-        var sql = @"select tarifasflete.*, flete.description as flete, cargas.description as carga, paisregion.description as pais,trucksemi.description as semi 
+        var sql = @"select tarifasflete.*, flete.description as flete, cargas.description as carga, paisregion.description as pais, paisregion.region as region, trucksemi.description as semi 
                     from tarifasflete 
                     inner join flete on tarifasflete.flete_id=flete.id 
                     inner join cargas on tarifasflete.carga_id=cargas.id 

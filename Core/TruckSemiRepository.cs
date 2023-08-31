@@ -66,7 +66,7 @@ public class TruckSemiRepository : ITruckSemiRepository
     {
         try
         {
-            var sql = "select trucksemi.*,paisregion.description as pais from trucksemi inner join paisregion on trucksemi.paisregion_id=paisregion.id";
+            var sql = "select trucksemi.*,paisregion.description as pais, paisregion.region as region from trucksemi inner join paisregion on trucksemi.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

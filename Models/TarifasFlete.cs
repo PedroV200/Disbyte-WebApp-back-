@@ -48,5 +48,6 @@ public class TarifasFleteVista
     public string flete{get;set;}
     public string carga{get;set;}
     public string pais{get;set;}
+    public string region {get;set;}
     public string semi{get;set;}
 }

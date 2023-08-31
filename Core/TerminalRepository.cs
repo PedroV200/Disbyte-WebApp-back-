@@ -54,7 +54,7 @@ public class TerminalRepository : ITerminalRepository
     {
         try
         {
-            var sql = "select terminal.*,paisregion.description as pais from terminal inner join paisregion on terminal.paisregion_id=paisregion.id";
+            var sql = "select terminal.*,paisregion.description as pais, paisregion.region as region from terminal inner join paisregion on terminal.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

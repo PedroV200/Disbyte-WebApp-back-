@@ -90,7 +90,7 @@ public class TarifasDepositoRepository : ITarifasDepositoRepository
 
     public async Task<IEnumerable<TarifasDepositoVista>> GetAllVistaAsync()
     {
-        var sql = @"select tarifasdepositos.*, depositos.description as deposito, cargas.description as freight, paisregion.description as pais,trucksemi.description as semi 
+        var sql = @"select tarifasdepositos.*, depositos.description as deposito, cargas.description as freight, paisregion.description as pais, paisregion.region as region, trucksemi.description as semi 
                     from tarifasdepositos 
                     inner join depositos on tarifasdepositos.depositos_id=depositos.id 
                     inner join cargas on tarifasdepositos.carga_id=cargas.id 

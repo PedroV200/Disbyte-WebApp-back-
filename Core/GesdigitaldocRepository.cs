@@ -51,7 +51,7 @@ public class GestDigitalDocRepository : IGestDigitalDocRepository
     {
         try
         {
-            var sql = "select gestdigdoc.*,paisregion.description as pais from gestdigdoc inner join paisregion on gestdigdoc.paisregion_id=paisregion.id";
+            var sql = "select gestdigdoc.*,paisregion.description as pais,paisregion.region as region from gestdigdoc inner join paisregion on gestdigdoc.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

@@ -1,6 +1,6 @@
 namespace WebApiSample.Models;
 
-// Segun Version 3B 15Ago
+// Segun Version 3B 15Ago 
 public class TarifasBanco
 {
     public int id{get;set;}
@@ -28,4 +28,5 @@ public class TarifasBancoVista
 
     public string banco{get;set;}
     public string pais{get;set;}
+    public string region{get;set;}
 }

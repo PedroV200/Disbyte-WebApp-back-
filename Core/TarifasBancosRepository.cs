@@ -74,7 +74,7 @@ public class TarifasBancoRepository : ITarifasBancoRepository
 
     public async Task<IEnumerable<TarifasBancoVista>>GetAllVistaAsync()
     {
-        var sql= @"select tarifasbancos.*, banco.description as banco, paisregion.description as pais
+        var sql= @"select tarifasbancos.*, banco.description as banco, paisregion.description as pais, paisregion.region as region
                     from tarifasbancos
                     inner join banco on tarifasbancos.banco_id=banco.id 
                     inner join paisregion  on tarifasbancos.paisregion_id=paisregion.id ";

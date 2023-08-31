@@ -14,6 +14,7 @@ public class GestDigitalDocVista
     public string description { get; set; }
     public int paisregion_id {get;set;}
     public string pais {get;set;}
+    public string region {get;set;}
     
  
 }

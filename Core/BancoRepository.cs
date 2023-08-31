@@ -73,7 +73,7 @@ public class BancoRepository : IBancoRepository
     {
         try
         {
-            var sql = "select banco.*,paisregion.description as pais from banco inner join paisregion on banco.paisregion_id=paisregion.id";
+            var sql = "select banco.*,paisregion.description as pais,paisregion.region as region from banco inner join paisregion on banco.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

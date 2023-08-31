@@ -46,6 +46,7 @@ public class TarifasDepositoVista
     public string deposito {get;set;}
     public string freight {get;set;}
     public string pais {get;set;}
+    public string region {get;set;}
     public string semi{get;set;}
 
 }

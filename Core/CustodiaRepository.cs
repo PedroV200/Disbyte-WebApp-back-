@@ -53,7 +53,7 @@ public class CustodiaRepository : ICustodiaRepository
     {
         try
         {
-            var sql = "select custodia.*,paisregion.description as pais from custodia inner join paisregion on custodia.paisregion_id=paisregion.id";
+            var sql = "select custodia.*,paisregion.description as pais,paisregion.region as region from custodia inner join paisregion on custodia.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

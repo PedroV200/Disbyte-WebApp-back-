@@ -51,7 +51,7 @@ public class DepositoRepository : IDepositoRepository
     {
         try
         {
-            var sql = "select depositos.*,paisregion.description as pais from depositos inner join paisregion on depositos.paisregion_id=paisregion.id";
+            var sql = "select depositos.*,paisregion.description as pais,paisregion.region as region from depositos inner join paisregion on depositos.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

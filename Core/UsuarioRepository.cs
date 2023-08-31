@@ -87,7 +87,7 @@ public class UsuarioRepository : IUsuarioRepository
     {
         try
         {
-            var sql = "select usuarios.*,paisregion.description as pais from usuarios inner join paisregion on usuarios.paisregion_id=paisregion.id";
+            var sql = "select usuarios.*,paisregion.description as pais, paisregion.region as region from usuarios inner join paisregion on usuarios.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();
