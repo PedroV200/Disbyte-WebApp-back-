@@ -23,5 +23,6 @@
         public double costindex2 {get;set;}
         public int paisregion_id {get;set;} 
         public string pais {get;set;}
+        public string region {get;set;}
     }
 }

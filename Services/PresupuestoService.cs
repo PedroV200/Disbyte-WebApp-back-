@@ -163,14 +163,7 @@ public class PresupuestoService:IPresupuestoService
         miEst.estHeaderDB.htimestamp=DateTime.Now;
         // Preparo un string solo con la fecha para consultar a la DB
         string fecha=miEst.estHeaderDB.htimestamp.ToString("yyyy-MM-dd");
-        // Busco la lista de tarifas mas cercana en fecha. La consulta es basicamente para obtener el id de la misma
-        // y cargarlo en el estHeader. Se maneja todo como FK. Es la uinica vez que se consultara por fecha
-        TarifasByDate myTar=await _unitOfWork.TarifasPorFecha.GetByNearestDateAsync(fecha);
-        if(myTar==null)
-        {
-            return null;
-        }
-        //#-----ARREGLAR------##### =>miEst.estHeaderDB.tarifasbydateid=myTar.id;
+
 
         // Cuando me pasan el presupuesto con dolar billete "-1" es por que debo extraerlo
         // desde la base TC-CDA. 

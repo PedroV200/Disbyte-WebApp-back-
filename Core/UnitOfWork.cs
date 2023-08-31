@@ -36,7 +36,6 @@ public class UnitOfWork : IUnitOfWork
                       IUsuarioRepository UsuarioRepository,
                       IDespachanteRepository DespachanteRepository,
                       IPaisRegionRepository PaisRegionRepo,
-                      ITarifasByDateRepository TarifasByDateRepo,
                       ITarifasBancoRepository MiTarifBancos,
                       ITarifasDespachanteRepository MiTarifDespa, 
                       ITarifasFleteRepository MiTarifFlete,
@@ -77,7 +76,6 @@ public class UnitOfWork : IUnitOfWork
         Usuarios = UsuarioRepository;
         Despachantes = DespachanteRepository;
         PaisesRegiones = PaisRegionRepo;
-        TarifasPorFecha = TarifasByDateRepo;
         TarifBancos = MiTarifBancos;
         TarifDespa = MiTarifDespa;
         TarifGestDigDoc = MiTarifGestDigDoc;
@@ -114,7 +112,6 @@ public class UnitOfWork : IUnitOfWork
     public ITarifasFleteRepository TarifFlete {get;}
     public ITarifasDepositoRepository TarifasDepositos {get;}
     public ITarifasFwdRepository TarifFwd {get;}
-    public ITarifasByDateRepository TarifasPorFecha {get;}
     public ITarifasBancoRepository TarifBancos {get;}
     public ITarifasDespachanteRepository TarifDespa {get;}
     public ITarifasGestDigDocRepository  TarifGestDigDoc {get;}

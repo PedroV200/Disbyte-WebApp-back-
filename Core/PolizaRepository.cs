@@ -51,7 +51,7 @@ public class PolizaRepository : IPolizaRepository
     {
         try
         {
-            var sql = "select polizas.*,paisregion.description as pais from polizas inner join paisregion on polizas.paisregion_id=paisregion.id";
+            var sql = "select polizas.*,paisregion.description as pais, paisregion.region as region from polizas inner join paisregion on polizas.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

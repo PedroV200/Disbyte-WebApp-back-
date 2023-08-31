@@ -51,7 +51,7 @@ public class FwdtteRepository : IFwdtteRepository
     {
         try
         {
-            var sql = "select fwdtte.*,paisregion.description as pais from fwdtte inner join paisregion on fwdtte.paisregion_id=paisregion.id";
+            var sql = "select fwdtte.*,paisregion.description as pais, paisregion.region as region from fwdtte inner join paisregion on fwdtte.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

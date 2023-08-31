@@ -48,7 +48,7 @@ namespace WebApiSample.Core
         {
             try
             {
-                var sql = "select empresas.*,paisregion.description as pais from empresas inner join paisregion on empresas.paisregion_id=paisregion.id";
+                var sql = "select empresas.*,paisregion.description as pais,paisregion.region as region from empresas inner join paisregion on empresas.paisregion_id=paisregion.id";
                 using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
                 {
                     connection.Open();

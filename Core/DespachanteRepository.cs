@@ -72,7 +72,7 @@ public class DespachanteRepository : IDespachanteRepository
     {
         try
         {
-            var sql = "select despachantes.*,paisregion.description as pais from despachantes inner join paisregion on despachantes.paisregion_id=paisregion.id";
+            var sql = "select despachantes.*,paisregion.description as pais,paisregion.region as region from despachantes inner join paisregion on despachantes.paisregion_id=paisregion.id";
             using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();

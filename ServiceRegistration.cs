@@ -41,7 +41,6 @@ public static class ServiceRegistration
         services.AddTransient<IUsuarioRepository, UsuarioRepository>();
         services.AddTransient<IDespachanteRepository, DespachanteRepository>();
         services.AddTransient<IPaisRegionRepository, PaisRegionRepository>();
-        services.AddTransient<ITarifasByDateRepository, TarifasByDateRepository>();
         services.AddTransient<ITarifasBancoRepository, TarifasBancoRepository>();
         services.AddTransient<ITarifasDespachanteRepository, TarifasDespachanteRepository>();
         services.AddTransient<ITarifasGestDigDocRepository, TarifasGestDigDocRepository>();

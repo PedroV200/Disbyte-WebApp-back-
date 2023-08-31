@@ -30,7 +30,6 @@ public interface IUnitOfWork
     ITarifasTerminalRepository TarifTerminal { get; }
     ITarifasDepositoRepository TarifasDepositos {get;}
     ITarifasFwdRepository TarifFwd {get;}
-    ITarifasByDateRepository TarifasPorFecha {get;}
     ITarifasBancoRepository TarifBancos {get;}
     ITarifasDespachanteRepository TarifDespa {get;}
     ITarifasGestDigDocRepository TarifGestDigDoc {get;}
