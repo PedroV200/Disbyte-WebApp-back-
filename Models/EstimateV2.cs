@@ -8,6 +8,10 @@ public class EstimateV2
     public double freight_insurance_cost;
     public Carga miCarga;
     public Tarifas misTarifas;
+
+    public int updated;
+
+    public bool usarTarifasMasModernas{get;set;}
     
     public CONSTANTES constantes;
     public List<EstimateDetail> estDetails {get; set;}

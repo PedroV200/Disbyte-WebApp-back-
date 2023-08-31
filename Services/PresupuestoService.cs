@@ -20,6 +20,8 @@ public class PresupuestoService:IPresupuestoService
 
     public ICnstService _cnstService {get;}
 
+    public string presupError;
+
     public PresupuestoService(IUnitOfWork unitOfWork, IEstimateService estService,ICnstService constService)
     {
         _unitOfWork=unitOfWork;
@@ -30,7 +32,7 @@ public class PresupuestoService:IPresupuestoService
 
     public string getLastErr()
     {
-        return myCalc.haltError;
+        return myCalc.haltError+presupError;
     }
 
 
@@ -88,7 +90,7 @@ public class PresupuestoService:IPresupuestoService
             }
         }
 
-
+        // ################################### INIT ######################################
         // El objeto Estimate que se definio. 
         EstimateV2 myEstV2=new EstimateV2();
         // Expando el EstimateDB a un EstimateV2
@@ -100,6 +102,22 @@ public class PresupuestoService:IPresupuestoService
             _estService.setLastError("No existe una instancia de constantes en tabla");
             return null;
         }
+
+        // Ingresa las constantes a la varieble local de _estService.
+         _estService.setConstants(myEstV2.constantes);
+         // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
+         _estService.loadContenedor(myEstV2);
+        // Busca las tarifas, calcula cada uno de los gastos locales y los pasa al header segun sea
+        // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
+        // El FP solo estara disponible luego de calculado el FOB TOTAL.
+         myEstV2=await _estService.loadTarifas(myEstV2);
+         if(myEstV2==null)
+         {
+            presupError=_estService.getLastError();
+            return null;
+         }
+        // ################################## FIN INIT ############################################
+
         // CALCULOS PROPIAMENTE DICHOS
         ret=await myCalc.calcBatch(myEstV2);
         // Si los calculos fallan, no hacer nada.
@@ -117,6 +135,11 @@ public class PresupuestoService:IPresupuestoService
         EstimateDB resultEDB=new EstimateDB();
         resultEDB=myDBhelper.transferDataToDBType(ret);
 
+        // ###### INIT
+        // Es un presupuesto nuevo ... me aseguro que todo lo que es extragasto este en cero y los flags de update en false
+        resultEDB=myDBhelper.setDefaultEstimateDB(resultEDB);
+        // ###### FIN INIT
+
         // Guardo el header.
         result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
         // Veo que ID le asigno la base:
@@ -125,6 +148,7 @@ public class PresupuestoService:IPresupuestoService
         foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
         {
             ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
+            ed.updated=false;                       // El calculo se hizo por completo. No hay actualizaciones epndientes. Borro el flag de cada producto.
             result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
         }
         
@@ -220,14 +244,6 @@ public class PresupuestoService:IPresupuestoService
         miEst.estHeaderDB.htimestamp=DateTime.Now;
         // Preparo un string solo con la fecha para consultar a la DB
         string fecha=miEst.estHeaderDB.htimestamp.ToString("yyyy-MM-dd");
-        // Busco la lista de tarifas mas cercana en fecha. La consulta es basicamente para obtener el id de la misma
-        // y cargarlo en el estHeader. Se maneja todo como FK. Es la uinica vez que se consultara por fecha
-        TarifasByDate myTar=await _unitOfWork.TarifasPorFecha.GetByNearestDateAsync(fecha);
-        if(myTar==null)
-        {
-            return null;
-        }
-        //#-----ARREGLAR------##### =>miEst.estHeaderDB.tarifasbydateid=myTar.id;
 
         // Cuando me pasan el presupuesto con dolar billete "-1" es por que debo extraerlo
         // desde la base TC-CDA. 
@@ -248,7 +264,7 @@ public class PresupuestoService:IPresupuestoService
             }
         }
 
-
+        // ########################### INIT ##################################################
         // El objeto Estimate que se definio. 
         EstimateV2 myEstV2=new EstimateV2();
         // Expando el EstimateDB a un EstimateV2
@@ -260,9 +276,24 @@ public class PresupuestoService:IPresupuestoService
             _estService.setLastError("No existe una instancia de constantes en tabla");
             return null;
         }
+        
+        // Ingresa las constantes a la varieble local de _estService.
+         _estService.setConstants(myEstV2.constantes);
+         // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
+         _estService.loadContenedor(myEstV2);
+        // Busca las tarifas, calcula cada uno de los gastos locales y los pasa al header segun sea
+        // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
+        // El FP solo estara disponible luego de calculado el FOB TOTAL.
+         myEstV2=await _estService.loadTarifas(myEstV2);
+         if(myEstV2==null)
+         {
+            presupError=_estService.getLastError();
+            return null;
+         }
+        // ############################# FIN INIT ########################################
 
 
-
+        // Los calculos propiemanete dichos.
         ret=await myCalc.calcBatch(myEstV2);
         // Si los calculos fallan, no hacer nada.
         if(ret==null)
@@ -297,7 +328,7 @@ public class PresupuestoService:IPresupuestoService
     public async Task<EstimateV2>reclaimPresupuesto(int estNumber,int estVers)
     {
         dbutils dbhelper=new dbutils(_unitOfWork);
-        EstimateV2 ret=new EstimateV2();
+        EstimateV2 myEstV2=new EstimateV2();
         EstimateDB miEst=new EstimateDB();
 
         // Levanto el header segun numero y version
@@ -314,8 +345,6 @@ public class PresupuestoService:IPresupuestoService
         }
         miEst.estDetailsDB=result.ToList();
 
-        // El objeto Estimate que se definio. 
-        EstimateV2 myEstV2=new EstimateV2();
         // Expando el EstimateDB a un EstimateV2
         myEstV2=dbhelper.transferDataFromDBType(miEst);
         // Cargo las constnates de calculo.
@@ -326,17 +355,40 @@ public class PresupuestoService:IPresupuestoService
             return null;
         }
         
-        // Dado que el header ya contiene algunos totales, no vale la pena recalcularlos
-        // calcReclaim no es igual a calcBatch, hace menos cuentas.
-        ret=await myCalc.calcReclaim(myEstV2);
-
-        // Si los calculos fallan, no hacer nada.
-        if(ret==null)
+        // Cuando se levantaron todos los estimateDetail, se ven si sus campos "update" estan en true.
+        // En ese caso se incrementa un contador. Con que al menos un detail tenga el flag en tru, todos
+        // lo calculos deben correrse de cero. Entonces llamo a calcbatch y no a calc reclaim.
+        // Luego voy y borro los flags para indicar que las cuetnas se actualizaron.
+        // Este feature es para soportar una actualizacion de detail a la base sin necesidad de correr todo
+        // el presupuesto de nuevo. En verdad la demora luego ocurrira durante el get dado que hay un estdet
+        // actualizado y no asi los calculos.
+        if(myEstV2.updated>0)
         {
-            return null;
+            // Paso las costantes a estDetailServ via estimateService
+            _estService.setConstants(myEstV2.constantes);
+         
+            // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
+            _estService.loadContenedor(myEstV2);
+
+            // Busca las tarifas, calcula cada uno de los gastos locales y los pasa al header segun sea
+            // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
+            // El FP solo estara disponible luego de calculado el FOB TOTAL.
+            myEstV2=await _estService.loadTarifas(myEstV2);
+            if(myEstV2==null)
+            {
+                presupError=_estService.getLastError();
+                return null;
+            }
+
+            myEstV2=await myCalc.calcBatch(myEstV2);
+            var res=await _unitOfWork.EstimateDetailsDB.ClearFlagsByEstimateHeaderIdAsync(miEst.estHeaderDB.id);
         }
-        
-        return ret;      
+        else
+        {
+            myEstV2=await myCalc.calcReclaim(myEstV2);
+        }
+
+        return myEstV2;      
     }
 
 }
