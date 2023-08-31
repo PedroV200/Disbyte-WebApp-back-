@@ -84,7 +84,7 @@ public class EstimateDetailService: IEstimateDetailService
 
     public double CalcFob(EstimateDetail estD)
     {
-        return (estD.qty*estD.fobunit);
+        return (estD.qty*estD.fob_u);
     }
 
     public double CalcFlete(EstimateDetail estD, double costoFlete,double fobGrandTotal)
@@ -246,26 +246,60 @@ public class EstimateDetailService: IEstimateDetailService
         return estD.factorproducto*gastosTotProy;
     }
     
-    public double CalcGastosProyPondUSS(EstimateDetail estD,double dolar)
+    public double CalcGastos_Loc_y_Extra(EstimateDetail estD)
     {
-        return estD.totalgastosloc_uss/dolar;
+        double tmp;
+
+        tmp=0;
+        //tmp=estD.precio_u;
+        // Gastos locales ponderados 
+        tmp+=estD.gloc_bancos;
+        tmp+=estD.gloc_depositos;
+        tmp+=estD.gloc_despachantes;
+        tmp+=estD.gloc_flete;
+        tmp+=estD.gloc_fwd;
+        tmp+=estD.gloc_gestdigdoc;
+        tmp+=estD.gloc_polizas;
+        tmp+=estD.gloc_terminales;
+        // Sumo los extragastos que son por producto.
+        tmp+=estD.extrag_comex1;
+        tmp+=estD.extrag_comex2;
+        tmp+=estD.extrag_comex3;
+        tmp+=estD.extrag_finan1;
+        tmp+=estD.extrag_finan2;
+        tmp+=estD.extrag_finan3;
+        tmp+=estD.extrag_local1;
+        tmp+=estD.extrag_local2;
+        // Sumo los extragastos globales que vienen desde el header y ya fueron ponderados.
+        tmp+=estD.extrag_glob_comex1;
+        tmp+=estD.extrag_glob_comex2;
+        tmp+=estD.extrag_glob_comex3;
+        tmp+=estD.extrag_glob_comex4;
+        tmp+=estD.extrag_glob_comex5;
+        tmp+=estD.extrag_glob_finan1;
+        tmp+=estD.extrag_glob_finan2;
+        tmp+=estD.extrag_glob_finan3;
+        tmp+=estD.extrag_glob_finan4;
+        tmp+=estD.extrag_glob_comex5;
+        return tmp;
     }
-    public double CalcGastosProyPorUnidUSS(EstimateDetail estD)
+
+    public double CalcGastos_Loc_y_Extra_Unit(EstimateDetail estD)
     {
         if(estD.qty>0)
         {
-            return estD.totalgastosloc_uss/estD.qty;
+            return estD.totalgastos_loc_y_extra/estD.qty;
         }
         else
         {
             return -1;
         }
     }
-    public double CalcOverHeadUnitUSS(EstimateDetail estD)
+    public double CalcOverHeadUnit(EstimateDetail estD)
     {
         if(estD.precio_u!=0)
         {
-            return estD.totalgastosloc_uss/estD.precio_u;
+            return estD.totalgastos_loc_y_extra_u/estD.precio_u;
         }
         else
         {
@@ -275,7 +309,8 @@ public class EstimateDetailService: IEstimateDetailService
 
     public double CalcCostoUnitUSS(EstimateDetail estD)
     {
-        return estD.precio_u+estD.totalgastosloc_uss;
+
+        return estD.precio_u+estD.totalgastos_loc_y_extra_u;
     }
 
     public double CalcCostoUnit(EstimateDetail estD, double dolar)

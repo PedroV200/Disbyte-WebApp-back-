@@ -65,18 +65,20 @@ public interface IEstimateDetailService : IGenericService<EstimateDetail>
     // SEGUIR HASTA LA COL AN*/
     public double CalcFactorProducto(EstimateDetail estD, double fobTotal);
 
+    public double CalcGastos_Loc_y_Extra(EstimateDetail estD);
+
+    public double CalcGastos_Loc_y_Extra_Unit(EstimateDetail estD);
+
     public double CalcGastosProyPond(EstimateDetail estD, double gastosProy);
 
-    public double CalcGastosProyPondUSS(EstimateDetail estD,double dolar);
-    
-    public double CalcGastosProyPorUnidUSS(EstimateDetail estD);
-
-    public double CalcOverHeadUnitUSS(EstimateDetail estD);
+    public double CalcOverHeadUnit(EstimateDetail estD);
 
     public double CalcCostoUnitUSS(EstimateDetail estD);
 
     public double CalcCostoUnit(EstimateDetail estD, double dolar);
 
     public Task<NCM> lookUp_NCM_Data(EstimateDetail estDetails);
+
+
 
 }

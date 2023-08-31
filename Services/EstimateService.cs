@@ -42,7 +42,7 @@ public class EstimateService: IEstimateService
         
     }*/
 
-    public void loadConstants(CONSTANTES miConst)
+    public void setConstants(CONSTANTES miConst)
     {
         _estDetServices.loadConstants(miConst);
     }
@@ -320,7 +320,7 @@ public class EstimateService: IEstimateService
     
 // Hace las cuentas de la tabla inferior del presupuestador, gastos locales / proyectados.
 // Los devuelve en dolarbillete. CELDA D59
-    public async Task<EstimateV2> calcularGastosProyecto(EstimateV2 miEst)
+    /*public async Task<EstimateV2> calcularGastosProyecto(EstimateV2 miEst)
     {
         double tmp;
         double result;
@@ -335,16 +335,24 @@ public class EstimateService: IEstimateService
             haltError="FALLA CALCULAR GASTOS FWD. TABLA TarifasFWD no accesible o no existen datos para el tipo de contenedor / origen indicados";
             return null;
         }
-        // Registro el gasto en cada articulo (ponderado por el factor de producto)
+        // Guardo en el header.
+        miEst.estHeader.gloc_fwd=tmp;
+        // Registro el gasto en cada articulo (ponderado por el factor de producto)  
         miEst=Calc_GLOC_FWD_POND(miEst,tmp);
+
+
         tmp=await calcularGastosTerminal(miEst);
         if(tmp<0)
         {
             haltError="FALLA AL CALCULAR GASTOS DE TERMINAL. TAbla no accesible o no existen datos para el tipo de contenedor ingresado";
             return null;
         }
+        //Guardo en el header.
+        miEst.estHeader.gloc_terminales=tmp;
         // Registro el gasto en cada articulo
         miEst=Calc_GLOC_TERMINAL_POND(miEst,tmp);
+
+
 
         tmp=await calcularGastosDespachante(miEst);
         if(tmp<0)
@@ -352,7 +360,11 @@ public class EstimateService: IEstimateService
 
             return null;
         }
+        // Lo guardo en el header
+        miEst.estHeader.gloc_despachantes=tmp;
+        // Registro el gasto en el producto
         miEst=Calc_GLOC_DESPACHANTE_POND(miEst,tmp);
+
 
         tmp=await calcularGastosTteLocal(miEst);
         if(tmp<0)
@@ -360,28 +372,37 @@ public class EstimateService: IEstimateService
             haltError="FALLA AL CALCULAR LOS GASTOS DE TTE LOC. Tabla de tarifa no accesible o no existen datos para el contenedor ingresado";
             return null;
         }
+        // Guardo el gasto en el header
+        miEst.estHeader.gloc_flete=tmp;
+        // Registro el gasto en el producto
         miEst=Calc_GLOC_FLETE_POND(miEst,tmp);
 
-        tmp=await calcularGastosCustodia(miEst);
 
+
+        tmp=await calcularGastosCustodia(miEst);
         if(tmp<0)
         {
             haltError="FALLO AL CALCULAR LOS GASTOS DE CUSTODIA. Tabla de tarifa no accesible o no existen datos para el Proveedor de Poliza ingresado";
             return null;
         }
+        // Guardo el gasto en el header
+        miEst.estHeader.gloc_polizas=tmp;
+        // Registro el gasto
         miEst=Calc_GLOC_CUSTODIA_POND(miEst,tmp);
 
 
         tmp=calcularGastosGestDigDocs(miEst);       // Este metodo no involucra una consulta a tabla, tmp np puede ser negativo
+        miEst.estHeader.gloc_gestdigdoc=tmp;
         miEst=Calc_GLOC_GESTDIGDOC_POND(miEst,tmp);
 
         tmp=calcularGastosBancarios(miEst);         // Este idem.
+        miEst.estHeader.gloc_bancos=tmp;
         miEst=Calc_GLOC_BANCARIO_POND(miEst,tmp);
 
 
         return miEst;
 
-    }
+    }*/
 
 
 // Rutinas que distribuyen a lo largo de todos los art del detail los diferentes gastos locales:
@@ -393,60 +414,94 @@ public class EstimateService: IEstimateService
 // Digitalizaion Documental
 // Bancarios
 /////////////////////////////////
-    public EstimateV2 Calc_GLOC_FWD_POND(EstimateV2 est,Double gastoFWD)
+    public EstimateV2 Calc_GLOC_FWD_POND(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.gloc_fwd_adj=_estDetServices.CalcGastosProyPond(ed,gastoFWD);       
+            ed.gloc_fwd=_estDetServices.CalcGastosProyPond(ed,est.estHeader.gloc_fwd);       
         }
         return est;
     }
-    public EstimateV2 Calc_GLOC_TERMINAL_POND(EstimateV2 est,Double gastoTerminal)
+    public EstimateV2 Calc_GLOC_TERMINAL_POND(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.gloc_terminal_adj=_estDetServices.CalcGastosProyPond(ed,gastoTerminal);       
+            ed.gloc_terminales=_estDetServices.CalcGastosProyPond(ed,est.estHeader.gloc_terminales);       
         }
         return est;
     }
-    public EstimateV2 Calc_GLOC_DESPACHANTE_POND(EstimateV2 est,Double gastoDespachante)
+    public EstimateV2 Calc_GLOC_DESPACHANTE_POND(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.gloc_despachante_adj=_estDetServices.CalcGastosProyPond(ed,gastoDespachante);       
+            ed.gloc_despachantes=_estDetServices.CalcGastosProyPond(ed,est.estHeader.gloc_despachantes);       
         }
         return est;
     }
-    public EstimateV2 Calc_GLOC_FLETE_POND(EstimateV2 est,Double gastoFlete)
+    public EstimateV2 Calc_GLOC_FLETE_POND(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.gloc_flete_adj=_estDetServices.CalcGastosProyPond(ed,gastoFlete);       
+            ed.gloc_flete=_estDetServices.CalcGastosProyPond(ed,est.estHeader.gloc_flete);       
         }
         return est;
     }
-    public EstimateV2 Calc_GLOC_CUSTODIA_POND(EstimateV2 est,Double gastoCustodia)
+    public EstimateV2 Calc_GLOC_CUSTODIA_POND(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.gloc_poliza_adj=_estDetServices.CalcGastosProyPond(ed,gastoCustodia);       
+            ed.gloc_polizas=_estDetServices.CalcGastosProyPond(ed,est.estHeader.gloc_polizas);       
         }
         return est;
     }
-    public EstimateV2 Calc_GLOC_BANCARIO_POND(EstimateV2 est,Double gastoBanco)
+    public EstimateV2 Calc_GLOC_BANCARIO_POND(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.gloc_banco_adj=_estDetServices.CalcGastosProyPond(ed,gastoBanco);       
+            ed.gloc_bancos=_estDetServices.CalcGastosProyPond(ed,est.estHeader.gloc_bancos);       
         }
         return est;
     }
 
-        public EstimateV2 Calc_GLOC_GESTDIGDOC_POND(EstimateV2 est,Double gastoBanco)
+    public EstimateV2 Calc_GLOC_POND(EstimateV2 miEst)
+    {
+        foreach(EstimateDetail ed in miEst.estDetails)
+        {
+            ed.gloc_bancos=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_bancos);
+            ed.gloc_depositos=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_depositos);
+            ed.gloc_despachantes=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_despachantes);
+            ed.gloc_flete=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_flete);
+            ed.gloc_fwd=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_fwd);
+            ed.gloc_gestdigdoc=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_gestdigdoc);
+            ed.gloc_polizas=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_polizas);
+            ed.gloc_terminales=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_terminales);
+        }
+        return miEst;
+    }
+
+    public EstimateV2 Calc_EXTRAG_GLOBAL_POND(EstimateV2 miEst)
+    {
+        foreach(EstimateDetail ed in miEst.estDetails)
+        {
+            ed.extrag_glob_comex1=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex1);
+            ed.extrag_glob_comex2=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex2);
+            ed.extrag_glob_comex3=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex3);
+            ed.extrag_glob_comex4=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex4);
+            ed.extrag_glob_comex5=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex5);
+            ed.extrag_glob_finan1=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_finan1);
+            ed.extrag_glob_finan2=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_finan2);
+            ed.extrag_glob_finan3=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_finan3);
+            ed.extrag_glob_finan4=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_finan4);
+            ed.extrag_glob_finan5=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_finan5);
+        }
+        return miEst;
+    }
+
+    public EstimateV2 Calc_GLOC_GESTDIGDOC_POND(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.gloc_banco_adj=_estDetServices.CalcGastosProyPond(ed,gastoBanco);       
+            ed.gloc_gestdigdoc=_estDetServices.CalcGastosProyPond(ed,est.estHeader.gloc_gestdigdoc);       
         }
         return est;
     }
@@ -585,14 +640,24 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
 
 
 
-    public EstimateV2 CalcExtraGastoLocProyectoUSS(EstimateV2 est)
+    public EstimateV2 CalcGastos_LOC_Y_EXTRA(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.totalgastosloc_uss=_estDetServices.CalcGastosProyPond(ed,est.estHeader.gastos_loc_total);       
+            ed.totalgastos_loc_y_extra=_estDetServices.CalcGastos_Loc_y_Extra(ed);       
         }
         return est;
     }
+
+    public EstimateV2 CalcGastos_LOC_Y_EXTRA_U(EstimateV2 est)
+    {
+        foreach(EstimateDetail ed in est.estDetails)
+        {
+            ed.totalgastos_loc_y_extra_u=_estDetServices.CalcGastos_Loc_y_Extra_Unit(ed);       
+        }
+        return est;
+    }
+
 
 
 
@@ -603,7 +668,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.overhead=_estDetServices.CalcOverHeadUnitUSS(ed);  
+            ed.overhead=_estDetServices.CalcOverHeadUnit(ed);  
             if(ed.overhead<0)
             {
                 haltError=$"ATENCION: El articulo '{ed.description}' tiene un PRECIO USS UNIT de 0. Div 0 !";
@@ -701,28 +766,203 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
 
         misTarifas=new Tarifas();
 
-        misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByNearestDateAsync(hoy);
-        if(misTarifas.tBanco==null)         { haltError=$"La tarifa Banco mas prox no encontrada"; return null;}
+        // Quieren las tarifas mas arrimadas en fecha ?
+        if(miEst.usarTarifasMasModernas)
+        {   // Si
+            misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByNearestDateAsync(hoy);
+            if(misTarifas.tBanco==null)         { haltError=$"La tarifa Banco mas prox no encontrada"; return null;}
 
-        misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByNearestDateAsync(hoy);
-        if(misTarifas.tDepo==null)          { haltError=$"La tarifa Deposito mas prox no encontrada"; return null;}
+            misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByNearestDateAsync(hoy);
+            if(misTarifas.tDepo==null)          { haltError=$"La tarifa Deposito mas prox no encontrada"; return null;}
 
-        misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByNearestDateAsync(hoy);
-        if(misTarifas.tDespa==null)         { haltError=$"La tarifa Despachante mas prox no encontrada"; return null;}
+            misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByNearestDateAsync(hoy);
+            if(misTarifas.tDespa==null)         { haltError=$"La tarifa Despachante mas prox no encontrada"; return null;}
 
-        misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy);
-        if(misTarifas.tFwd==null)           { haltError=$"La tarifa Fowarder mas prox no encontrada"; return null;}
+            misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy);
+            if(misTarifas.tFwd==null)           { haltError=$"La tarifa Fowarder mas prox no encontrada"; return null;}
 
-        misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy);
-        if(misTarifas.tFlete==null)         { haltError=$"La tarifa Flete mas prox no encontrada"; return null;}
+            misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy);
+            if(misTarifas.tFlete==null)         { haltError=$"La tarifa Flete mas prox no encontrada"; return null;}
 
-        misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(hoy);
-        if(misTarifas.tGestDigDoc==null)    { haltError=$"La tarifa GestionDigitalDocumental mas prox no encontrada"; return null;}
+            misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(hoy);
+            if(misTarifas.tGestDigDoc==null)    { haltError=$"La tarifa GestionDigitalDocumental mas prox no encontrada"; return null;}
 
-        misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByNearestDateAsync(hoy);
-        if(misTarifas.tPoliza==null)        { haltError=$"La tarifa Poliza mas prox no encontrada"; return null;}
+            misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByNearestDateAsync(hoy);
+            if(misTarifas.tPoliza==null)        { haltError=$"La tarifa Poliza mas prox no encontrada"; return null;}
 
-        miEst.misTarifas=misTarifas;
+            miEst.misTarifas=misTarifas;
+            return miEst;
+        }
+        else
+        {   // No. Pues uso los IDs (FKs) enviados en el JSON
+            // TIP: Si el ID es negativo no se repite el query, se asume sin cambios. El signo menos debera ser
+            // colocado por el front para avisar cuales tarifas permanecen sin modificacion
+            // Es solo un tema de EFICIENCIA. Al finalizar su uso, se hacen todos positivos sin importar si son o no
+            // negativos. Es mas rapido y limpio que andar preguntando.
+            if(miEst.estHeader.tarifasbancos_id>0)
+            {
+                misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByIdAsync(miEst.estHeader.tarifasbancos_id);
+                if(misTarifas.tBanco==null)         
+                        { haltError=$"La tarifa Banco con ID:{miEst.estHeader.tarifasbancos_id} no existe"; return null;}
+            }
+            if(miEst.estHeader.tarifasdepositos_id>0)
+            {
+                misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByIdAsync(miEst.estHeader.tarifasdepositos_id);
+                if(misTarifas.tDepo==null)         
+                        { haltError=$"La tarifa Deposito mas prox no encontrada"; return null;}
+            }
+            if(miEst.estHeader.tarifasdespachantes_id>0)
+            {
+                misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByIdAsync(miEst.estHeader.tarifasdespachantes_id);
+                if(misTarifas.tDespa==null)         
+                        { haltError=$"La tarifa Despachante mas prox no encontrada"; return null;}
+            }
+
+            if(miEst.estHeader.tarifasfwd_id>0)
+            {
+                misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByIdAsync(miEst.estHeader.tarifasfwd_id);
+                if(misTarifas.tFwd==null)           
+                        { haltError=$"La tarifa Fowarder mas prox no encontrada"; return null;}
+            }
+
+            if(miEst.estHeader.tarifasflete_id>0)
+            {
+                misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByIdAsync(miEst.estHeader.tarifasflete_id);
+                if(misTarifas.tFlete==null)         
+                        { haltError=$"La tarifa Flete mas prox no encontrada"; return null;}
+            }
+
+            if(miEst.estHeader.tarifasgestdigdoc_id>0)
+            {
+                misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByIdAsync(miEst.estHeader.tarifasgestdigdoc_id);
+                if(misTarifas.tGestDigDoc==null)    
+                        { haltError=$"La tarifa GestionDigitalDocumental mas prox no encontrada"; return null;}
+            }
+
+            if(miEst.estHeader.tarifaspolizas_id>0)
+            {
+                misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByIdAsync(miEst.estHeader.tarifaspolizas_id);
+                if(misTarifas.tPoliza==null)        
+                        { haltError=$"La tarifa Poliza mas prox no encontrada"; return null;}
+            }
+            
+
+            // Si alguno de los IDs fuere negativo, los hago todos positivos. Ni me gasto en preguntar
+            miEst.estHeader.tarifasbancos_id=Math.Abs(miEst.estHeader.tarifasbancos_id);
+            miEst.estHeader.tarifasdepositos_id=Math.Abs(miEst.estHeader.tarifasdepositos_id);
+            miEst.estHeader.tarifasdespachantes_id=Math.Abs(miEst.estHeader.tarifasdespachantes_id);
+            miEst.estHeader.tarifasflete_id=Math.Abs(miEst.estHeader.tarifasflete_id);
+            miEst.estHeader.tarifasfwd_id=Math.Abs(miEst.estHeader.tarifasfwd_id);
+            miEst.estHeader.tarifasgestdigdoc_id=Math.Abs(miEst.estHeader.tarifasgestdigdoc_id);
+            miEst.estHeader.tarifaspolizas_id=Math.Abs(miEst.estHeader.tarifaspolizas_id);
+            miEst.estHeader.tarifasterminales_id=Math.Abs(miEst.estHeader.tarifasterminales_id);
+
+            miEst.misTarifas=misTarifas;
+        }
+
+        double tmp;
+
+        // Calculo el gasto bancario (ARG)       
+        if(miEst.estHeader.tarifasbancos_id>0)
+        {
+            tmp=calcularGastosBancarios(miEst);         // Este idem.
+            // Lo guardo en el header
+            miEst.estHeader.gloc_bancos=tmp;
+        }
+        // Calculo gastos del despachante (ARG)
+        if(miEst.estHeader.tarifasdespachantes_id>0)
+        {
+            tmp=await calcularGastosDespachante(miEst);
+            if(tmp<0)
+            {
+
+            return null;
+            }
+            // Lo guardo en el header
+            miEst.estHeader.gloc_despachantes=tmp;
+        }
+        // Calculo gastos de FLETE INTERNO (ARG)
+        if(miEst.estHeader.tarifasflete_id>0)
+        {
+            tmp=await calcularGastosTteLocal(miEst);
+            if(tmp<0)
+            {
+                haltError="FALLA AL CALCULAR LOS GASTOS DE TTE LOC. Tabla de tarifa no accesible o no existen datos para el contenedor ingresado";
+                return null;
+            }
+        // Guardo el gasto en el header
+        miEst.estHeader.gloc_flete=tmp;
+        }
+        // Calculo el gasto de Fowarder con el 040 del flete (ARG)
+        if(miEst.estHeader.tarifasfwd_id>0)
+        {
+            tmp=await calcularGastosFwd(miEst);
+            if(tmp<0)
+            {   // Todos los metodos que consultan una tabla tienen opcion de devolver -1 si algo no salio bien.
+                haltError="FALLA CALCULAR GASTOS FWD. TABLA TarifasFWD no accesible o no existen datos para el tipo de contenedor / origen indicados";
+                return null;
+            }
+            // Guardo en el header.
+            miEst.estHeader.gloc_fwd=tmp;
+        }
+        // Calculo los gastos de Gestion digital de documentos
+        if(miEst.estHeader.tarifasgestdigdoc_id>0)
+        {
+            tmp=calcularGastosGestDigDocs(miEst);       // Este metodo no involucra una consulta a tabla, tmp np puede ser negativo
+            miEst.estHeader.gloc_gestdigdoc=tmp;
+        }
+        // Calculo los gastos de custodia / seguro
+        if(miEst.estHeader.tarifaspolizas_id>0)
+        {
+            tmp=await calcularGastosCustodia(miEst);
+            if(tmp<0)
+            {
+                haltError="FALLO AL CALCULAR LOS GASTOS DE CUSTODIA. Tabla de tarifa no accesible o no existen datos para el Proveedor de Poliza ingresado";
+                return null;
+            }
+            // Guardo el gasto en el header
+            miEst.estHeader.gloc_polizas=tmp;
+        }
+        // Calculo los gastos de Terminal
+        if(miEst.estHeader.tarifasterminales_id>0)
+        {
+            tmp=await calcularGastosTerminal(miEst);
+            if(tmp<0)
+            {
+                haltError="FALLA AL CALCULAR GASTOS DE TERMINAL. TAbla no accesible o no existen datos para el tipo de contenedor ingresado";
+                return null;
+            }
+            //Guardo en el header.
+            miEst.estHeader.gloc_terminales=tmp;
+        }
+
+        return miEst;
+    }
+
+    public EstimateV2 registrarGastosLocalesPorProducto(EstimateV2 miEst)
+    {
+       /* miEst=Calc_GLOC_BANCARIO_POND(miEst);
+        miEst=Calc_GLOC_DESPACHANTE_POND(miEst);
+        miEst=Calc_GLOC_FLETE_POND(miEst);
+        miEst=Calc_GLOC_FWD_POND(miEst);
+        miEst=Calc_GLOC_GESTDIGDOC_POND(miEst);
+        miEst=Calc_GLOC_CUSTODIA_POND(miEst);
+        miEst=Calc_GLOC_TERMINAL_POND(miEst);*/
+        miEst=Calc_GLOC_POND(miEst);
+
+        return miEst;
+    }
+
+    public EstimateV2 registrarExtraGastosGlobalesPorProducto(EstimateV2 miEst)
+    {
+        /*miEst=Calc_GLOC_BANCARIO_POND(miEst);
+        miEst=Calc_GLOC_DESPACHANTE_POND(miEst);
+        miEst=Calc_GLOC_FLETE_POND(miEst);
+        miEst=Calc_GLOC_FWD_POND(miEst);
+        miEst=Calc_GLOC_GESTDIGDOC_POND(miEst);
+        miEst=Calc_GLOC_CUSTODIA_POND(miEst);
+        miEst=Calc_GLOC_TERMINAL_POND(miEst);*/
+        miEst=Calc_EXTRAG_GLOBAL_POND(miEst);
         return miEst;
     }
 

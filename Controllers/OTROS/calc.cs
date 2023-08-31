@@ -34,12 +34,7 @@ public class calc
 
 
         
-        // Paso las costantes a estDetailServ via estimateService
-         _estService.loadConstants(myEstV2.constantes);
-         // est service carga las tarifas en una variable de la clase para posterior uso
-         _estService.loadTarifas(myEstV2);
-         // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
-         _estService.loadContenedor(myEstV2);
+        
 
         // Expando el EstimateDB a un EstimateV2
         /*myEstV2=dbhelper.transferDataFromDBType(myEstDB);
@@ -50,7 +45,7 @@ public class calc
         {
             haltError="Tabla Constantes no accesible";
             return null;
-        }*/
+        }*/ 
 
         // Cargo la sumatoria de los factores de cada provincia segun lo requerido por los calculos 
         myEstV2.estHeader.iibb_total=await _unitOfWork.IIBBs.GetSumFactores();
@@ -167,32 +162,25 @@ public class calc
             haltError=_estService.getLastError();
             return null;
         }
-        // Proceso todos los gastos proyectados.
-        myEstV2=await _estService.calcularGastosProyecto(myEstV2);
-        if(myEstV2==null)
-        {
-            haltError=_estService.getLastError();
-            return null;
-        }
-        // AI
-        //myEstV2=_estService.CalcExtraGastoLocProyectoUSS(myEstV2);
-        //AJ
-       /* myEstV2=_estService.CalcExtraGastoProyectoUSS(myEstV2);
-        //AK
-        myEstV2=_estService.CalcExtraGastoProyectoUnitUSS(myEstV2);
-        if(myEstV2==null)
-        {
-            haltError=_estService.getLastError();
-            return null;
-        }*/
-        //AL
+
+
+        // Pondera los gastos locales del header en los diferentes productos. 
+        // Los gastos locales fueron extraidos de las tarifas o ya se hayaban guardados en el header
+        myEstV2=_estService.registrarGastosLocalesPorProducto(myEstV2);
+        myEstV2=_estService.registrarExtraGastosGlobalesPorProducto(myEstV2);
+
+        // SUMA todo los gastos locales y extra que ya se encuentran ponderados por articulo
+        myEstV2=_estService.CalcGastos_LOC_Y_EXTRA(myEstV2);
+        // Divide el gasto calculado anterior por la cantidad de articulos de esa fila.
+        myEstV2=_estService.CalcGastos_LOC_Y_EXTRA_U(myEstV2);
+        // Gastos_LOC_Y_EXTRA_U / Precio_U
         myEstV2=_estService.CalcOverhead(myEstV2);
         if(myEstV2==null)
         {
             haltError=_estService.getLastError();
             return null;
         }
-        //AM
+        //Precio + Gastos_LOC_Y_EXTRA_U.
         myEstV2=_estService.CalcCostoUnitarioUSS(myEstV2);
         //AN
         myEstV2=_estService.CalcCostoUnitario(myEstV2);
@@ -303,12 +291,12 @@ public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
         }
 
        // Proceso todos los gastos proyectados.
-        myEstV2=await _estService.calcularGastosProyecto(myEstV2);
+        /*myEstV2=await _estService.calcularGastosProyecto(myEstV2);
         if(myEstV2.estHeader.gastos_loc_total<0)
         {
             haltError=_estService.getLastError();
             return null;
-        }
+        }*/
         // AI
         /*myEstV2=_estService.CalcExtraGastoLocProyectoUSS(myEstV2);
         //AL

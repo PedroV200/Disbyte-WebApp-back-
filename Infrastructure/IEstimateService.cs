@@ -8,7 +8,7 @@ public interface IEstimateService : IGenericService<EstimateV2>
     IEstimateDetailService _estDetServices {get;}
 
     //public Task<EstimateV2> loadConstants(EstimateV2 est);
-    public void loadConstants(CONSTANTES miConst);
+    public void setConstants(CONSTANTES miConst);
 
     // CELDA I43
     //public EstimateV2 CalcCantPcsTotal(EstimateV2 est);
@@ -53,7 +53,10 @@ public interface IEstimateService : IGenericService<EstimateV2>
 
     public EstimateV2 CalcFactorProdTotal(EstimateV2 est);
 
-    public EstimateV2 CalcExtraGastoLocProyectoUSS(EstimateV2 est);
+    //public EstimateV2 CalcExtraGastoLocProyectoUSS(EstimateV2 est);
+
+    public EstimateV2 CalcGastos_LOC_Y_EXTRA(EstimateV2 V2);
+    public EstimateV2 CalcGastos_LOC_Y_EXTRA_U(EstimateV2 est);
 
     public EstimateV2 CalcOverhead(EstimateV2 est);
 
@@ -61,9 +64,12 @@ public interface IEstimateService : IGenericService<EstimateV2>
 
     public EstimateV2 CalcCostoUnitario(EstimateV2 est); 
 
-    public Task<EstimateV2> calcularGastosProyecto(EstimateV2 miEst);
+    //public Task<EstimateV2> calcularGastosProyecto(EstimateV2 miEst);
 
     //public Task<double> lookUpTarifaFleteCont(EstimateV2 est);
+
+    public EstimateV2 registrarGastosLocalesPorProducto(EstimateV2 miEst);
+    public EstimateV2 registrarExtraGastosGlobalesPorProducto(EstimateV2 miEst);
 
     public Task<EstimateV2> CalcularCantContenedores(EstimateV2 est);
 
