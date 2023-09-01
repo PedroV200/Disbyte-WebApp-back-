@@ -112,12 +112,12 @@ public class TarifasBancosController : ControllerBase
         }
     }
 
-    [HttpGet("fecha/{fechahora}")]
-    public async Task<TarifasBanco> GetByNearestFecha(string fechahora)
+    [HttpGet("fecha/{fechahora}/{paisregion}")]
+    public async Task<TarifasBanco> GetByNearestFecha(string fechahora, int paisregion)
     {
         try
         {
-            return await _unitOfWork.TarifBancos.GetByNearestDateAsync(fechahora);
+            return await _unitOfWork.TarifBancos.GetByNearestDateAsync(fechahora,paisregion);
         }
         catch (Exception ex)
         {

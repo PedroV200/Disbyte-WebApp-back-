@@ -5,5 +5,5 @@ using WebApiSample.Models;
     public interface ITarifasBancoRepository : IGenericRepository<TarifasBanco>
     {
          public Task<IEnumerable<TarifasBancoVista>>GetAllVistaAsync();
-         public Task<TarifasBanco> GetByNearestDateAsync(string fechahora);
+         public Task<TarifasBanco> GetByNearestDateAsync(string fechahora, int paisregion_id);
     }

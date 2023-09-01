@@ -112,12 +112,25 @@ public class TarifasPolizaController : ControllerBase
         }
     }
 
-    [HttpGet("fecha/{fechahora}")]
-    public async Task<TarifasPoliza> GetByNearestFecha(string fechahora)
+    [HttpGet("fecha/{fechahora}/{paisregion}")]
+    public async Task<TarifasPoliza> GetByNearestFecha(string fechahora, int paisregion)
     {
         try
         {
-            return await _unitOfWork.TarifPoliza.GetByNearestDateAsync(fechahora);
+            return await _unitOfWork.TarifPoliza.GetByNearestDateAsync(fechahora, paisregion);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    [HttpGet("vista/")]
+    public async Task<IEnumerable<TarifasPolizaVista>> GetAllVista()
+    {
+        try
+        {
+            return await _unitOfWork.TarifPoliza.GetAllVistaAsync();
         }
         catch (Exception ex)
         {

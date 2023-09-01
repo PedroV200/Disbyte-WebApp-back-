@@ -112,12 +112,25 @@ public class TarifasTerminalController : ControllerBase
         }
     }
 
-    [HttpGet("fecha/{fechahora}")]
-    public async Task<TarifasTerminal> GetByNearestFecha(string fechahora)
+    [HttpGet("fecha/{fechahora}/{carga}/{paisregion}")]
+    public async Task<TarifasTerminal> GetByNearestFecha(string fechahora, int carga, int paisregion)
     {
         try
         {
-            return await _unitOfWork.TarifTerminal.GetByNearestDateAsync(fechahora);
+            return await _unitOfWork.TarifTerminal.GetByNearestDateAsync(fechahora,carga,paisregion);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    [HttpGet("vista/")]
+    public async Task<IEnumerable<TarifasTerminalVista>> GetAllVista()
+    {
+        try
+        {
+            return await _unitOfWork.TarifTerminal.GetAllVistaAsync();
         }
         catch (Exception ex)
         {
