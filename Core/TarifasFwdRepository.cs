@@ -79,6 +79,24 @@ public class TarifasFwdRepository : ITarifasFwdRepository
             return await connection.QueryAsync<TarifasFwd>(sql);
         }
     }
+
+    public async Task<IEnumerable<TarifasFwdVista>> GetAllVistaAsync()
+    {
+        var sql = @"select tarifasfwd.*, fwdtte.description as fwdtte, cargas.description as carga, pr1.description as pais_dest, pr1.region as region_dest, pr2.description as pais_orig, pr2.region as region_orig
+                    from tarifasfwd
+                    inner join fwdtte on tarifasfwd.fwdtte_id=fwdtte.id
+                    inner join cargas on cargas.id = tarifasfwd.carga_id
+                    inner join paisregion as pr1 on pr1.id = tarifasfwd.paisregion_id
+                    inner join paisregion as pr2 on pr2.id = tarifasfwd.paisfwd_id";
+
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasFwdVista>(sql);
+        }
+    }
+
     public async Task<TarifasFwd> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasfwd WHERE id = {id}";
@@ -121,11 +139,11 @@ public class TarifasFwdRepository : ITarifasFwdRepository
     // Consulta postgresql que devuelve el row con la cotizacion cdel dia, en el ultimo horario  ...
     //  o
     // La mas cercana en fecha si no existe una entrada para la fecha pasada como parametro.
-    public async Task<TarifasFwd> GetByNearestDateAsync(string fecha)
+    public async Task<TarifasFwd> GetByNearestDateAsync(string fecha, int carga_id, int paisdest_id, int paisorig_id)
     {
         // Si la fecha por la que consulto tiene una entrada en la base, el criterio es la que tiene la cotizacion
         // con la hora mas tarde.
-        var sql = $@"select * from tarifasfwd where htimestamp::date=date '{fecha}' order by htimestamp::time DESC LIMIT 1"; 
+        var sql = $@"select * from tarifasfwd where carga_id={carga_id} AND paisregion_id={paisdest_id} AND paisfwd_id={paisorig_id} AND htimestamp::date=date '{fecha}' order by htimestamp::time DESC LIMIT 1"; 
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();
@@ -135,7 +153,7 @@ public class TarifasFwdRepository : ITarifasFwdRepository
             // y me quedo con la diferencia mas chica.
             if(result==null)
             {
-                sql = $@"SELECT * FROM tarifasfwd ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}'))) LIMIT 1";
+                sql = $@"SELECT * FROM tarifasfwd where carga_id={carga_id} AND paisregion_id={paisdest_id} AND paisfwd_id={paisorig_id} ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}'))) LIMIT 1";
                 result = await connection.QuerySingleOrDefaultAsync<TarifasFwd>(sql);
             }
             return result;

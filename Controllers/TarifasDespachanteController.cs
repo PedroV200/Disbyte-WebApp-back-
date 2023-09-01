@@ -112,12 +112,12 @@ public class TarifasDespachanteController : ControllerBase
         }
     }
 
-    [HttpGet("fecha/{fechahora}")]
-    public async Task<TarifasDespachante> GetByNearestFecha(string fechahora)
+    [HttpGet("fecha/{fechahora}/{paisregion}")]
+    public async Task<TarifasDespachante> GetByNearestFecha(string fechahora, int paisregion)
     {
         try
         {
-            return await _unitOfWork.TarifDespa.GetByNearestDateAsync(fechahora);
+            return await _unitOfWork.TarifDespa.GetByNearestDateAsync(fechahora,paisregion);
         }
         catch (Exception ex)
         {

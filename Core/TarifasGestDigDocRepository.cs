@@ -72,6 +72,22 @@ public class TarifasGestDigDocRepository : ITarifasGestDigDocRepository
             return await connection.QueryAsync<TarifasGestDigDoc>(sql);
         }
     }
+
+    public async Task<IEnumerable<TarifasGestDigDocVista>> GetAllVistaAsync()
+    {
+        var sql = @"select tarifasgestdigdoc.*, gestdigdoc.description as gestdigdoc, paisregion.description as pais, paisregion.region as region 
+                        from tarifasgestdigdoc
+                        inner join gestdigdoc on gestdigdoc.id=tarifasgestdigdoc.gestdigdoc_id
+                        inner join paisregion on paisregion.id=tarifasgestdigdoc.paisregion_id";
+
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasGestDigDocVista>(sql);
+        }
+    }
+
     public async Task<TarifasGestDigDoc> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasgestdigdoc WHERE id = {id}";
@@ -111,11 +127,11 @@ public class TarifasGestDigDocRepository : ITarifasGestDigDocRepository
     // Consulta postgresql que devuelve el row con la cotizacion cdel dia, en el ultimo horario  ...
     //  o
     // La mas cercana en fecha si no existe una entrada para la fecha pasada como parametro.
-    public async Task<TarifasGestDigDoc> GetByNearestDateAsync(string fecha)
+    public async Task<TarifasGestDigDoc> GetByNearestDateAsync(string fecha, int paisregion_id)
     {
         // Si la fecha por la que consulto tiene una entrada en la base, el criterio es la que tiene la cotizacion
         // con la hora mas tarde.
-        var sql = $@"select * from tarifasgestdigdoc where htimestamp::date=date '{fecha}' order by htimestamp::time DESC LIMIT 1"; 
+        var sql = $@"select * from tarifasgestdigdoc where paisregion_id={paisregion_id} AND htimestamp::date=date '{fecha}' order by htimestamp::time DESC LIMIT 1"; 
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();
@@ -125,7 +141,7 @@ public class TarifasGestDigDocRepository : ITarifasGestDigDocRepository
             // y me quedo con la diferencia mas chica.
             if(result==null)
             {
-                sql = $@"SELECT * FROM tarifasgestdigdoc ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}'))) LIMIT 1";
+                sql = $@"SELECT * FROM tarifasgestdigdoc where paisregion_id={paisregion_id} ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}'))) LIMIT 1";
                 result = await connection.QuerySingleOrDefaultAsync<TarifasGestDigDoc>(sql);
             }
             return result;

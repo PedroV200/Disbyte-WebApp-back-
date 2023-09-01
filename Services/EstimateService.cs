@@ -5,7 +5,7 @@ using WebApiSample.Models;
 using Npgsql;
 using Dapper;
 using System.Data;
-using System.Globalization;                                            
+using System.Globalization;                                              
 
 // 3_8_2023 SEGUNDA VERSION para "multiregion" basado en el sheet de MEX y ARG WIP
 
@@ -769,25 +769,25 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         // Quieren las tarifas mas arrimadas en fecha ?
         if(miEst.usarTarifasMasModernas)
         {   // Si
-            misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByNearestDateAsync(hoy);
+            misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
             if(misTarifas.tBanco==null)         { haltError=$"La tarifa Banco mas prox no encontrada"; return null;}
 
-            misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByNearestDateAsync(hoy);
+            misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
             if(misTarifas.tDepo==null)          { haltError=$"La tarifa Deposito mas prox no encontrada"; return null;}
 
-            misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByNearestDateAsync(hoy);
+            misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
             if(misTarifas.tDespa==null)         { haltError=$"La tarifa Despachante mas prox no encontrada"; return null;}
 
-            misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy);
+            misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id,miEst.estHeader.fwdpaisregion_id);
             if(misTarifas.tFwd==null)           { haltError=$"La tarifa Fowarder mas prox no encontrada"; return null;}
 
-            misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy);
+            misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
             if(misTarifas.tFlete==null)         { haltError=$"La tarifa Flete mas prox no encontrada"; return null;}
 
-            misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(hoy);
+            misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
             if(misTarifas.tGestDigDoc==null)    { haltError=$"La tarifa GestionDigitalDocumental mas prox no encontrada"; return null;}
 
-            misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByNearestDateAsync(hoy);
+            misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
             if(misTarifas.tPoliza==null)        { haltError=$"La tarifa Poliza mas prox no encontrada"; return null;}
 
             miEst.misTarifas=misTarifas;

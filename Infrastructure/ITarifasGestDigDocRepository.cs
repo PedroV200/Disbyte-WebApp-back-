@@ -4,5 +4,6 @@ using WebApiSample.Models;
 
     public interface ITarifasGestDigDocRepository : IGenericRepository<TarifasGestDigDoc>
     {
-         public Task<TarifasGestDigDoc> GetByNearestDateAsync(string fechahora);
+         public Task<IEnumerable<TarifasGestDigDocVista>> GetAllVistaAsync();
+         public Task<TarifasGestDigDoc> GetByNearestDateAsync(string fechahora, int paisregion_id);
     }

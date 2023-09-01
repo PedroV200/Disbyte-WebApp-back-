@@ -149,11 +149,11 @@ public class TarifasDepositoRepository : ITarifasDepositoRepository
     // Consulta postgresql que devuelve el row con la cotizacion cdel dia, en el ultimo horario  ...
     //  o
     // La mas cercana en fecha si no existe una entrada para la fecha pasada como parametro.
-    public async Task<TarifasDeposito> GetByNearestDateAsync(string fecha)
+    public async Task<TarifasDeposito> GetByNearestDateAsync(string fecha, int carga_id, int paisregion_id)
     {
         // Si la fecha por la que consulto tiene una entrada en la base, el criterio es la que tiene la cotizacion
         // con la hora mas tarde.
-        var sql = $@"select * from tarifasdepositos where htimestamp::date=date '{fecha}' order by htimestamp::time DESC LIMIT 1"; 
+        var sql = $@"select * from tarifasdepositos where paisregion_id={paisregion_id} AND carga_id={carga_id} AND htimestamp::date=date '{fecha}' order by htimestamp::time DESC LIMIT 1"; 
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();
@@ -163,7 +163,7 @@ public class TarifasDepositoRepository : ITarifasDepositoRepository
             // y me quedo con la diferencia mas chica.
             if(result==null)
             {
-                sql = $@"SELECT * FROM tarifasdepositos ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}'))) LIMIT 1";
+                sql = $@"SELECT * FROM tarifasdepositos where paisregion_id={paisregion_id} AND carga_id={carga_id} ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}'))) LIMIT 1";
                 result = await connection.QuerySingleOrDefaultAsync<TarifasDeposito>(sql);
             }
             return result;

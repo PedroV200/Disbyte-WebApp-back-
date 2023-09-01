@@ -33,4 +33,5 @@ public class TarifasDespachanteVista
     public DateTime htimestamp{get;set;}
     public string despachante{get;set;}
     public string pais{get;set;}
+    public string region{get;set;}
 }

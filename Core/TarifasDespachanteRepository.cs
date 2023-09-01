@@ -20,7 +20,7 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
     {
         string tmpString=entity.htimestamp.ToString("yyyy-MM-dd hh:mm:ss");
         //var sql = $"INSERT INTO tarifasdepositos (depo, contype, descarga, ingreso, totingreso, carga, armado, egreso, totegreso) VALUES ('{entity.depo}','{entity.contype}','{entity.descarga.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.ingreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.totingreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.carga.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.armado.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.egreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.totegreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}')";
-        var sql = $@"INSERT INTO tarifasdespachentes 
+        var sql = $@"INSERT INTO tarifasdespachantes 
                 (  
                     description,
                     despachantes_id,
@@ -81,7 +81,7 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
 
     public async Task<IEnumerable<TarifasDespachanteVista>> GetAllVistaAsync()
     {
-        var sql = @"select tarifasdespachantes.*, despachantes.description as despachante, paisregion.description as pais
+        var sql = @"select tarifasdespachantes.*, despachantes.description as despachante, paisregion.description as pais, paisregion.region as region
                     from tarifasdespachantes
                     inner join despachantes on tarifasdespachantes.despachantes_id=despachantes.id 
                     inner join paisregion  on tarifasdespachantes.paisregion_id=paisregion.id ";
@@ -134,11 +134,11 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
     // Consulta postgresql que devuelve el row con la cotizacion cdel dia, en el ultimo horario  ...
     //  o
     // La mas cercana en fecha si no existe una entrada para la fecha pasada como parametro.
-    public async Task<TarifasDespachante> GetByNearestDateAsync(string fecha)
+    public async Task<TarifasDespachante> GetByNearestDateAsync(string fecha, int paisregion_id)
     {
         // Si la fecha por la que consulto tiene una entrada en la base, el criterio es la que tiene la cotizacion
         // con la hora mas tarde.
-        var sql = $@"select * from tarifasdespachantes where htimestamp::date=date '{fecha}' order by htimestamp::time DESC LIMIT 1"; 
+        var sql = $@"select * from tarifasdespachantes where paisregion_id={paisregion_id} AND htimestamp::date=date '{fecha}' order by htimestamp::time DESC LIMIT 1"; 
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();
@@ -148,7 +148,7 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
             // y me quedo con la diferencia mas chica.
             if(result==null)
             {
-                sql = $@"SELECT * FROM tarifasdespachantes ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}'))) LIMIT 1";
+                sql = $@"SELECT * FROM tarifasdespachantes where paisregion_id={paisregion_id} ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}'))) LIMIT 1";
                 result = await connection.QuerySingleOrDefaultAsync<TarifasDespachante>(sql);
             }
             return result;

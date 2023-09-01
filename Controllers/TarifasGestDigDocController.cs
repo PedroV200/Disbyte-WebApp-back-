@@ -112,14 +112,27 @@ public class TarifasGestDigDocController : ControllerBase
         }
     }
 
-    [HttpGet("fecha/{fechahora}")]
-    public async Task<TarifasGestDigDoc> GetByNearestFecha(string fechahora)
+    [HttpGet("fecha/{fechahora}/{paisregion}")]
+    public async Task<TarifasGestDigDoc> GetByNearestFecha(string fechahora, int paisregion)
     {
         try
         {
-            return await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(fechahora);
+            return await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(fechahora, paisregion);
         }
         catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    [HttpGet("vista/")]
+    //[Authorize("put:sample-role-admin-messages")]
+    public async Task<IEnumerable<TarifasGestDigDocVista>>GetAllVista()
+    {
+        try
+        {
+            return await _unitOfWork.TarifGestDigDoc.GetAllVistaAsync();
+        }catch (Exception ex)
         {
             throw new Exception(ex.Message);
         }
