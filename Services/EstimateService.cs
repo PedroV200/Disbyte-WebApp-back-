@@ -8,6 +8,7 @@ using System.Data;
 using System.Globalization;                                              
 
 // 3_8_2023 SEGUNDA VERSION para "multiregion" basado en el sheet de MEX y ARG WIP
+// 4_9_2023 Refactor logica de tarifas.
 
 public class EstimateService: IEstimateService
 {
@@ -766,111 +767,146 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
 
         misTarifas=new Tarifas();
 
-        // Quieren las tarifas mas arrimadas en fecha ?
-        if(miEst.usarTarifasMasModernas)
-        {   // Si
-            misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
-            if(misTarifas.tBanco==null)         { haltError=$"La tarifa Banco mas prox no encontrada"; return null;}
+       
+        // El campo tarifsource es una mascara de bit que comanda que tarifa va a actualizarse 
+        // Si el bit 8 esta encendido, toda tarifa que tenga su bit encendido sera actualizada
+        // x fecha (mas moderna)
+        // Si el octavo bit esta apagado, toda tarfia que tenga su bit encendido sera actualizada
+        // usando el ID enviado en el JSON
+        // Si el campo tarifsource se envia con todos los bits de tarifa apagados, se usaran los 
+        // valores de gastos locales calculados ya guardos en en versiones anteriores.
+        // Ningun acceso a datos de tarfia en la DB sera realizado.
 
-            misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
-            if(misTarifas.tDepo==null)          { haltError=$"La tarifa Deposito mas prox no encontrada"; return null;}
-
-            misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
-            if(misTarifas.tDespa==null)         { haltError=$"La tarifa Despachante mas prox no encontrada"; return null;}
-
-            misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id,miEst.estHeader.fwdpaisregion_id);
-            if(misTarifas.tFwd==null)           { haltError=$"La tarifa Fowarder mas prox no encontrada"; return null;}
-
-            misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
-            if(misTarifas.tFlete==null)         { haltError=$"La tarifa Flete mas prox no encontrada"; return null;}
-
-            misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
-            if(misTarifas.tGestDigDoc==null)    { haltError=$"La tarifa GestionDigitalDocumental mas prox no encontrada"; return null;}
-
-            misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
-            if(misTarifas.tPoliza==null)        { haltError=$"La tarifa Poliza mas prox no encontrada"; return null;}
-
-            miEst.misTarifas=misTarifas;
-            return miEst;
-        }
-        else
-        {   // No. Pues uso los IDs (FKs) enviados en el JSON
-            // TIP: Si el ID es negativo no se repite el query, se asume sin cambios. El signo menos debera ser
-            // colocado por el front para avisar cuales tarifas permanecen sin modificacion
-            // Es solo un tema de EFICIENCIA. Al finalizar su uso, se hacen todos positivos sin importar si son o no
-            // negativos. Es mas rapido y limpio que andar preguntando.
-            if(miEst.estHeader.tarifasbancos_id>0)
-            {
+        // Actualizo tarifa Banco ?
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifBanco))>0)
+        {   // SI. Actualizo por fecha ?
+            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            {   // SI
+                misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
+                if(misTarifas.tBanco==null)         
+                    { haltError=$"La tarifa Banco mas prox no encontrada"; return null;}
+            }
+            else
+            {   // No. Actualizo segun registro elegido ID DB
                 misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByIdAsync(miEst.estHeader.tarifasbancos_id);
                 if(misTarifas.tBanco==null)         
-                        { haltError=$"La tarifa Banco con ID:{miEst.estHeader.tarifasbancos_id} no existe"; return null;}
+                    { haltError=$"La tarifa Banco con ID:{miEst.estHeader.tarifasbancos_id} no existe"; return null;}
             }
-            if(miEst.estHeader.tarifasdepositos_id>0)
-            {
+        }
+        // Actualizo Tarifa Deposito ?
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifDepo))>0)
+        {   // Actualizo Tarifas Deposito
+            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            {   // Actualizo usando cotizacion mas moderna
+                misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
+                if(misTarifas.tDepo==null)          
+                    { haltError=$"La tarifa Deposito mas prox no encontrada"; return null;}
+            }
+            else
+            {   // Actualizo usando el ID provisto.
                 misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByIdAsync(miEst.estHeader.tarifasdepositos_id);
-                if(misTarifas.tDepo==null)         
-                        { haltError=$"La tarifa Deposito mas prox no encontrada"; return null;}
+                if(misTarifas.tDepo==null)      
+                    { haltError=$"La tarifa Deposito con ID: {miEst.estHeader.tarifasdepositos_id} no existe"; return null;}
             }
-            if(miEst.estHeader.tarifasdespachantes_id>0)
+        }
+        // Actualizo Tarifa Flete ?
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifDespa))>0)
+        {
+            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            {
+                misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
+                if(misTarifas.tFlete==null)         
+                    { haltError=$"La tarifa Flete mas prox no encontrada"; return null;}
+            }
+            else                 
             {
                 misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByIdAsync(miEst.estHeader.tarifasdespachantes_id);
-                if(misTarifas.tDespa==null)         
-                        { haltError=$"La tarifa Despachante mas prox no encontrada"; return null;}
+                if(misTarifas.tDespa==null)  
+                    { haltError=$"La tarifa Despachante con ID: {miEst.estHeader.tarifasdespachantes_id} no existe"; return null;}
             }
-
-            if(miEst.estHeader.tarifasfwd_id>0)
+        }
+        // Actualizo Tarifa Fowarder ?
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasFwd))>0)
+        {
+            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            {
+                misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id,miEst.estHeader.fwdpaisregion_id);
+                if(misTarifas.tFwd==null)           
+                    { haltError=$"La tarifa Fowarder mas prox no encontrada para paisorig ID: {miEst.estHeader.fwdpaisregion_id} y paisdest ID:{miEst.estHeader.paisregion_id}"; return null;}
+            }
+            else
             {
                 misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByIdAsync(miEst.estHeader.tarifasfwd_id);
                 if(misTarifas.tFwd==null)           
-                        { haltError=$"La tarifa Fowarder mas prox no encontrada"; return null;}
+                    { haltError=$"La tarifa Fowarder con ID: {miEst.estHeader.tarifasfwd_id}, no existe"; return null;}
             }
-
-            if(miEst.estHeader.tarifasflete_id>0)
+        }
+        // Actualizo Tarifa Flete ?
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifFlete))>0)
+        {
+            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            {
+                misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
+                if(misTarifas.tFlete==null)         
+                    { haltError=$"La tarifa Flete mas prox no encontrada"; return null;}
+            }
+            else
             {
                 misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByIdAsync(miEst.estHeader.tarifasflete_id);
                 if(misTarifas.tFlete==null)         
-                        { haltError=$"La tarifa Flete mas prox no encontrada"; return null;}
+                    { haltError=$"La tarifa Flete con ID: {miEst.estHeader.tarifasflete_id}"; return null;}
             }
-
-            if(miEst.estHeader.tarifasgestdigdoc_id>0)
+        }
+        // Actualizo tarifa GestDigDoc
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifGestDigDoc))>0)
+        {
+            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            {
+                misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
+                if(misTarifas.tGestDigDoc==null)    
+                    { haltError=$"La tarifa GestionDigitalDocumental mas prox no encontrada"; return null;}
+            }
+            else
             {
                 misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByIdAsync(miEst.estHeader.tarifasgestdigdoc_id);
                 if(misTarifas.tGestDigDoc==null)    
-                        { haltError=$"La tarifa GestionDigitalDocumental mas prox no encontrada"; return null;}
+                        { haltError=$"La tarifa GestionDigitalDocumental con ID: {miEst.estHeader.tarifasgestdigdoc_id} no existe"; return null;}
             }
-
-            if(miEst.estHeader.tarifaspolizas_id>0)
+        }
+        // Actualizo Tarfias Poliza ?
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifPoliza))>0)
+        {
+            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            {
+                misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
+                if(misTarifas.tPoliza==null)        
+                    { haltError=$"La tarifa Poliza mas prox no encontrada"; return null;} 
+            }
+            else
             {
                 misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByIdAsync(miEst.estHeader.tarifaspolizas_id);
                 if(misTarifas.tPoliza==null)        
-                        { haltError=$"La tarifa Poliza mas prox no encontrada"; return null;}
+                    { haltError=$"La tarifa Poliza con ID: {miEst.estHeader.tarifaspolizas_id}"; return null;}
             }
-            
-
-            // Si alguno de los IDs fuere negativo, los hago todos positivos. Ni me gasto en preguntar
-            miEst.estHeader.tarifasbancos_id=Math.Abs(miEst.estHeader.tarifasbancos_id);
-            miEst.estHeader.tarifasdepositos_id=Math.Abs(miEst.estHeader.tarifasdepositos_id);
-            miEst.estHeader.tarifasdespachantes_id=Math.Abs(miEst.estHeader.tarifasdespachantes_id);
-            miEst.estHeader.tarifasflete_id=Math.Abs(miEst.estHeader.tarifasflete_id);
-            miEst.estHeader.tarifasfwd_id=Math.Abs(miEst.estHeader.tarifasfwd_id);
-            miEst.estHeader.tarifasgestdigdoc_id=Math.Abs(miEst.estHeader.tarifasgestdigdoc_id);
-            miEst.estHeader.tarifaspolizas_id=Math.Abs(miEst.estHeader.tarifaspolizas_id);
-            miEst.estHeader.tarifasterminales_id=Math.Abs(miEst.estHeader.tarifasterminales_id);
-
-            miEst.misTarifas=misTarifas;
         }
+        // Las tarfias que levante la fui guardando en "misTarifas". Las guardo en EstimateV2.    
+        miEst.misTarifas=misTarifas;
 
         double tmp;
 
-        // Calculo el gasto bancario (ARG)       
-        if(miEst.estHeader.tarifasbancos_id>0)
+        // Me fijo si los gastos deben o no recalcularse. Arriba se determino si la tarifa se levanta por fecha o por ID
+        // En este punto todas las tarfias han sido cargdas dentro del EstimateV2.
+
+        // Calculo el gasto bancario (ARG), si el bit de actualizar esta encendido
+        // Si el bit actualizar esta apagado ... se usara el valor g_loc correspondiente.
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifBanco))>0)
         {
             tmp=calcularGastosBancarios(miEst);         // Este idem.
             // Lo guardo en el header
             miEst.estHeader.gloc_bancos=tmp;
         }
         // Calculo gastos del despachante (ARG)
-        if(miEst.estHeader.tarifasdespachantes_id>0)
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifDespa))>0)
         {
             tmp=await calcularGastosDespachante(miEst);
             if(tmp<0)
@@ -882,7 +918,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             miEst.estHeader.gloc_despachantes=tmp;
         }
         // Calculo gastos de FLETE INTERNO (ARG)
-        if(miEst.estHeader.tarifasflete_id>0)
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifFlete))>0)
         {
             tmp=await calcularGastosTteLocal(miEst);
             if(tmp<0)
@@ -890,11 +926,11 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
                 haltError="FALLA AL CALCULAR LOS GASTOS DE TTE LOC. Tabla de tarifa no accesible o no existen datos para el contenedor ingresado";
                 return null;
             }
-        // Guardo el gasto en el header
-        miEst.estHeader.gloc_flete=tmp;
+            // Guardo el gasto en el header
+            miEst.estHeader.gloc_flete=tmp;
         }
         // Calculo el gasto de Fowarder con el 040 del flete (ARG)
-        if(miEst.estHeader.tarifasfwd_id>0)
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasFwd))>0)
         {
             tmp=await calcularGastosFwd(miEst);
             if(tmp<0)
@@ -906,13 +942,13 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             miEst.estHeader.gloc_fwd=tmp;
         }
         // Calculo los gastos de Gestion digital de documentos
-        if(miEst.estHeader.tarifasgestdigdoc_id>0)
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifGestDigDoc))>0)
         {
             tmp=calcularGastosGestDigDocs(miEst);       // Este metodo no involucra una consulta a tabla, tmp np puede ser negativo
             miEst.estHeader.gloc_gestdigdoc=tmp;
         }
         // Calculo los gastos de custodia / seguro
-        if(miEst.estHeader.tarifaspolizas_id>0)
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifPoliza))>0)
         {
             tmp=await calcularGastosCustodia(miEst);
             if(tmp<0)
@@ -924,7 +960,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             miEst.estHeader.gloc_polizas=tmp;
         }
         // Calculo los gastos de Terminal
-        if(miEst.estHeader.tarifasterminales_id>0)
+        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasTerm))>0)
         {
             tmp=await calcularGastosTerminal(miEst);
             if(tmp<0)

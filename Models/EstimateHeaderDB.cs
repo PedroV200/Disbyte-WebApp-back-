@@ -13,6 +13,7 @@ public class EstimateHeaderDB
     public int fwdpaisregion_id{get;set;}
     public string own{get;set;}
     public double dolar{get;set;}
+    public int tarifsource{get;set;}
     public int tarifasfwd_id{get;set;}
     public int tarifasflete_id{get;set;}
     public int tarifasterminales_id{get;set;}
@@ -61,4 +62,18 @@ public class EstimateHeaderDB
     public double freight_insurance_cost{get;set;}
     public double iibb_total{get;set;}
     public DateTime htimestamp{get;set;}
+}
+
+[Flags]
+public enum tarifaControl
+{
+    tarifBanco = 0,
+    tarifDepo = 1,
+    tarifDespa = 2,
+    tarifFlete = 3,
+    tarifasFwd = 4,
+    tarifGestDigDoc = 5,
+    tarifPoliza =6,
+    tarifasTerm = 7,
+    tarifasHoy = 8
 }
