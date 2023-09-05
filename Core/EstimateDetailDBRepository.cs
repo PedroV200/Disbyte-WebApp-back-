@@ -146,7 +146,7 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
     }
         public async Task<IEnumerable<EstimateDetailDB>>GetAllByIdEstHeadersync(int Id)
     {
-        var sql = $"SELECT * FROM estimatedetails WHERE IdEstHeader={Id}";
+        var sql = $"SELECT * FROM estimatedetails WHERE estimateheader_id={Id}";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();

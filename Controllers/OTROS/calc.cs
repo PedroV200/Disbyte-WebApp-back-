@@ -73,7 +73,7 @@ public class calc
 
         // PRECONDICIONES PARA EL LLAMADO: CBMTOTAL Y PESOTOTAL ya calculados.
         // CELDA C10
-        myEstV2=await _estService.CalcularCantContenedores(myEstV2);
+        myEstV2=_estService.CalcularCantContenedores(myEstV2);
         if(myEstV2==null)
         {
             haltError="La tabla de contenedores no es accesible,el volumen del contenedor es 0, o el peso del contenedor es cero";
@@ -202,19 +202,14 @@ public class calc
 public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
     {
 
-        EstimateDB myEstDB=new EstimateDB(); 
-        dbutils dbhelper=new dbutils(_unitOfWork);
-
-
-        // Hago algunas cuentas.
-        // Calculo el peso total por articulo
-        // COL J
         myEstV2=_estService.CalcPesoTotal(myEstV2);
+
         if(myEstV2==null)
         {
             haltError=_estService.getLastError();
             return null;
         }
+        
         // COL K
         myEstV2=_estService.CalcCbmTotal(myEstV2);
         if(myEstV2==null)
@@ -223,8 +218,16 @@ public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
             return null;
         }
 
+        // PRECONDICIONES PARA EL LLAMADO: CBMTOTAL Y PESOTOTAL ya calculados.
+        // CELDA C10
+        myEstV2=_estService.CalcularCantContenedores(myEstV2);
         // COL L. Calculo el fob total por articulo
         myEstV2=_estService.CalcFobTotal(myEstV2);
+        // CELDA C5 que es funcion del valor FOB
+        myEstV2=_estService.CalcSeguroTotal(myEstV2);
+
+        //myEstV2=_estService.CalcFleteTotal(myEstV2);
+
 
         // COL M. Calcula el flete ponderado a cada articulo del detalle.
         myEstV2=_estService.CalcFleteTotalByProd(myEstV2);
@@ -241,17 +244,14 @@ public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
         }
         // COL O. Calcula el CIF que solo depende de los datos ya calculados previamente (COL L, N y M)
         myEstV2=_estService.CalcCif(myEstV2);
+        // CELDA =43
+        myEstV2=_estService.CalcCifTotal(myEstV2);
         // COL R (COL O y COL Q no estan en uso)
         myEstV2=_estService.CalcAjusteIncDec(myEstV2);
         // COL S, COL U, COLY, COL AA 
         // Evito consultar la base de NCM una vez por cada factor necesario. Se que son 4 los factores.
         // Los traigo en una sola consulta (una consulta x item)
-        /*myEstV2=await _estService.search_NCM_DATA(myEstV2);
-        if(myEstV2==null)
-        {   
-            haltError=_estService.getLastError();
-            return null;
-        }*/
+        // NCM data ya esta cargada.
         //myEstV2=await _estService.searchNcmDie(myEstV2);
         // COL T
         myEstV2=_estService.CalcDerechos(myEstV2);
@@ -282,6 +282,8 @@ public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
         }
         // COL AF
         myEstV2=_estService.CalcPagado(myEstV2);
+        // CELDA AF43
+        myEstV2=_estService.CalcPagadoTot(myEstV2);
         // AH
         myEstV2=_estService.CalcFactorProdTotal(myEstV2);
         if(myEstV2==null)
@@ -290,23 +292,24 @@ public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
             return null;
         }
 
-       // Proceso todos los gastos proyectados.
-        /*myEstV2=await _estService.calcularGastosProyecto(myEstV2);
-        if(myEstV2.estHeader.gastos_loc_total<0)
-        {
-            haltError=_estService.getLastError();
-            return null;
-        }*/
-        // AI
-        /*myEstV2=_estService.CalcExtraGastoLocProyectoUSS(myEstV2);
-        //AL
+
+        // Pondera los gastos locales del header en los diferentes productos. 
+        // Los gastos locales fueron extraidos de las tarifas o ya se hayaban guardados en el header
+        myEstV2=_estService.registrarGastosLocalesPorProducto(myEstV2);
+        myEstV2=_estService.registrarExtraGastosGlobalesPorProducto(myEstV2);
+
+        // SUMA todo los gastos locales y extra que ya se encuentran ponderados por articulo
+        myEstV2=_estService.CalcGastos_LOC_Y_EXTRA(myEstV2);
+        // Divide el gasto calculado anterior por la cantidad de articulos de esa fila.
+        myEstV2=_estService.CalcGastos_LOC_Y_EXTRA_U(myEstV2);
+        // Gastos_LOC_Y_EXTRA_U / Precio_U
         myEstV2=_estService.CalcOverhead(myEstV2);
         if(myEstV2==null)
         {
             haltError=_estService.getLastError();
             return null;
-        }*/
-        //AM
+        }
+        //Precio + Gastos_LOC_Y_EXTRA_U.
         myEstV2=_estService.CalcCostoUnitarioUSS(myEstV2);
         //AN
         myEstV2=_estService.CalcCostoUnitario(myEstV2);
