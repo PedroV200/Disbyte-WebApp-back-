@@ -13,7 +13,8 @@ public class EstimateHeaderDB
     public int fwdpaisregion_id{get;set;}
     public string own{get;set;}
     public double dolar{get;set;}
-    public int tarifsource{get;set;}
+    public int tarifupdate{get;set;}
+    public int tarifrecent{get;set;}
     public int tarifasfwd_id{get;set;}
     public int tarifasflete_id{get;set;}
     public int tarifasterminales_id{get;set;}

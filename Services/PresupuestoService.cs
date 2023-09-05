@@ -45,18 +45,15 @@ public class PresupuestoService:IPresupuestoService
     public async Task<EstimateV2>submitPresupuestoNew(EstimateDB miEst)
     {
         var result=0;
-        EstimateV2 ret=new EstimateV2();
-        dbutils dbhelper=new dbutils(_unitOfWork);
-
-        // La version no es 0. No es una simulacion. Va en serio. 
+        EstimateV2 myEstV2=new EstimateV2();
+        dbutils myDBhelper=new dbutils(_unitOfWork);
+        EstimateDB resultEDB=new EstimateDB();
         EstimateHeaderDB readBackHeader=new EstimateHeaderDB();
-        
-        /*readBackHeader=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(miEst.estHeaderDB.EstNumber,miEst.estHeaderDB.EstVers);
-        if(readBackHeader !=null)
-        {   // OJO
-             return null;
-        }*/
 
+        // ###### INIT
+        // Es un presupuesto nuevo ... me aseguro que todo lo que es extragasto este en cero y los flags de update en false
+        resultEDB=myDBhelper.setDefaultEstimateDB(resultEDB);
+        // ###### FIN INIT
 
         // Numeracion / Versionado:
         // Este es un nuevo presupuesto, con lo cual me limito a preguntar el estNumber mas alto usado
@@ -91,10 +88,10 @@ public class PresupuestoService:IPresupuestoService
         }
 
         // ################################### INIT ######################################
-        // El objeto Estimate que se definio. 
-        EstimateV2 myEstV2=new EstimateV2();
+        
+        
         // Expando el EstimateDB a un EstimateV2
-        myEstV2=dbhelper.transferDataFromDBType(miEst);
+        myEstV2=myDBhelper.transferDataFromDBType(miEst);
         // Cargo las constnates de calculo.
         myEstV2.constantes=await _cnstService.getConstantesLastVers();
         if(myEstV2.constantes==null)
@@ -119,9 +116,9 @@ public class PresupuestoService:IPresupuestoService
         // ################################## FIN INIT ############################################
 
         // CALCULOS PROPIAMENTE DICHOS
-        ret=await myCalc.calcBatch(myEstV2);
+        myEstV2=await myCalc.calcBatch(myEstV2);
         // Si los calculos fallan, no hacer nada.
-        if(ret==null)
+        if(myEstV2==null)
         {
             return null;
         }
@@ -131,14 +128,8 @@ public class PresupuestoService:IPresupuestoService
 
         // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
         // En la base no se guardan calculos,  por lo que debi convertir el estimate V2 a estimate DB y guardarlo.
-        dbutils myDBhelper=new dbutils(_unitOfWork);
-        EstimateDB resultEDB=new EstimateDB();
-        resultEDB=myDBhelper.transferDataToDBType(ret);
 
-        // ###### INIT
-        // Es un presupuesto nuevo ... me aseguro que todo lo que es extragasto este en cero y los flags de update en false
-        resultEDB=myDBhelper.setDefaultEstimateDB(resultEDB);
-        // ###### FIN INIT
+        resultEDB=myDBhelper.transferDataToDBType(myEstV2);
 
         // Guardo el header.
         result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
@@ -152,7 +143,7 @@ public class PresupuestoService:IPresupuestoService
             result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
         }
         
-        return ret;      
+        return myEstV2;      
     }
 
     public async Task<EstimateV2>simulaPresupuesto(EstimateDB miEst)
@@ -347,40 +338,21 @@ public class PresupuestoService:IPresupuestoService
             _estService.setLastError("No existe una instancia de constantes en tabla");
             return null;
         }
+        // Paso las costantes a estDetailServ via estimateService
+        _estService.setConstants(myEstV2.constantes);
+
+        // Por el momento reclaim tarifas no hace mucho. Los GLOC ya fueron calculados.
+        myEstV2=_estService.reclaimTarifas(myEstV2);
+        /*if(myEstV2==null)
+        {
+            presupError=_estService.getLastError();
+            return null;
+        }*/
+        // Carga los datos de la carga en EstimateV2.miCarga
+        _estService.loadContenedor(myEstV2);
+
+        myEstV2=await myCalc.calcReclaim(myEstV2);
         
-        // Cuando se levantaron todos los estimateDetail, se ven si sus campos "update" estan en true.
-        // En ese caso se incrementa un contador. Con que al menos un detail tenga el flag en tru, todos
-        // lo calculos deben correrse de cero. Entonces llamo a calcbatch y no a calc reclaim.
-        // Luego voy y borro los flags para indicar que las cuetnas se actualizaron.
-        // Este feature es para soportar una actualizacion de detail a la base sin necesidad de correr todo
-        // el presupuesto de nuevo. En verdad la demora luego ocurrira durante el get dado que hay un estdet
-        // actualizado y no asi los calculos.
-        if(myEstV2.updated>0)
-        {
-            // Paso las costantes a estDetailServ via estimateService
-            _estService.setConstants(myEstV2.constantes);
-         
-            // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
-            _estService.loadContenedor(myEstV2);
-
-            // Busca las tarifas, calcula cada uno de los gastos locales y los pasa al header segun sea
-            // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
-            // El FP solo estara disponible luego de calculado el FOB TOTAL.
-            myEstV2=await _estService.loadTarifas(myEstV2);
-            if(myEstV2==null)
-            {
-                presupError=_estService.getLastError();
-                return null;
-            }
-
-            myEstV2=await myCalc.calcBatch(myEstV2);
-            var res=await _unitOfWork.EstimateDetailsDB.ClearFlagsByEstimateHeaderIdAsync(miEst.estHeaderDB.id);
-        }
-        else
-        {
-            myEstV2=await myCalc.calcReclaim(myEstV2);
-        }
-
         return myEstV2;      
     }
 

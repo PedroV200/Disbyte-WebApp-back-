@@ -71,7 +71,7 @@ public interface IEstimateService : IGenericService<EstimateV2>
     public EstimateV2 registrarGastosLocalesPorProducto(EstimateV2 miEst);
     public EstimateV2 registrarExtraGastosGlobalesPorProducto(EstimateV2 miEst);
 
-    public Task<EstimateV2> CalcularCantContenedores(EstimateV2 est);
+    public EstimateV2 CalcularCantContenedores(EstimateV2 est);
 
     public EstimateV2 CalcCbmGrandTotal(EstimateV2 est);
 
@@ -94,7 +94,7 @@ public interface IEstimateService : IGenericService<EstimateV2>
     public void setLastError(string err);
 
     public Task<EstimateV2> loadTarifas(EstimateV2 miEst);
-
+    public EstimateV2 reclaimTarifas(EstimateV2 miEst);
     public Task<EstimateV2> loadContenedor(EstimateV2 miEst);
 
     }

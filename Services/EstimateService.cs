@@ -9,6 +9,7 @@ using System.Globalization;
 
 // 3_8_2023 SEGUNDA VERSION para "multiregion" basado en el sheet de MEX y ARG WIP
 // 4_9_2023 Refactor logica de tarifas.
+// 4_9_2023 Rework presup_reclaim. 
 
 public class EstimateService: IEstimateService
 {
@@ -91,7 +92,7 @@ public class EstimateService: IEstimateService
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.freightCharge=_estDetServices.CalcFlete(ed,est.totalfreight_cost,est.estHeader.fob_grand_total); 
+            ed.freightCharge=_estDetServices.CalcFlete(ed,est.estHeader.freight_cost,est.estHeader.fob_grand_total); 
             if(ed.freightCharge<0)
             {
                 return null;
@@ -306,104 +307,7 @@ public class EstimateService: IEstimateService
         return est;
     }
 
-    /*public async Task<double> lookUpTarifaFleteCont(EstimateV2 est)
-    {
-        TarifasFwdCont myTarCont=null;//await _unitOfWork.TarifasFwdContenedores.GetByFwdContTypeAsync(est.estHeader.freight_fwd,est.estHeader.freight_type); 
-
-        if(myTarCont!=null)
-        { 
-            return myTarCont.costoflete060;
-        }
-        return -1;
-    }*/
-
-
     
-// Hace las cuentas de la tabla inferior del presupuestador, gastos locales / proyectados.
-// Los devuelve en dolarbillete. CELDA D59
-    /*public async Task<EstimateV2> calcularGastosProyecto(EstimateV2 miEst)
-    {
-        double tmp;
-        double result;
-
-       //TarifasByDate myTbd=await _unitOfWork.TarifasPorFecha.GetByIdAsync(miEst.estHeader.tarifasbydateid);
-        // Ahora se maneja todo por FK ... para saber el tipo de contenedor necesito consultar la tabla contenedores
-       //Contenedor myCont=await _unitOfWork.Contenedores.GetByIdAsync(miEst.estHeader.freight_type);
-
-        tmp=await calcularGastosFwd(miEst);
-        if(tmp<0)
-        {   // Todos los metodos que consultan una tabla tienen opcion de devolver -1 si algo no salio bien.
-            haltError="FALLA CALCULAR GASTOS FWD. TABLA TarifasFWD no accesible o no existen datos para el tipo de contenedor / origen indicados";
-            return null;
-        }
-        // Guardo en el header.
-        miEst.estHeader.gloc_fwd=tmp;
-        // Registro el gasto en cada articulo (ponderado por el factor de producto)  
-        miEst=Calc_GLOC_FWD_POND(miEst,tmp);
-
-
-        tmp=await calcularGastosTerminal(miEst);
-        if(tmp<0)
-        {
-            haltError="FALLA AL CALCULAR GASTOS DE TERMINAL. TAbla no accesible o no existen datos para el tipo de contenedor ingresado";
-            return null;
-        }
-        //Guardo en el header.
-        miEst.estHeader.gloc_terminales=tmp;
-        // Registro el gasto en cada articulo
-        miEst=Calc_GLOC_TERMINAL_POND(miEst,tmp);
-
-
-
-        tmp=await calcularGastosDespachante(miEst);
-        if(tmp<0)
-        {
-
-            return null;
-        }
-        // Lo guardo en el header
-        miEst.estHeader.gloc_despachantes=tmp;
-        // Registro el gasto en el producto
-        miEst=Calc_GLOC_DESPACHANTE_POND(miEst,tmp);
-
-
-        tmp=await calcularGastosTteLocal(miEst);
-        if(tmp<0)
-        {
-            haltError="FALLA AL CALCULAR LOS GASTOS DE TTE LOC. Tabla de tarifa no accesible o no existen datos para el contenedor ingresado";
-            return null;
-        }
-        // Guardo el gasto en el header
-        miEst.estHeader.gloc_flete=tmp;
-        // Registro el gasto en el producto
-        miEst=Calc_GLOC_FLETE_POND(miEst,tmp);
-
-
-
-        tmp=await calcularGastosCustodia(miEst);
-        if(tmp<0)
-        {
-            haltError="FALLO AL CALCULAR LOS GASTOS DE CUSTODIA. Tabla de tarifa no accesible o no existen datos para el Proveedor de Poliza ingresado";
-            return null;
-        }
-        // Guardo el gasto en el header
-        miEst.estHeader.gloc_polizas=tmp;
-        // Registro el gasto
-        miEst=Calc_GLOC_CUSTODIA_POND(miEst,tmp);
-
-
-        tmp=calcularGastosGestDigDocs(miEst);       // Este metodo no involucra una consulta a tabla, tmp np puede ser negativo
-        miEst.estHeader.gloc_gestdigdoc=tmp;
-        miEst=Calc_GLOC_GESTDIGDOC_POND(miEst,tmp);
-
-        tmp=calcularGastosBancarios(miEst);         // Este idem.
-        miEst.estHeader.gloc_bancos=tmp;
-        miEst=Calc_GLOC_BANCARIO_POND(miEst,tmp);
-
-
-        return miEst;
-
-    }*/
 
 
 // Rutinas que distribuyen a lo largo de todos los art del detail los diferentes gastos locales:
@@ -697,10 +601,10 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         return est;
     } 
 
-    public async Task<EstimateV2> CalcularCantContenedores(EstimateV2 est)
+    public EstimateV2 CalcularCantContenedores(EstimateV2 est)
     {
         Carga myCont=new Carga();
-        myCont=await _unitOfWork.micarga.GetByIdAsync(est.estHeader.carga_id);
+        myCont=est.miCarga;//await _unitOfWork.micarga.GetByIdAsync(est.estHeader.carga_id);
         if(myCont==null)        
         {
             return null;
@@ -728,7 +632,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
     {
         double tmp;
         tmp=est.misTarifas.tFwd.costo_local*est.estHeader.cantidad_contenedores;
-        est.totalfreight_cost=tmp;
+        est.estHeader.freight_cost=tmp;
         return est;
     }
 
@@ -768,19 +672,17 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         misTarifas=new Tarifas();
 
        
-        // El campo tarifsource es una mascara de bit que comanda que tarifa va a actualizarse 
-        // Si el bit 8 esta encendido, toda tarifa que tenga su bit encendido sera actualizada
-        // x fecha (mas moderna)
-        // Si el octavo bit esta apagado, toda tarfia que tenga su bit encendido sera actualizada
-        // usando el ID enviado en el JSON
-        // Si el campo tarifsource se envia con todos los bits de tarifa apagados, se usaran los 
-        // valores de gastos locales calculados ya guardos en en versiones anteriores.
-        // Ningun acceso a datos de tarfia en la DB sera realizado.
-
+        // Existen para las tarifas 2 campos de bit. Son 2 campos. El bit0 de los 2 campos comanda la actualizacion de tarifaBanco
+        // el bit 1 de la tarifaDepo y asi siguiendo.
+        // El campo tarifupdate indica: 1=la tarifa sera actualizada y por ende el gasto local generado se actualizaran
+        //                              0=la La tarifa no sera actualizada ni el gasto local sera actualizado.
+        // El campo tarifrecent indica: 1=la tarifa debe actualizarse por con el valor mas cercanos en fecha
+        //                              0=la tarifa debe tomarde del ID correspondiente en el JSON    
+        //
         // Actualizo tarifa Banco ?
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifBanco))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifBanco))>0)
         {   // SI. Actualizo por fecha ?
-            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            if((miEst.estHeader.tarifrecent&(1<<(int)tarifaControl.tarifBanco))>0)
             {   // SI
                 misTarifas.tBanco=await _unitOfWork.TarifBancos.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
                 if(misTarifas.tBanco==null)         
@@ -794,9 +696,9 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             }
         }
         // Actualizo Tarifa Deposito ?
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifDepo))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifDepo))>0)
         {   // Actualizo Tarifas Deposito
-            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            if((miEst.estHeader.tarifrecent&(1<<(int)tarifaControl.tarifDepo))>0)
             {   // Actualizo usando cotizacion mas moderna
                 misTarifas.tDepo=await _unitOfWork.TarifasDepositos.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
                 if(misTarifas.tDepo==null)          
@@ -810,9 +712,9 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             }
         }
         // Actualizo Tarifa Flete ?
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifDespa))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifDespa))>0)
         {
-            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            if((miEst.estHeader.tarifrecent&(1<<(int)tarifaControl.tarifDespa))>0)
             {
                 misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
                 if(misTarifas.tFlete==null)         
@@ -826,9 +728,9 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             }
         }
         // Actualizo Tarifa Fowarder ?
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasFwd))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasFwd))>0)
         {
-            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            if((miEst.estHeader.tarifrecent&(1<<(int)tarifaControl.tarifasFwd))>0)
             {
                 misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id,miEst.estHeader.fwdpaisregion_id);
                 if(misTarifas.tFwd==null)           
@@ -842,9 +744,9 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             }
         }
         // Actualizo Tarifa Flete ?
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifFlete))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifFlete))>0)
         {
-            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            if((miEst.estHeader.tarifrecent&(1<<(int)tarifaControl.tarifFlete))>0)
             {
                 misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
                 if(misTarifas.tFlete==null)         
@@ -858,9 +760,9 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             }
         }
         // Actualizo tarifa GestDigDoc
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifGestDigDoc))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifGestDigDoc))>0)
         {
-            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            if((miEst.estHeader.tarifrecent&(1<<(int)tarifaControl.tarifGestDigDoc))>0)
             {
                 misTarifas.tGestDigDoc=await _unitOfWork.TarifGestDigDoc.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
                 if(misTarifas.tGestDigDoc==null)    
@@ -874,9 +776,9 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             }
         }
         // Actualizo Tarfias Poliza ?
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifPoliza))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifPoliza))>0)
         {
-            if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasHoy))>0)
+            if((miEst.estHeader.tarifrecent&(1<<(int)tarifaControl.tarifPoliza))>0)
             {
                 misTarifas.tPoliza=await _unitOfWork.TarifPoliza.GetByNearestDateAsync(hoy,miEst.estHeader.paisregion_id);
                 if(misTarifas.tPoliza==null)        
@@ -891,6 +793,23 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         }
         // Las tarfias que levante la fui guardando en "misTarifas". Las guardo en EstimateV2.    
         miEst.misTarifas=misTarifas;
+        // Me guardo los IDs de las tarfias que busque. Cuando haga reclaim usare estos IDs para recuperar
+        // las tarfias.
+        // ATENCION: misTarifas no es una variable que se guarda en la DB. Los IDs SI. misTarifas solo existe en estimateV2
+        // por conveniencia. Es un objeto que la clase usa, pero que no se publica en la API ni se guarda en la DB
+        // al finalizar la transaccion de pierde.
+
+
+
+
+        miEst.estHeader.tarifasbancos_id=misTarifas.tBanco.id;
+        miEst.estHeader.tarifasdepositos_id=misTarifas.tDepo.id;
+        miEst.estHeader.tarifasdespachantes_id=1;//misTarifas.tDespa.id;
+        miEst.estHeader.tarifasflete_id=misTarifas.tFlete.id;
+        miEst.estHeader.tarifasfwd_id=misTarifas.tFwd.id;
+        miEst.estHeader.tarifasgestdigdoc_id=misTarifas.tGestDigDoc.id;
+        miEst.estHeader.tarifaspolizas_id=misTarifas.tPoliza.id;
+        miEst.estHeader.tarifasterminales_id=1;//misTarifas.tTerminal.id;
 
         double tmp;
 
@@ -899,14 +818,14 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
 
         // Calculo el gasto bancario (ARG), si el bit de actualizar esta encendido
         // Si el bit actualizar esta apagado ... se usara el valor g_loc correspondiente.
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifBanco))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifBanco))>0)
         {
             tmp=calcularGastosBancarios(miEst);         // Este idem.
             // Lo guardo en el header
             miEst.estHeader.gloc_bancos=tmp;
         }
         // Calculo gastos del despachante (ARG)
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifDespa))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifDespa))>0)
         {
             tmp=await calcularGastosDespachante(miEst);
             if(tmp<0)
@@ -918,7 +837,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             miEst.estHeader.gloc_despachantes=tmp;
         }
         // Calculo gastos de FLETE INTERNO (ARG)
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifFlete))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifFlete))>0)
         {
             tmp=await calcularGastosTteLocal(miEst);
             if(tmp<0)
@@ -930,7 +849,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             miEst.estHeader.gloc_flete=tmp;
         }
         // Calculo el gasto de Fowarder con el 040 del flete (ARG)
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasFwd))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasFwd))>0)
         {
             tmp=await calcularGastosFwd(miEst);
             if(tmp<0)
@@ -942,13 +861,13 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             miEst.estHeader.gloc_fwd=tmp;
         }
         // Calculo los gastos de Gestion digital de documentos
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifGestDigDoc))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifGestDigDoc))>0)
         {
             tmp=calcularGastosGestDigDocs(miEst);       // Este metodo no involucra una consulta a tabla, tmp np puede ser negativo
             miEst.estHeader.gloc_gestdigdoc=tmp;
         }
         // Calculo los gastos de custodia / seguro
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifPoliza))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifPoliza))>0)
         {
             tmp=await calcularGastosCustodia(miEst);
             if(tmp<0)
@@ -960,7 +879,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             miEst.estHeader.gloc_polizas=tmp;
         }
         // Calculo los gastos de Terminal
-        if((miEst.estHeader.tarifsource&(1<<(int)tarifaControl.tarifasTerm))>0)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasTerm))>0)
         {
             tmp=await calcularGastosTerminal(miEst);
             if(tmp<0)
@@ -975,15 +894,15 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         return miEst;
     }
 
+    public EstimateV2 reclaimTarifas(EstimateV2 miEst)
+    {
+            // Por ahora no hace nada. Cuando se envia un presupuesto para calculo se dejan grabados los gastos locales.
+            // que es el motivo por el cual se usan tarifas.
+            return miEst;
+    }
+
     public EstimateV2 registrarGastosLocalesPorProducto(EstimateV2 miEst)
     {
-       /* miEst=Calc_GLOC_BANCARIO_POND(miEst);
-        miEst=Calc_GLOC_DESPACHANTE_POND(miEst);
-        miEst=Calc_GLOC_FLETE_POND(miEst);
-        miEst=Calc_GLOC_FWD_POND(miEst);
-        miEst=Calc_GLOC_GESTDIGDOC_POND(miEst);
-        miEst=Calc_GLOC_CUSTODIA_POND(miEst);
-        miEst=Calc_GLOC_TERMINAL_POND(miEst);*/
         miEst=Calc_GLOC_POND(miEst);
 
         return miEst;
@@ -991,13 +910,6 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
 
     public EstimateV2 registrarExtraGastosGlobalesPorProducto(EstimateV2 miEst)
     {
-        /*miEst=Calc_GLOC_BANCARIO_POND(miEst);
-        miEst=Calc_GLOC_DESPACHANTE_POND(miEst);
-        miEst=Calc_GLOC_FLETE_POND(miEst);
-        miEst=Calc_GLOC_FWD_POND(miEst);
-        miEst=Calc_GLOC_GESTDIGDOC_POND(miEst);
-        miEst=Calc_GLOC_CUSTODIA_POND(miEst);
-        miEst=Calc_GLOC_TERMINAL_POND(miEst);*/
         miEst=Calc_EXTRAG_GLOBAL_POND(miEst);
         return miEst;
     }
