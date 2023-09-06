@@ -92,6 +92,22 @@ public class TarifasDespachanteRepository : ITarifasDespachanteRepository
             return await connection.QueryAsync<TarifasDespachanteVista>(sql);
         }
     }
+
+    public async Task<IEnumerable<TarifasDespachanteVista>> GetAllVistaByDateAsync(string fecha)
+    {
+        var sql = $@"select tarifasdespachantes.*, despachantes.description as despachante, paisregion.description as pais, paisregion.region as region
+                    from tarifasdespachantes
+                    inner join despachantes on tarifasdespachantes.despachantes_id=despachantes.id 
+                    inner join paisregion  on tarifasdespachantes.paisregion_id=paisregion.id
+                    ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}')))";
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasDespachanteVista>(sql);
+        }
+    }
+
     public async Task<TarifasDespachante> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasdespachantes WHERE id = {id}";

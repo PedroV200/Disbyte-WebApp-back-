@@ -97,6 +97,24 @@ public class TarifasFwdRepository : ITarifasFwdRepository
         }
     }
 
+    public async Task<IEnumerable<TarifasFwdVista>> GetAllVistaByDateAsync(string fecha)
+    {
+        var sql = $@"select tarifasfwd.*, fwdtte.description as fwdtte, cargas.description as carga, pr1.description as pais_dest, pr1.region as region_dest, pr2.description as pais_orig, pr2.region as region_orig
+                    from tarifasfwd
+                    inner join fwdtte on tarifasfwd.fwdtte_id=fwdtte.id
+                    inner join cargas on cargas.id = tarifasfwd.carga_id
+                    inner join paisregion as pr1 on pr1.id = tarifasfwd.paisregion_id
+                    inner join paisregion as pr2 on pr2.id = tarifasfwd.paisfwd_id
+                    ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}')))";
+
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasFwdVista>(sql);
+        }
+    }
+
     public async Task<TarifasFwd> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasfwd WHERE id = {id}";

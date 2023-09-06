@@ -109,6 +109,24 @@ public class TarifasFleteRepository : ITarifasFleteRepository
             return await connection.QueryAsync<TarifasFleteVista>(sql);
         }
     }
+
+    public async Task<IEnumerable<TarifasFleteVista>> GetAllVistaByDateAsync(string fecha)
+    {
+        var sql = $@"select tarifasflete.*, flete.description as flete, cargas.description as carga, paisregion.description as pais, paisregion.region as region, trucksemi.description as semi 
+                    from tarifasflete 
+                    inner join flete on tarifasflete.flete_id=flete.id 
+                    inner join cargas on tarifasflete.carga_id=cargas.id 
+                    inner join paisregion  on tarifasflete.paisregion_id=paisregion.id 
+                    inner join trucksemi on tarifasflete.trucksemi_id=trucksemi.id
+                    ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}')))";
+
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasFleteVista>(sql);
+        }
+    }
     public async Task<TarifasFlete> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasflete WHERE id = {id}";

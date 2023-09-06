@@ -137,4 +137,16 @@ public class TarifasTerminalController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+    [HttpGet("vistafecha/")]
+    public async Task<IEnumerable<TarifasTerminalVista>> GetAllVistaByDate()
+    {
+        try
+        {   // HH en las horas significa formato 24h.
+            return await _unitOfWork.TarifTerminal.GetAllVistaByDateAsync(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

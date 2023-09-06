@@ -8,6 +8,7 @@ using System.Data;
 using System.Globalization;
 
 // En conformidad con version 3B Ago15
+// Endpoint vistafecha para todas la tarifas 
 
 public class TarifasBancoRepository : ITarifasBancoRepository
 {
@@ -84,6 +85,22 @@ public class TarifasBancoRepository : ITarifasBancoRepository
             return await connection.QueryAsync<TarifasBancoVista>(sql);
         }
     }
+
+    public async Task<IEnumerable<TarifasBancoVista>>GetAllVistaByDateAsync(string fecha)
+    {
+        var sql= $@"select tarifasbancos.*, banco.description as banco, paisregion.description as pais, paisregion.region as region
+                    from tarifasbancos
+                    inner join banco on tarifasbancos.banco_id=banco.id 
+                    inner join paisregion  on tarifasbancos.paisregion_id=paisregion.id
+                    ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}')))";
+        using(var connection =new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+            return await connection.QueryAsync<TarifasBancoVista>(sql);
+        }
+    }
+
+
     public async Task<TarifasBanco> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasbancos WHERE id = {id}";
