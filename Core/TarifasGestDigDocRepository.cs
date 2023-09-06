@@ -88,6 +88,22 @@ public class TarifasGestDigDocRepository : ITarifasGestDigDocRepository
         }
     }
 
+    public async Task<IEnumerable<TarifasGestDigDocVista>> GetAllVistaByDateAsync(string fecha)
+    {
+        var sql = $@"select tarifasgestdigdoc.*, gestdigdoc.description as gestdigdoc, paisregion.description as pais, paisregion.region as region 
+                        from tarifasgestdigdoc
+                        inner join gestdigdoc on gestdigdoc.id=tarifasgestdigdoc.gestdigdoc_id
+                        inner join paisregion on paisregion.id=tarifasgestdigdoc.paisregion_id
+                        ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}')))";
+
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasGestDigDocVista>(sql);
+        }
+    }
+
     public async Task<TarifasGestDigDoc> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasgestdigdoc WHERE id = {id}";

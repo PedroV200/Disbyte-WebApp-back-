@@ -67,7 +67,7 @@ public interface IEstimateDetailService : IGenericService<EstimateDetail>
 
     public double CalcGastos_Loc_y_Extra(EstimateDetail estD);
 
-    public double CalcGastos_Loc_y_Extra_Unit(EstimateDetail estD);
+    public double CalcGastos_Loc_y_Extra_ByProd_Unit(EstimateDetail estD);
 
     public double CalcGastosProyPond(EstimateDetail estD, double gastosProy);
 

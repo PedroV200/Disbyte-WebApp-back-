@@ -284,17 +284,18 @@ public class EstimateDetailService: IEstimateDetailService
         return tmp;
     }
 
-    public double CalcGastos_Loc_y_Extra_Unit(EstimateDetail estD)
+    public double CalcGastos_Loc_y_Extra_ByProd_Unit(EstimateDetail estD)
     {
-        if(estD.qty>0)
-        {
-            return estD.totalgastos_loc_y_extra/estD.qty;
-        }
-        else
+        if(estD.qty==0)
         {
             return -1;
         }
+        else
+        {
+            return (estD.totalgastos_loc_y_extra)/estD.qty;
+        }
     }
+
     public double CalcOverHeadUnit(EstimateDetail estD)
     {
         if(estD.precio_u!=0)

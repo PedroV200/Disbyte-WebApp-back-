@@ -137,4 +137,17 @@ public class TarifasDespachanteController : ControllerBase
             throw new Exception(ex.Message);
         }
     }
+
+    [HttpGet("vistafecha/")]
+    public async Task<IEnumerable<TarifasDespachanteVista>> GetAllVistaByDate()
+    {
+        try
+        {   // HH en las horas significa formato 24h.
+            return await _unitOfWork.TarifDespa.GetAllVistaByDateAsync(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

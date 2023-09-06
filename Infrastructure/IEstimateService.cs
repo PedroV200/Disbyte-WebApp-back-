@@ -56,8 +56,8 @@ public interface IEstimateService : IGenericService<EstimateV2>
     //public EstimateV2 CalcExtraGastoLocProyectoUSS(EstimateV2 est);
 
     public EstimateV2 CalcGastos_LOC_Y_EXTRA(EstimateV2 V2);
-    public EstimateV2 CalcGastos_LOC_Y_EXTRA_U(EstimateV2 est);
-
+    public EstimateV2 CalcGastos_LOC_Y_EXTRA_BYPROD_UNIT(EstimateV2 est);
+  
     public EstimateV2 CalcOverhead(EstimateV2 est);
 
     public EstimateV2 CalcCostoUnitarioUSS(EstimateV2 est);
@@ -96,5 +96,6 @@ public interface IEstimateService : IGenericService<EstimateV2>
     public Task<EstimateV2> loadTarifas(EstimateV2 miEst);
     public EstimateV2 reclaimTarifas(EstimateV2 miEst);
     public Task<EstimateV2> loadContenedor(EstimateV2 miEst);
+    public EstimateV2 CalcularGastosLocales(EstimateV2 miEst);
 
     }

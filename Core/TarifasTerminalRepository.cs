@@ -93,6 +93,23 @@ public class TarifasTerminalRepository : ITarifasTerminalRepository
         }
     }
 
+    public async Task<IEnumerable<TarifasTerminalVista>> GetAllVistaByDateAsync(string fecha)
+    {
+        var sql = $@"select tarifasterminales.*, terminal.description as terminal, cargas.description as carga, paisregion.description as pais, paisregion.region as region
+                        from tarifasterminales
+                        inner join terminal on terminal.id=tarifasterminales.terminal_id
+                        inner join cargas on cargas.id=tarifasterminales.carga_id
+                        inner join paisregion on paisregion.id=tarifasterminales.paisregion_id
+                        ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}')))";
+
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasTerminalVista>(sql);
+        }
+    }
+
     public async Task<TarifasTerminal> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasterminales WHERE id = {id}";

@@ -97,6 +97,23 @@ public class TarifasPolizaRepository : ITarifasPolizaRepository
         }
     }
 
+    public async Task<IEnumerable<TarifasPolizaVista>> GetAllVistaByDateAsync(string fecha)
+    {
+        var sql = $@"select tarifaspolizas.*, polizas.description as poliza, cargas.description as carga, paisregion.description as pais, paisregion.region as region
+                        from tarifaspolizas
+                        inner join polizas on polizas.id=tarifaspolizas.poliza_id
+                        inner join cargas on cargas.id=tarifaspolizas.carga_id
+                        inner join paisregion on paisregion.id=tarifaspolizas.paisregion_id
+                        ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}')))";
+
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasPolizaVista>(sql);
+        }
+    }
+
     public async Task<TarifasPoliza> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifaspolizas WHERE id = {id}";

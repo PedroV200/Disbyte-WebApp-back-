@@ -83,6 +83,14 @@ public class calc
         myEstV2=_estService.CalcFobTotal(myEstV2);
         // CELDA L43. Sumo todos los fob totales. Sumatoria de L15-L41 que se copia en celda C3
         myEstV2.estHeader.fob_grand_total=_estService.sumFobTotal(myEstV2);
+
+        // AH - FACTOR DE PRODUCTO
+        myEstV2=_estService.CalcFactorProdTotal(myEstV2);
+        if(myEstV2==null)
+        {
+            haltError=_estService.getLastError();
+            return null;
+        }
         // CELDA C5 que es funcion del valor FOB
         myEstV2=_estService.CalcSeguroTotal(myEstV2);
         // CELDA C4. Traigo la tarifa del flete desde BASE_TARIFAS por fowarder y tipo cont
@@ -155,14 +163,8 @@ public class calc
         myEstV2=_estService.CalcPagado(myEstV2);
         // CELDA AF43
         myEstV2=_estService.CalcPagadoTot(myEstV2);
-        // AH
-        myEstV2=_estService.CalcFactorProdTotal(myEstV2);
-        if(myEstV2==null)
-        {
-            haltError=_estService.getLastError();
-            return null;
-        }
 
+        myEstV2=_estService.CalcularGastosLocales(myEstV2);
 
         // Pondera los gastos locales del header en los diferentes productos. 
         // Los gastos locales fueron extraidos de las tarifas o ya se hayaban guardados en el header
@@ -171,8 +173,8 @@ public class calc
 
         // SUMA todo los gastos locales y extra que ya se encuentran ponderados por articulo
         myEstV2=_estService.CalcGastos_LOC_Y_EXTRA(myEstV2);
-        // Divide el gasto calculado anterior por la cantidad de articulos de esa fila.
-        myEstV2=_estService.CalcGastos_LOC_Y_EXTRA_U(myEstV2);
+        // Pondera el gasto calculado anterior x el FP y luego lo divide por la cantidad de articulos.
+        myEstV2=_estService.CalcGastos_LOC_Y_EXTRA_BYPROD_UNIT(myEstV2);
         // Gastos_LOC_Y_EXTRA_U / Precio_U
         myEstV2=_estService.CalcOverhead(myEstV2);
         if(myEstV2==null)
@@ -301,7 +303,7 @@ public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
         // SUMA todo los gastos locales y extra que ya se encuentran ponderados por articulo
         myEstV2=_estService.CalcGastos_LOC_Y_EXTRA(myEstV2);
         // Divide el gasto calculado anterior por la cantidad de articulos de esa fila.
-        myEstV2=_estService.CalcGastos_LOC_Y_EXTRA_U(myEstV2);
+        myEstV2=_estService.CalcGastos_LOC_Y_EXTRA_BYPROD_UNIT(myEstV2);
         // Gastos_LOC_Y_EXTRA_U / Precio_U
         myEstV2=_estService.CalcOverhead(myEstV2);
         if(myEstV2==null)

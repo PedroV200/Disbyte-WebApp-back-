@@ -103,6 +103,24 @@ public class TarifasDepositoRepository : ITarifasDepositoRepository
             return await connection.QueryAsync<TarifasDepositoVista>(sql);
         }
     }
+
+    public async Task<IEnumerable<TarifasDepositoVista>> GetAllVistaByDateAsync(string fecha)
+    {
+        var sql = $@"select tarifasdepositos.*, depositos.description as deposito, cargas.description as freight, paisregion.description as pais, paisregion.region as region, trucksemi.description as semi 
+                    from tarifasdepositos 
+                    inner join depositos on tarifasdepositos.depositos_id=depositos.id 
+                    inner join cargas on tarifasdepositos.carga_id=cargas.id 
+                    inner join paisregion  on tarifasdepositos.paisregion_id=paisregion.id 
+                    inner join trucksemi on tarifasdepositos.trucksemi_id=trucksemi.id
+                    ORDER BY abs(extract(epoch from (htimestamp - timestamp '{fecha}')))";
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<TarifasDepositoVista>(sql);
+        }
+    }
+
     public async Task<TarifasDeposito> GetByIdAsync(int id)
     {
         var sql = $"SELECT * FROM tarifasdepositos WHERE id = {id}";
