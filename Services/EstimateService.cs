@@ -10,6 +10,9 @@ using System.Globalization;
 // 3_8_2023 SEGUNDA VERSION para "multiregion" basado en el sheet de MEX y ARG WIP
 // 4_9_2023 Refactor logica de tarifas.
 // 4_9_2023 Rework presup_reclaim. 
+// 5_9_2023 De bug Gastos locales / Tarifas. 
+// 5_9_2023 18:24 Repara carga tarifaTerminales.  
+// 6_9_2023 10:41 Cuantas Auditadas OK contra libro Presupuestador JUL23 usando libro duchas Escocesas
 
 public class EstimateService: IEstimateService
 {
@@ -422,7 +425,7 @@ public class EstimateService: IEstimateService
 // Digitalizaion Documental
 // Bancarios
 ////////////////////////////////////////
-public async Task<double> calcularGastosFwd(EstimateV2 miEst)
+public double calcularGastosFwd(EstimateV2 miEst)
     {   
         if(miEst==null)
         {
@@ -439,15 +442,15 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         
         if(miEst.miCarga.description=="LCL")
         {
-            return (miEst.misTarifas.tFwd.costo_local*miEst.constantes.CNST_FREIGHT_PORCT_ARG*miEst.estHeader.cbm_grand_total*miEst.estHeader.dolar)+miEst.misTarifas.tFwd.gasto_otro1*miEst.estHeader.dolar;
+            return (miEst.misTarifas.tFwd.costo_local*miEst.constantes.CNST_FREIGHT_PORCT_ARG*miEst.estHeader.cbm_grand_total/**miEst.estHeader.dolar*/)+miEst.misTarifas.tFwd.gasto_otro1/**miEst.estHeader.dolar*/;
         }
         else
         {
-            return ((miEst.misTarifas.tFwd.costo_local*miEst.constantes.CNST_FREIGHT_PORCT_ARG)+miEst.misTarifas.tFwd.gasto_otro1)*miEst.estHeader.dolar*miEst.estHeader.cantidad_contenedores;
+            return ((miEst.misTarifas.tFwd.costo*miEst.constantes.CNST_FREIGHT_PORCT_ARG/100.0)+miEst.misTarifas.tFwd.gasto_otro1)/**miEst.estHeader.dolar*/*miEst.estHeader.cantidad_contenedores;
         }
     }
 
-    public async Task<double> calcularGastosTerminal(EstimateV2 miEst)
+    public double calcularGastosTerminal(EstimateV2 miEst)
     {
         if(miEst==null)
         {
@@ -458,10 +461,10 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         {
             return -1;
         }
-        return ((miEst.misTarifas.tTerminal.gasto_fijo+miEst.misTarifas.tTerminal.gasto_variable)*miEst.estHeader.dolar*miEst.estHeader.cantidad_contenedores);
+        return ((miEst.misTarifas.tTerminal.gasto_fijo+miEst.misTarifas.tTerminal.gasto_variable)/**miEst.estHeader.dolar*/*miEst.estHeader.cantidad_contenedores);
     }
 
-    public async Task<double> calcularGastosDespachante(EstimateV2 miEst)
+    public double calcularGastosDespachante(EstimateV2 miEst)
     {
         double tmp;
         if(miEst==null)
@@ -471,17 +474,17 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
 
         if((miEst.estHeader.cif_grand_total*miEst.constantes.CNST_GASTOS_DESPA_Cif_Mult)>miEst.constantes.CNST_GASTOS_DESPA_Cif_Thrhld)
         {
-            tmp=miEst.estHeader.cif_grand_total*miEst.constantes.CNST_GASTOS_DESPA_Cif_Mult*miEst.estHeader.dolar;
+            tmp=miEst.estHeader.cif_grand_total*miEst.constantes.CNST_GASTOS_DESPA_Cif_Mult/**miEst.estHeader.dolar*/;
         }
         else
         {
-            tmp=miEst.estHeader.dolar*miEst.constantes.CNST_GASTOS_DESPA_Cif_Min;
+            tmp=miEst.constantes.CNST_GASTOS_DESPA_Cif_Min/**miEst.estHeader.dolar*/;
         }
 
-        return tmp+(miEst.constantes.CNST_GASTOS_DESPA_Cif_Thrhld*miEst.estHeader.dolar);
+        return tmp+(miEst.constantes.CNST_GASTOS_DESPA_Cif_Thrhld/**miEst.estHeader.dolar*/);
     }
 
-    public async Task<double> calcularGastosTteLocal(EstimateV2 miEst)
+    public double calcularGastosTteLocal(EstimateV2 miEst)
     {
         double tmp;
         if(miEst==null)
@@ -498,15 +501,15 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         // si es un LCL, es menos que un contenedor. No se multiplica por Cantidad de Contenedores.
         if(miEst.miCarga.description=="LCL")
         {
-            return tmp;
+            return tmp/miEst.estHeader.dolar;
         }
         else
         {
-            return tmp*miEst.estHeader.cantidad_contenedores;
+            return tmp*miEst.estHeader.cantidad_contenedores/miEst.estHeader.dolar;
         }
     }
 
-    public async Task<double> calcularGastosCustodia(EstimateV2 miEst)
+    public double calcularGastosCustodia(EstimateV2 miEst)
     {   
             if(miEst==null)
             {
@@ -520,7 +523,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
 
             if(miEst.estHeader.fob_grand_total>miEst.constantes.CNST_GASTOS_CUSTODIA_Thrshld)
             {
-                return (miEst.misTarifas.tPoliza.prima+miEst.misTarifas.tPoliza.demora) + ((miEst.misTarifas.tPoliza.prima+miEst.misTarifas.tPoliza.demora)*(miEst.misTarifas.tPoliza.impuestos_internos/100)*(miEst.misTarifas.tPoliza.sellos/100));
+                return ((miEst.misTarifas.tPoliza.prima+miEst.misTarifas.tPoliza.demora) + ((miEst.misTarifas.tPoliza.prima+miEst.misTarifas.tPoliza.demora)*(miEst.misTarifas.tPoliza.impuestos_internos/100)*(miEst.misTarifas.tPoliza.sellos/100)))/miEst.estHeader.dolar;
             }
             else
             {
@@ -530,12 +533,12 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
 
     public double calcularGastosGestDigDocs(EstimateV2 miEst)
     {
-        return miEst.misTarifas.tGestDigDoc.factor1*miEst.estHeader.dolar;
+        return miEst.misTarifas.tGestDigDoc.costo/**miEst.estHeader.dolar*/;
     }
 
     public double calcularGastosBancarios(EstimateV2 miEst)
     {
-        return miEst.misTarifas.tBanco.factor1*miEst.estHeader.dolar;
+        return miEst.misTarifas.tBanco.costo/**miEst.estHeader.dolar*/;
     }
 //#########################################################################################
 
@@ -554,17 +557,14 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         return est;
     }
 
-    public EstimateV2 CalcGastos_LOC_Y_EXTRA_U(EstimateV2 est)
+    public EstimateV2 CalcGastos_LOC_Y_EXTRA_BYPROD_UNIT(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
         {
-            ed.totalgastos_loc_y_extra_u=_estDetServices.CalcGastos_Loc_y_Extra_Unit(ed);       
+            ed.totalgastos_loc_y_extra_u=_estDetServices.CalcGastos_Loc_y_Extra_ByProd_Unit(ed);       
         }
         return est;
     }
-
-
-
 
 
     
@@ -791,6 +791,23 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
                     { haltError=$"La tarifa Poliza con ID: {miEst.estHeader.tarifaspolizas_id}"; return null;}
             }
         }
+
+        // Actualizo Tarfias Terminal ?
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasTerm))>0)
+        {
+            if((miEst.estHeader.tarifrecent&(1<<(int)tarifaControl.tarifasTerm))>0)
+            {
+                misTarifas.tTerminal=await _unitOfWork.TarifTerminal.GetByNearestDateAsync(hoy,miEst.estHeader.carga_id,miEst.estHeader.paisregion_id);
+                if(misTarifas.tTerminal==null)        
+                    { haltError=$"La tarifa Terminal mas prox no encontrada"; return null;} 
+            }
+            else
+            {
+                misTarifas.tTerminal=await _unitOfWork.TarifTerminal.GetByIdAsync(miEst.estHeader.tarifasterminales_id);
+                if(misTarifas.tTerminal==null)        
+                    { haltError=$"La tarifa Terminal con ID: {miEst.estHeader.tarifasterminales_id}"; return null;}
+            }
+        }
         // Las tarfias que levante la fui guardando en "misTarifas". Las guardo en EstimateV2.    
         miEst.misTarifas=misTarifas;
         // Me guardo los IDs de las tarfias que busque. Cuando haga reclaim usare estos IDs para recuperar
@@ -809,9 +826,9 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         miEst.estHeader.tarifasfwd_id=misTarifas.tFwd.id;
         miEst.estHeader.tarifasgestdigdoc_id=misTarifas.tGestDigDoc.id;
         miEst.estHeader.tarifaspolizas_id=misTarifas.tPoliza.id;
-        miEst.estHeader.tarifasterminales_id=1;//misTarifas.tTerminal.id;
+        miEst.estHeader.tarifasterminales_id=misTarifas.tTerminal.id;
 
-        double tmp;
+        /*double tmp;
 
         // Me fijo si los gastos deben o no recalcularse. Arriba se determino si la tarifa se levanta por fecha o por ID
         // En este punto todas las tarfias han sido cargdas dentro del EstimateV2.
@@ -827,7 +844,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         // Calculo gastos del despachante (ARG)
         if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifDespa))>0)
         {
-            tmp=await calcularGastosDespachante(miEst);
+            tmp=calcularGastosDespachante(miEst);
             if(tmp<0)
             {
 
@@ -839,7 +856,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         // Calculo gastos de FLETE INTERNO (ARG)
         if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifFlete))>0)
         {
-            tmp=await calcularGastosTteLocal(miEst);
+            tmp=calcularGastosTteLocal(miEst);
             if(tmp<0)
             {
                 haltError="FALLA AL CALCULAR LOS GASTOS DE TTE LOC. Tabla de tarifa no accesible o no existen datos para el contenedor ingresado";
@@ -851,7 +868,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         // Calculo el gasto de Fowarder con el 040 del flete (ARG)
         if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasFwd))>0)
         {
-            tmp=await calcularGastosFwd(miEst);
+            tmp=calcularGastosFwd(miEst);
             if(tmp<0)
             {   // Todos los metodos que consultan una tabla tienen opcion de devolver -1 si algo no salio bien.
                 haltError="FALLA CALCULAR GASTOS FWD. TABLA TarifasFWD no accesible o no existen datos para el tipo de contenedor / origen indicados";
@@ -869,7 +886,7 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         // Calculo los gastos de custodia / seguro
         if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifPoliza))>0)
         {
-            tmp=await calcularGastosCustodia(miEst);
+            tmp=calcularGastosCustodia(miEst);
             if(tmp<0)
             {
                 haltError="FALLO AL CALCULAR LOS GASTOS DE CUSTODIA. Tabla de tarifa no accesible o no existen datos para el Proveedor de Poliza ingresado";
@@ -881,7 +898,92 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
         // Calculo los gastos de Terminal
         if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasTerm))>0)
         {
-            tmp=await calcularGastosTerminal(miEst);
+            tmp=calcularGastosTerminal(miEst);
+            if(tmp<0)
+            {
+                haltError="FALLA AL CALCULAR GASTOS DE TERMINAL. TAbla no accesible o no existen datos para el tipo de contenedor ingresado";
+                return null;
+            }
+            //Guardo en el header.
+            miEst.estHeader.gloc_terminales=tmp;
+        }*/
+
+        return miEst;
+    }
+
+    public EstimateV2 CalcularGastosLocales(EstimateV2 miEst)
+    {
+        double tmp;
+
+        // Me fijo si los gastos deben o no recalcularse. Arriba se determino si la tarifa se levanta por fecha o por ID
+        // En este punto todas las tarfias han sido cargdas dentro del EstimateV2.
+
+        // Calculo el gasto bancario (ARG), si el bit de actualizar esta encendido
+        // Si el bit actualizar esta apagado ... se usara el valor g_loc correspondiente.
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifBanco))>0)
+        {
+            tmp=calcularGastosBancarios(miEst);         // Este idem.
+            // Lo guardo en el header
+            miEst.estHeader.gloc_bancos=tmp;
+        }
+        // Calculo gastos del despachante (ARG)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifDespa))>0)
+        {
+            tmp=calcularGastosDespachante(miEst);
+            if(tmp<0)
+            {
+
+            return null;
+            }
+            // Lo guardo en el header
+            miEst.estHeader.gloc_despachantes=tmp;
+        }
+        // Calculo gastos de FLETE INTERNO (ARG)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifFlete))>0)
+        {
+            tmp=calcularGastosTteLocal(miEst);
+            if(tmp<0)
+            {
+                haltError="FALLA AL CALCULAR LOS GASTOS DE TTE LOC. Tabla de tarifa no accesible o no existen datos para el contenedor ingresado";
+                return null;
+            }
+            // Guardo el gasto en el header
+            miEst.estHeader.gloc_flete=tmp;
+        }
+        // Calculo el gasto de Fowarder con el 040 del flete (ARG)
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasFwd))>0)
+        {
+            tmp=calcularGastosFwd(miEst);
+            if(tmp<0)
+            {   // Todos los metodos que consultan una tabla tienen opcion de devolver -1 si algo no salio bien.
+                haltError="FALLA CALCULAR GASTOS FWD. TABLA TarifasFWD no accesible o no existen datos para el tipo de contenedor / origen indicados";
+                return null;
+            }
+            // Guardo en el header.
+            miEst.estHeader.gloc_fwd=tmp;
+        }
+        // Calculo los gastos de Gestion digital de documentos
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifGestDigDoc))>0)
+        {
+            tmp=calcularGastosGestDigDocs(miEst);       // Este metodo no involucra una consulta a tabla, tmp np puede ser negativo
+            miEst.estHeader.gloc_gestdigdoc=tmp;
+        }
+        // Calculo los gastos de custodia / seguro
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifPoliza))>0)
+        {
+            tmp=calcularGastosCustodia(miEst);
+            if(tmp<0)
+            {
+                haltError="FALLO AL CALCULAR LOS GASTOS DE CUSTODIA. Tabla de tarifa no accesible o no existen datos para el Proveedor de Poliza ingresado";
+                return null;
+            }
+            // Guardo el gasto en el header
+            miEst.estHeader.gloc_polizas=tmp;
+        }
+        // Calculo los gastos de Terminal
+        if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasTerm))>0)
+        {
+            tmp=calcularGastosTerminal(miEst);
             if(tmp<0)
             {
                 haltError="FALLA AL CALCULAR GASTOS DE TERMINAL. TAbla no accesible o no existen datos para el tipo de contenedor ingresado";
@@ -890,6 +992,16 @@ public async Task<double> calcularGastosFwd(EstimateV2 miEst)
             //Guardo en el header.
             miEst.estHeader.gloc_terminales=tmp;
         }
+
+
+        miEst.estHeader.gastos_loc_total=miEst.estHeader.gloc_bancos+
+                                         miEst.estHeader.gloc_depositos+
+                                         miEst.estHeader.gloc_despachantes+
+                                         miEst.estHeader.gloc_flete+
+                                         miEst.estHeader.gloc_fwd+
+                                         miEst.estHeader.gloc_gestdigdoc+
+                                         miEst.estHeader.gloc_polizas+
+                                         miEst.estHeader.gloc_terminales;
 
         return miEst;
     }

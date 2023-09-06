@@ -104,6 +104,7 @@ public class PresupuestoService:IPresupuestoService
          _estService.setConstants(myEstV2.constantes);
          // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
          _estService.loadContenedor(myEstV2);
+
         // Busca las tarifas, calcula cada uno de los gastos locales y los pasa al header segun sea
         // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
         // El FP solo estara disponible luego de calculado el FOB TOTAL.
