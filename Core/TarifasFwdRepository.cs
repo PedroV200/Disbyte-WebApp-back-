@@ -31,7 +31,7 @@ public class TarifasFwdRepository : ITarifasFwdRepository
                     costo,
                     costo_local,
                     gasto_otro1,
-                    gasto_otro2,
+                    seguro_porct,
                     notas,
                     htimestamp
                     ) 
@@ -44,7 +44,7 @@ public class TarifasFwdRepository : ITarifasFwdRepository
                                      '{entity.costo.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                      '{entity.costo_local.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                      '{entity.gasto_otro1.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',      
-                                     '{entity.gasto_otro2.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',                                                                 
+                                     '{entity.seguro_porct.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',                                                                 
                                      '{entity.notas}',
                                      '{tmpString}')";
 
@@ -141,7 +141,7 @@ public class TarifasFwdRepository : ITarifasFwdRepository
                         costo = @costo,
                         costo_local = @costo_local,
                         gasto_otro1 = @gasto_otro1,
-                        gasto_otro2 = @gasto_otro2,
+                        seguro_porct = @seguro_porct,
                         notas = @notas,
                         htimestamp = @htimestamp
 

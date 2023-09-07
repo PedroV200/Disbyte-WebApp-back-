@@ -1,5 +1,6 @@
 using WebApiSample.Models;
 using WebApiSample.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 // LISTED 20_7_2023 17:02
 
@@ -125,7 +126,20 @@ public class calc
         // COL S, COL U, COLY, COL AA 
         // Evito consultar la base de NCM una vez por cada factor necesario. Se que son 4 los factores.
         // Los traigo en una sola consulta (una consulta x item)
-        myEstV2=await _estService.search_NCM_DATA(myEstV2);
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2=await _estService.search_NCM_DATA(myEstV2);
+        }
+        else if(myEstV2.pais=="MEX")
+        {
+            myEstV2=await _estService.search_NCM_MEX_DATA(myEstV2);
+        }
+        else
+        {
+            ;
+        }
+
+
         if(myEstV2==null)
         {   
             haltError=_estService.getLastError();
@@ -137,7 +151,18 @@ public class calc
         // COL U
         //myEstV2=await _estService.resolveNcmTe(myEstV2);
         // COL V
-        myEstV2=_estService.CalcTasaEstad061(myEstV2);
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2=_estService.CalcTasaEstad061(myEstV2);
+        }
+        else if(myEstV2.pais=="MEX")
+        {
+            myEstV2=_estService.CalcDTA(myEstV2);
+        }
+        else
+        {
+            ;
+        }
         // COL X
         myEstV2=_estService.CalcBaseGcias(myEstV2); 
         // COL Y
@@ -164,7 +189,18 @@ public class calc
         // CELDA AF43
         myEstV2=_estService.CalcPagadoTot(myEstV2);
 
-        myEstV2=_estService.CalcularGastosLocales(myEstV2);
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2=_estService.CalcularGastosLocales(myEstV2);
+        }
+        else if(myEstV2.pais=="MEX")
+        {
+            myEstV2=_estService.CalcularGastosLocalesMEX(myEstV2);
+        }
+        else
+        {
+            ;
+        }
 
         // Pondera los gastos locales del header en los diferentes productos. 
         // Los gastos locales fueron extraidos de las tarifas o ya se hayaban guardados en el header

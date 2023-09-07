@@ -11,7 +11,7 @@ public class TarifasFwd
     public double costo{get;set;}               
     public double costo_local{get;set;}
     public double gasto_otro1{get;set;}
-    public double gasto_otro2{get;set;}
+    public double seguro_porct{get;set;}
     public string notas{get;set;}
     public DateTime htimestamp{get;set;}
  
@@ -28,7 +28,7 @@ public class TarifasFwdVista
     public double costo{get;set;}               
     public double costo_local{get;set;}
     public double gasto_otro1{get;set;}
-    public double gasto_otro2{get;set;}
+    public double seguro_porct{get;set;}
     public string notas{get;set;}
     public DateTime htimestamp{get;set;}
     public string fwdtte{get;set;}              //FK a la agencia de fowarding / transporte
