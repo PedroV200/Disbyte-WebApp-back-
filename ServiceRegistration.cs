@@ -9,6 +9,7 @@ public static class ServiceRegistration
         services.AddTransient<IProductRepository, ProductRepository>();
         services.AddTransient<IIIBBrepository, IIBBRepository>();
         services.AddTransient<INCMrepository, NCMrepository>();
+        services.AddTransient<INCM_MexRepository, NCM_MexRepository>();
         services.AddTransient<IBancoRepository, BancoRepository>();
         services.AddTransient<IFwdtteRepository, FwdtteRepository>();
         services.AddTransient<ITerminalRepository, TerminalRepository>();

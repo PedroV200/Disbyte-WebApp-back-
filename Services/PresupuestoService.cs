@@ -105,6 +105,22 @@ public class PresupuestoService:IPresupuestoService
          // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
          _estService.loadContenedor(myEstV2);
 
+        // Traduzco el id del pais / region en un string de 3 caracteres normalizado.
+        // Sera clave para bifurcar la logica del calculo segun los diferentes paises
+         myEstV2=await getCountry(myEstV2);
+
+        // Mexico no tiene algunos de los gastos. Uso el cmpo update para deshabilitar las busqueda
+        // cde tarifas que Mexico no tiene.
+        // Copia a temporal.
+        int tarifNOTupdateMEXICO=myEstV2.estHeader.tarifupdate;
+        // Apago los bists de la tarfias que no necesito.
+        tarifNOTupdateMEXICO&=~(1<<(int)tarifaControl.tarifBanco);
+        tarifNOTupdateMEXICO&=~(1<<(int)tarifaControl.tarifDepo);
+        tarifNOTupdateMEXICO&=~(1<<(int)tarifaControl.tarifGestDigDoc);
+        tarifNOTupdateMEXICO&=~(1<<(int)tarifaControl.tarifPoliza);
+        // Grabo el valor enmascarado.
+        myEstV2.estHeader.tarifupdate=tarifNOTupdateMEXICO;
+
         // Busca las tarifas, calcula cada uno de los gastos locales y los pasa al header segun sea
         // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
         // El FP solo estara disponible luego de calculado el FOB TOTAL.
@@ -114,6 +130,7 @@ public class PresupuestoService:IPresupuestoService
             presupError=_estService.getLastError();
             return null;
          }
+
         // ################################## FIN INIT ############################################
 
         // CALCULOS PROPIAMENTE DICHOS
@@ -355,6 +372,37 @@ public class PresupuestoService:IPresupuestoService
         myEstV2=await myCalc.calcReclaim(myEstV2);
         
         return myEstV2;      
+    }
+
+    public async Task<EstimateV2> getCountry(EstimateV2 miEst)
+    {
+        PaisRegion pais=await _unitOfWork.PaisesRegiones.GetByIdAsync(miEst.estHeader.paisregion_id);
+        string pais_str=pais.description;
+        if(pais_str.ToUpper().Contains("BRA"))
+        {
+            miEst.pais="BRA";
+        }
+        else if(pais_str.ToUpper().Contains("MEX"))
+        {
+            miEst.pais="MEX";       
+        }
+        else if(pais_str.ToUpper().Contains("ARG"))
+        {
+            miEst.pais="ARG";
+        }
+        else if(pais_str.ToUpper().Contains("USA")||(pais_str.ToUpper().Contains("ESTADOS")))
+        {
+            miEst.pais="USA";
+        }
+        else if(pais_str.ToUpper().Contains("COL"))
+        {
+            miEst.pais="COL";
+        }
+        else
+        {
+        miEst.pais="";
+        }
+        return miEst;
     }
 
 }

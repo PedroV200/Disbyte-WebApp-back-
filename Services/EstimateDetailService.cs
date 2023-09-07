@@ -37,6 +37,16 @@ public class EstimateDetailService: IEstimateDetailService
         return null;
     }
 
+    public async Task<NCM_Mex> lookUp_NCM_MEX_Data(EstimateDetail estDetails)
+    {
+        NCM_Mex myNCM=await _unitOfWork.NCM_MEXs.GetByIdAsync(estDetails.ncm_id); 
+        if(myNCM!=null)
+        {
+            return myNCM;
+        }   
+        return null;
+    }
+
     public async Task<double> lookUpDie(EstimateDetail estDetails)
     {
         NCM myNCM=await _unitOfWork.NCMs.GetByIdAsync(estDetails.ncm_id); 
@@ -118,6 +128,11 @@ public class EstimateDetailService: IEstimateDetailService
     public double CalcDerechos(EstimateDetail est)
     {
         return est.totalcif*est.ncm_arancel;
+    }
+
+    public double CalcDTA(EstimateDetail est)
+    {
+        return est.totalcif*est.ncm_te_dta_otro;
     }
     // Conforme COL V
     public double CalcTasaEstad061(EstimateDetail est)

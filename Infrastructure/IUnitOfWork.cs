@@ -44,5 +44,6 @@ public interface IUnitOfWork
     IUsuarioRepository Usuarios { get; }
     IDespachanteRepository Despachantes { get; }
     IPaisRegionRepository PaisesRegiones {get;}
+    INCM_MexRepository NCM_MEXs {get;}
     
 }

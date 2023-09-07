@@ -33,6 +33,8 @@ public interface IEstimateService : IGenericService<EstimateV2>
 
     // COL V
     public EstimateV2 CalcTasaEstad061(EstimateV2 est);
+    // MEX    
+    public EstimateV2 CalcDTA(EstimateV2 est);
     // COL X
     public EstimateV2 CalcBaseGcias(EstimateV2 est);
     // COL Y
@@ -89,6 +91,8 @@ public interface IEstimateService : IGenericService<EstimateV2>
 
     public Task<EstimateV2> search_NCM_DATA(EstimateV2 est);
 
+    public Task<EstimateV2>search_NCM_MEX_DATA(EstimateV2 est);
+
     public string getLastError();
 
     public void setLastError(string err);
@@ -97,5 +101,6 @@ public interface IEstimateService : IGenericService<EstimateV2>
     public EstimateV2 reclaimTarifas(EstimateV2 miEst);
     public Task<EstimateV2> loadContenedor(EstimateV2 miEst);
     public EstimateV2 CalcularGastosLocales(EstimateV2 miEst);
+    public EstimateV2 CalcularGastosLocalesMEX(EstimateV2 miEst);
 
     }

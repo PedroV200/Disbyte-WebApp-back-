@@ -8,6 +8,7 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(IProductRepository productRepository, 
                       IIIBBrepository IIBBrepository,
                       INCMrepository NCMrepository,
+                      INCM_MexRepository NCM_MexRepo,
                       IBancoRepository BancoRepository,
                       IFwdtteRepository FwdtteRepository,
                       ITerminalRepository TermimalRepository,
@@ -45,6 +46,7 @@ public class UnitOfWork : IUnitOfWork
         Products = productRepository;
         IIBBs = IIBBrepository;
         NCMs = NCMrepository;
+        NCM_MEXs=NCM_MexRepo;
         Bancos = BancoRepository;
         Fwds = FwdtteRepository;
         Terminales = TermimalRepository;
@@ -85,6 +87,7 @@ public class UnitOfWork : IUnitOfWork
     public IProductRepository Products { get; } 
     public IIIBBrepository IIBBs { get; } 
     public INCMrepository NCMs { get;}
+    public INCM_MexRepository NCM_MEXs { get;}
     public IBancoRepository Bancos {get;}
     public IFwdtteRepository Fwds {get;}
     public ITerminalRepository Terminales {get; }

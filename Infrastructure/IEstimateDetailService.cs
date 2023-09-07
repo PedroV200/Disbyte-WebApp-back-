@@ -26,6 +26,8 @@ public interface IEstimateDetailService : IGenericService<EstimateDetail>
     public double CalcDerechos(EstimateDetail est);
     // COL U
     public double CalcTE(double te);
+
+    public double CalcDTA(EstimateDetail est);
     // COL V
     public double CalcTasaEstad061(EstimateDetail estDetails);
     // COL X
@@ -79,6 +81,6 @@ public interface IEstimateDetailService : IGenericService<EstimateDetail>
 
     public Task<NCM> lookUp_NCM_Data(EstimateDetail estDetails);
 
-
+    public Task<NCM_Mex> lookUp_NCM_MEX_Data(EstimateDetail estDetails);
 
 }
