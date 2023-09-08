@@ -62,7 +62,7 @@ public int id{get;set;}
     public double costo_u_est{get;set;}
     public  double costo_u_prov{get;set;}
     public double costo_u{get;set;}
-    public bool updated{get;set;}
+    public bool updated{get;set;} 
     // VALORES CALCULADOS
     public int ctns{get;set;}
     public double totalcbm{get;set;}

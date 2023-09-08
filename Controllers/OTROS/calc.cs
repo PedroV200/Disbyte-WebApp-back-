@@ -81,7 +81,18 @@ public class calc
             return null;
         }
         // COL L. Calculo el fob total por articulo
-        myEstV2=_estService.CalcFobTotal(myEstV2);
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2=_estService.CalcFobTotal(myEstV2);
+        }
+        else if(myEstV2.pais=="MEX")
+        {
+            myEstV2=_estService.CalcFobTotalMEX(myEstV2);
+        }
+        else
+        {
+            ;
+        }
         // CELDA L43. Sumo todos los fob totales. Sumatoria de L15-L41 que se copia en celda C3
         myEstV2.estHeader.fob_grand_total=_estService.sumFobTotal(myEstV2);
 
@@ -93,16 +104,33 @@ public class calc
             return null;
         }
         // CELDA C5 que es funcion del valor FOB
-        myEstV2=_estService.CalcSeguroTotal(myEstV2);
+        if((myEstV2.estHeader.tarifupdate&(1<<(int)tarifaControl.freight_insurance_cost))>0)
+        {
+            myEstV2=_estService.CalcSeguroTotal(myEstV2);
+        }
         // CELDA C4. Traigo la tarifa del flete desde BASE_TARIFAS por fowarder y tipo cont
         //TarifasFwdCont myTar=await _unitOfWork.TarifasFwdContenedores.GetByFwdContTypeAsync(myEstV2.FreightFwd,myEstV2.FreightType);
         // De la consulta me quedo con el valor del flete (se usa 60%)
         //myEstV2.FleteTotal=await _estService.lookUpTarifaFleteCont(myEstV2);
-        myEstV2=_estService.CalcFleteTotal(myEstV2);
-        if(myEstV2==null)
+        if((myEstV2.estHeader.tarifupdate&(1<<(int)tarifaControl.freight_insurance_cost))>0)
         {
-            haltError="Tarifas Flete Fowarder Inaccesible";
-            return null;
+            if(myEstV2.pais=="ARG")
+            {
+                myEstV2=_estService.CalcFleteTotal(myEstV2);
+            }
+            else if(myEstV2.pais=="MEX")
+            {
+                myEstV2=_estService.CalcFleteTotalMEX(myEstV2);
+            }
+            else
+            {
+                ;
+            }
+            if(myEstV2==null)
+            {
+                haltError="Tarifas Flete Fowarder Inaccesible";
+                return null;
+            }
         }
         // COL M. Calcula el flete ponderado a cada articulo del detalle.
         myEstV2=_estService.CalcFleteTotalByProd(myEstV2);
@@ -112,11 +140,13 @@ public class calc
             return null;
         }
         // COL N. Calcula el seguro ponderado a cada articulo del detalle 
+        
         myEstV2=_estService.CalcSeguro(myEstV2);
         if(myEstV2==null)
         {
             haltError="ATENCION: CalcSeguro. FOB GRAND TOTAL es 0. DOV 0 !";
         }
+        
         // COL O. Calcula el CIF que solo depende de los datos ya calculados previamente (COL L, N y M)
         myEstV2=_estService.CalcCif(myEstV2);
         // CELDA =43
@@ -172,11 +202,16 @@ public class calc
         // COL AA
         //myEstV2= await _estService.searchIvaAdic(myEstV2);
         // COL AB
-        myEstV2=_estService.CalcIVA_ad_Gcias(myEstV2);
-        // COL AC
-        myEstV2=_estService.CalcImpGcias424(myEstV2);
-        // COL AD
-        myEstV2=_estService.CalcIIBB900(myEstV2); 
+
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2=_estService.CalcIVA_ad_Gcias(myEstV2);
+            // COL AC
+            myEstV2=_estService.CalcImpGcias424(myEstV2);
+            // COL AD
+            myEstV2=_estService.CalcIIBB900(myEstV2); 
+        }
+
         // COL AE
         myEstV2=_estService.CalcPrecioUnitUSS(myEstV2);
         if(myEstV2==null)
@@ -218,6 +253,14 @@ public class calc
             haltError=_estService.getLastError();
             return null;
         }
+
+        myEstV2=_estService.CalcTotTradeFee(myEstV2);
+        if(myEstV2==null)
+        {
+            haltError=_estService.getLastError();
+            return null;
+        }
+        
         //Precio + Gastos_LOC_Y_EXTRA_U.
         myEstV2=_estService.CalcCostoUnitarioUSS(myEstV2);
         //AN
@@ -237,7 +280,7 @@ public class calc
 
 
 
-public async Task<EstimateV2> calcReclaim(EstimateV2 myEstV2)
+public EstimateV2 calcReclaim(EstimateV2 myEstV2)
     {
 
         myEstV2=_estService.CalcPesoTotal(myEstV2);

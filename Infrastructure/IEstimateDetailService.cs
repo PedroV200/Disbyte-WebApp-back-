@@ -13,6 +13,7 @@ public interface IEstimateDetailService : IGenericService<EstimateDetail>
     public double CalcCbmTotal(EstimateDetail estD);
     // COL L
     public double CalcFob(EstimateDetail estD);
+    public double CalcFobMEX(EstimateDetail estD);
     // COL M
     public double CalcFlete(EstimateDetail estD, double fleteTotal, double fobGrandTotal);
     // COL N
@@ -74,6 +75,8 @@ public interface IEstimateDetailService : IGenericService<EstimateDetail>
     public double CalcGastosProyPond(EstimateDetail estD, double gastosProy);
 
     public double CalcOverHeadUnit(EstimateDetail estD);
+
+    public double CalcTotTradeFee(EstimateDetail est);
 
     public double CalcCostoUnitUSS(EstimateDetail estD);
 
