@@ -18,6 +18,7 @@ public interface IEstimateService : IGenericService<EstimateV2>
     public EstimateV2 CalcCbmTotal(EstimateV2 est);
     // CELDA L43 y CELDA C3
     public EstimateV2 CalcFobTotal(EstimateV2 est);
+    public EstimateV2 CalcFobTotalMEX(EstimateV2 est);
     // CELDA M43
     public EstimateV2 CalcFleteTotalByProd(EstimateV2 est);
     // COL N
@@ -60,6 +61,7 @@ public interface IEstimateService : IGenericService<EstimateV2>
     public EstimateV2 CalcGastos_LOC_Y_EXTRA(EstimateV2 V2);
     public EstimateV2 CalcGastos_LOC_Y_EXTRA_BYPROD_UNIT(EstimateV2 est);
   
+    public EstimateV2 CalcTotTradeFee(EstimateV2 est);
     public EstimateV2 CalcOverhead(EstimateV2 est);
 
     public EstimateV2 CalcCostoUnitarioUSS(EstimateV2 est);
@@ -80,6 +82,8 @@ public interface IEstimateService : IGenericService<EstimateV2>
     public EstimateV2 CalcCifTotal(EstimateV2 est);
 
     public EstimateV2 CalcFleteTotal(EstimateV2 est);
+
+    public EstimateV2 CalcFleteTotalMEX(EstimateV2 est);
 
     public double sumPesoTotal(EstimateV2 est);
 

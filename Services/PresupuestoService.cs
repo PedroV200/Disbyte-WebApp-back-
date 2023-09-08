@@ -109,17 +109,7 @@ public class PresupuestoService:IPresupuestoService
         // Sera clave para bifurcar la logica del calculo segun los diferentes paises
          myEstV2=await getCountry(myEstV2);
 
-        // Mexico no tiene algunos de los gastos. Uso el cmpo update para deshabilitar las busqueda
-        // cde tarifas que Mexico no tiene.
-        // Copia a temporal.
-        int tarifNOTupdateMEXICO=myEstV2.estHeader.tarifupdate;
-        // Apago los bists de la tarfias que no necesito.
-        tarifNOTupdateMEXICO&=~(1<<(int)tarifaControl.tarifBanco);
-        tarifNOTupdateMEXICO&=~(1<<(int)tarifaControl.tarifDepo);
-        tarifNOTupdateMEXICO&=~(1<<(int)tarifaControl.tarifGestDigDoc);
-        tarifNOTupdateMEXICO&=~(1<<(int)tarifaControl.tarifPoliza);
-        // Grabo el valor enmascarado.
-        myEstV2.estHeader.tarifupdate=tarifNOTupdateMEXICO;
+
 
         // Busca las tarifas, calcula cada uno de los gastos locales y los pasa al header segun sea
         // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
@@ -367,9 +357,9 @@ public class PresupuestoService:IPresupuestoService
             return null;
         }*/
         // Carga los datos de la carga en EstimateV2.miCarga
-        _estService.loadContenedor(myEstV2);
+        await _estService.loadContenedor(myEstV2);
 
-        myEstV2=await myCalc.calcReclaim(myEstV2);
+        myEstV2=myCalc.calcReclaim(myEstV2);
         
         return myEstV2;      
     }

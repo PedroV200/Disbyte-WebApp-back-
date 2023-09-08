@@ -22,6 +22,11 @@ using System.Globalization;
 //                              Despachante
 //                              Terminal 
 // 7_9_2023 17:52 Repara bugs en tarifasxxx_id no asignados y tarifas despachantes no consultada . Primera corrida de Mexico.
+// 8_9_2023 16:26 Se reparan mas bugs. Agrega bit de update para freight cost y freight insurance dado que en el sheet
+//                figuran como ajustables. Se agrega el calculo basado en exw para MEX y el total trade fee que no estaba en ARG
+//                Se repara bug en calc reclaim (await faltante en _estService_loadContenedor
+ 
+
 
 public class EstimateService: IEstimateService
 {
@@ -86,6 +91,15 @@ public class EstimateService: IEstimateService
         return est;
     }
 
+    public EstimateV2 CalcFobTotalMEX(EstimateV2 est)
+    {
+        foreach(EstimateDetail ed in est.estDetails)
+        {
+            ed.totalfob=_estDetServices.CalcFobMEX(ed);       
+        }
+        return est;
+    }
+
     public EstimateV2 CalcCbmTotal(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
@@ -117,7 +131,7 @@ public class EstimateService: IEstimateService
     {
         foreach(EstimateDetail ed in est.estDetails)
         {                                               // CELDA C5=0.1*C3
-            ed.insuranceCharge=_estDetServices.CalcSeguro(ed,est.freight_insurance_cost,est.estHeader.fob_grand_total);   
+            ed.insuranceCharge=_estDetServices.CalcSeguro(ed,est.estHeader.freight_insurance_cost,est.estHeader.fob_grand_total);   
             if(ed.insuranceCharge<0)
             {
                 return null;
@@ -647,6 +661,20 @@ public double calcularGastosFwd(EstimateV2 miEst)
         return est;
     }
 
+    public EstimateV2 CalcTotTradeFee(EstimateV2 est)
+    {
+        foreach(EstimateDetail ed in est.estDetails)
+        {
+            ed.totaltraderfee=_estDetServices.CalcTotTradeFee(ed);  
+            if(ed.totaltraderfee<0)
+            {
+                haltError=$"ATENCION: El articulo '{ed.description}' genera un Total Trader Fee negativo";
+                return null;
+            }     
+        }
+        return est;
+    }
+
     public EstimateV2 CalcCostoUnitarioUSS(EstimateV2 est)
     {
         foreach(EstimateDetail ed in est.estDetails)
@@ -700,9 +728,17 @@ public double calcularGastosFwd(EstimateV2 miEst)
         return est;
     }
 
+    public EstimateV2 CalcFleteTotalMEX(EstimateV2 est)
+    {
+        double tmp;
+        tmp=est.misTarifas.tFwd.costo*est.estHeader.cantidad_contenedores;
+        est.estHeader.freight_cost=tmp;
+        return est;
+    }
+
     public EstimateV2 CalcSeguroTotal(EstimateV2 miEst)
     {
-        miEst.freight_insurance_cost=(miEst.misTarifas.tFwd.seguro_porct/100)*miEst.estHeader.fob_grand_total;
+        miEst.estHeader.freight_insurance_cost=(miEst.misTarifas.tFwd.seguro_porct/100)*miEst.estHeader.fob_grand_total;
         return miEst;
     }
 

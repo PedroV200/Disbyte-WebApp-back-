@@ -76,5 +76,6 @@ public enum tarifaControl
     tarifGestDigDoc = 5,
     tarifPoliza =6,
     tarifasTerm = 7,
-    tarifasHoy = 8
+    freight_cost = 8,
+    freight_insurance_cost=9
 }

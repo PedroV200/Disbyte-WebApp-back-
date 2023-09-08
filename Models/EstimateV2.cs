@@ -8,7 +8,7 @@ public class EstimateV2
     public EstimateHeaderDB estHeader{get;set;}
     public string pais;
     public double totalfreight_cost;
-    public double freight_insurance_cost;
+    //public double freight_insurance_cost;
     public Carga miCarga;
     public Tarifas misTarifas;
 

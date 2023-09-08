@@ -97,6 +97,11 @@ public class EstimateDetailService: IEstimateDetailService
         return (estD.qty*estD.fob_u);
     }
 
+    public double CalcFobMEX(EstimateDetail estD)
+    {
+        return (estD.qty*estD.exw_u);
+    }
+
     public double CalcFlete(EstimateDetail estD, double costoFlete,double fobGrandTotal)
     {
         if(fobGrandTotal>0)
@@ -323,10 +328,21 @@ public class EstimateDetailService: IEstimateDetailService
         }
     }
 
+    public double CalcTotTradeFee(EstimateDetail est)
+    {
+        return est.fob_u-est.exw_u;
+    }
+
     public double CalcCostoUnitUSS(EstimateDetail estD)
     {
-
-        return estD.precio_u+estD.totalgastos_loc_y_extra_u;
+        if(estD.totaltraderfee>0)
+        {
+            return estD.precio_u+estD.totalgastos_loc_y_extra_u+estD.totaltraderfee;
+        }
+        else
+        {
+            return estD.precio_u+estD.totalgastos_loc_y_extra_u;
+        }
     }
 
     public double CalcCostoUnit(EstimateDetail estD, double dolar)
