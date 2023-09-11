@@ -199,7 +199,7 @@ public class dbutils
         return estimateDB;       
     }
 
-    public EstimateDB setDefaultEstimateDB(EstimateDB miEst)
+    public EstimateDB ClearExtraGastosComex(EstimateDB miEst)
     {
         miEst.estHeaderDB.extrag_comex1=0;
         miEst.estHeaderDB.extrag_comex2=0;
@@ -207,6 +207,12 @@ public class dbutils
         miEst.estHeaderDB.extrag_comex4=0;
         miEst.estHeaderDB.extrag_comex5=0;
         miEst.estHeaderDB.extrag_comex_notas="";
+
+        return miEst;
+    }
+
+    public EstimateDB ClearExtraGastosFinanzas(EstimateDB miEst)
+    {
         miEst.estHeaderDB.extrag_finan1=0;
         miEst.estHeaderDB.extrag_finan2=0;
         miEst.estHeaderDB.extrag_finan3=0;
@@ -218,6 +224,24 @@ public class dbutils
         miEst.estHeaderDB.extrag_finanformula3_id=0;
         miEst.estHeaderDB.extrag_finanformula4_id=0;
         miEst.estHeaderDB.extrag_finanformula5_id=0;
+
+        return miEst;
+    }
+
+    public EstimateDB setDefaultEstimateDB(EstimateDB miEst)
+    {
+       
+        miEst=ClearExtraGastosComex(miEst);
+        miEst=ClearExtraGastosFinanzas(miEst);
+        // IMPORTANTE !!!!! 
+        // Valores por defecto: Estodo 0.
+        // Todos las tarifas son actualizables (bits 0 a 7)
+        // fregith_cost y freight_insurance se calculan desde las tarfias (bits 8 y 9)
+        // Las tarfias se actualizaran x fecha y no por ID.
+        miEst.estHeaderDB.status=0x00;
+        miEst.estHeaderDB.tarifrecent=1023;
+        miEst.estHeaderDB.tarifupdate=1023;
+        // FIN IMPORTANTE
         foreach(EstimateDetailDB edb in miEst.estDetailsDB)
         {
             edb.extrag_comex1=0;

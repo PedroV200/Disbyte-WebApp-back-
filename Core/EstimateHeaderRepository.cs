@@ -217,6 +217,16 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
         }
     }
 
+        public async Task<EstimateHeaderDB> GetByEstNumberLastVers_1ROW_Async(int estnumber)
+    {
+        var sql = $"SELECT * FROM estimateheader WHERE estnumber={estnumber} ORDER BY estvers DESC LIMIT 1";
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+            return await connection.QuerySingleOrDefaultAsync<EstimateHeaderDB>(sql);
+        }
+    }
+
     // 6/7/2023 Trae el proximo ID LIBRE para estNumber.
     public async Task<int> GetNextEstNumber()
     {

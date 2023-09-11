@@ -7,6 +7,9 @@ using Dapper;
 using System.Data;
 using System.Globalization;
 
+// Listed 11_09_2023 12:21 Arregla logica de calculo del precio total unitario cuando se suma o no el totaltradefee
+// Si exw_u es 0, no se usa totaltradefee. 
+
 public class EstimateDetailService: IEstimateDetailService
 {
     public IUnitOfWork _unitOfWork {get;}
@@ -335,7 +338,8 @@ public class EstimateDetailService: IEstimateDetailService
 
     public double CalcCostoUnitUSS(EstimateDetail estD)
     {
-        if(estD.totaltraderfee>0)
+        // Solo si ingresaron un valor exw, tiene sentido adicionar el total trade fee.
+        if(estD.exw_u>0)
         {
             return estD.precio_u+estD.totalgastos_loc_y_extra_u+estD.totaltraderfee;
         }

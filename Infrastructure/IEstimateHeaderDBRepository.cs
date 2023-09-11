@@ -11,4 +11,5 @@ public interface IEstimateHeaderDBRepository : IGenericRepository<EstimateHeader
     public Task<int> GetNextEstVersByEstNumber(int estNumber);
     public Task<IEnumerable<EstimateHeaderDB>> GetAllVersionsFromEstimate(int estNumbet);
     public Task<IEnumerable<EstimateHeaderDB>> GetByDescripAsync(string descrip);
+    public Task<EstimateHeaderDB> GetByEstNumberLastVers_1ROW_Async(int estnumber);
 }
