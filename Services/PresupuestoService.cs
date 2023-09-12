@@ -8,8 +8,11 @@ using System.Data;
 using System.Globalization;
 
 
-// LISTED 9_8_2023 11:36 AM  
+// LISTED 9_8_2023 11:36 AM   
 // LISTED 11_09_2023 17:15 Primera logica de estados aplicada a presupuestoUpdate.
+// LISTED 12_09_2023 17:21 Repara bug en calc reclaim. Comenta calc flete total y seguro total ya que
+// su valor fue calculado durante el POST y guardado en flete_cost flete_cost_insurance.
+
 public class PresupuestoService:IPresupuestoService
 {
     

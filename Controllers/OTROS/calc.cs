@@ -305,7 +305,7 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
         // COL L. Calculo el fob total por articulo
         myEstV2=_estService.CalcFobTotal(myEstV2);
         // CELDA C5 que es funcion del valor FOB
-        myEstV2=_estService.CalcSeguroTotal(myEstV2);
+        //myEstV2=_estService.CalcSeguroTotal(myEstV2);
 
         //myEstV2=_estService.CalcFleteTotal(myEstV2);
 
