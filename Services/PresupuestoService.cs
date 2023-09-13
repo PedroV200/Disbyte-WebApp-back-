@@ -12,6 +12,8 @@ using System.Globalization;
 // LISTED 11_09_2023 17:15 Primera logica de estados aplicada a presupuestoUpdate.
 // LISTED 12_09_2023 17:21 Repara bug en calc reclaim. Comenta calc flete total y seguro total ya que
 // su valor fue calculado durante el POST y guardado en flete_cost flete_cost_insurance.
+// LISTED 13_09_2023 10:36 Repara bug pais en calculo fob reclaim. Se reordena el codigo para evitar
+// repeticion. Se habilita el modo simulacion.  
 
 public class PresupuestoService:IPresupuestoService
 {
@@ -45,7 +47,10 @@ public class PresupuestoService:IPresupuestoService
             //return await myCalc.aCalc(miEst,miEst.estHeaderDB.estnumber,miEst.estHeaderDB.freight_insurance_cost,miEst.estHeaderDB.p_gloc_banco,miEst.estHeaderDB.total_impuestos,miEst.estHeaderDB.own);
             return null;
     }
-
+    // ########### NUEVO PRESUPUESTO ###############
+    // Un prespuesto nuevo consisten en los calculos (EstimateDB -> EstimateV2)
+    // Y luego la conversion inversa (EstimateV2 a estimateDB) y su posterior guardado a la base
+    // #############################################
     public async Task<EstimateV2>submitPresupuestoNew(EstimateDB miEst)
     {
         var result=0;
@@ -54,19 +59,59 @@ public class PresupuestoService:IPresupuestoService
         EstimateDB resultEDB=new EstimateDB();
         EstimateHeaderDB readBackHeader=new EstimateHeaderDB();
 
-        // ###### INIT
         // Es un presupuesto nuevo ... me aseguro que todo lo que es extragasto este en cero y los flags de update en false
         resultEDB=myDBhelper.setDefaultEstimateDB(resultEDB);
-        // ###### FIN INIT
-
-        // Numeracion / Versionado:
-        // Este es un nuevo presupuesto, con lo cual me limito a preguntar el estNumber mas alto usado
-        // y luego le sumo 1. La version es 1.
+ 
         miEst.estHeaderDB.estnumber=await _unitOfWork.EstimateHeadersDB.GetNextEstNumber();
         miEst.estHeaderDB.estvers=1;
 
         // Grabo la estampa de tiempo en el header
         miEst.estHeaderDB.htimestamp=DateTime.Now;
+
+        myEstV2=await calcularPresupuestoNewOrUpdate(miEst);
+
+        // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
+        // En la base no se guardan calculos,  por lo que debi convertir el estimate V2 a estimate DB y guardarlo.
+
+        resultEDB=myDBhelper.transferDataToDBType(myEstV2);
+        // Fijo el estado en 0. Es un presupuesto nuevo, no me importa lo que me manden en el JSON.
+        // el presupuesto nuevo arranca con estado 0. 
+        resultEDB.estHeaderDB.status=0;
+
+        // Guardo el header.
+        result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
+        // Veo que ID le asigno la base:
+        readBackHeader=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(resultEDB.estHeaderDB.estnumber,miEst.estHeaderDB.estvers);
+        // Ahora si, inserto los detail uno a uno ne la base
+        foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
+        {
+            ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
+            ed.updated=false;                       // El calculo se hizo por completo. No hay actualizaciones epndientes. Borro el flag de cada producto.
+            result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
+        }
+        
+        return myEstV2;      
+    }
+
+    // Una simulacion, es solo los calculos.
+    public async Task<EstimateV2>simulaPresupuesto(EstimateDB miEst)
+    {
+        return await calcularPresupuestoNewOrUpdate(miEst);
+    }
+
+    //  ########## CALCULOS ###########
+    // Toma un elemento estimateDB que es basicamente el json pasado como parametro
+    // los expande a un EstimaV2 y hace los calculos.
+    //  ###############################
+    public async Task<EstimateV2>calcularPresupuestoNewOrUpdate(EstimateDB miEst)
+    {
+        var result=0;
+        EstimateV2 myEstV2=new EstimateV2();
+        dbutils myDBhelper=new dbutils(_unitOfWork);
+        EstimateDB resultEDB=new EstimateDB();
+        EstimateHeaderDB readBackHeader=new EstimateHeaderDB();
+
+
 
 
 
@@ -134,78 +179,10 @@ public class PresupuestoService:IPresupuestoService
         {
             return null;
         }
-
-        // Le pongo la fecha / hora !!!!!!
-        //ret.estHeader.hTimeStamp=DateTime.Now;
-
-        // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
-        // En la base no se guardan calculos,  por lo que debi convertir el estimate V2 a estimate DB y guardarlo.
-
-        resultEDB=myDBhelper.transferDataToDBType(myEstV2);
-        // Fijo el estado en 0. Es un presupuesto nuevo, no me importa lo que me manden en el JSON.
-        // el presupuesto nuevo arranca con estado 0. 
-        resultEDB.estHeaderDB.status=0;
-
-        // Guardo el header.
-        result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
-        // Veo que ID le asigno la base:
-        readBackHeader=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(resultEDB.estHeaderDB.estnumber,miEst.estHeaderDB.estvers);
-        // Ahora si, inserto los detail uno a uno ne la base
-        foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
-        {
-            ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
-            ed.updated=false;                       // El calculo se hizo por completo. No hay actualizaciones epndientes. Borro el flag de cada producto.
-            result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
-        }
-        
-        return myEstV2;      
+        return myEstV2;
     }
 
-    public async Task<EstimateV2>simulaPresupuesto(EstimateDB miEst)
-    {
-        dbutils dbhelper=new dbutils(_unitOfWork);
-        EstimateV2 ret=new EstimateV2();
-        // Grabo la estampa de tiempo en el header
-        miEst.estHeaderDB.htimestamp=DateTime.Now;
-        // Preparo un string solo con la fecha para consultar a la DB
-        string fecha=miEst.estHeaderDB.htimestamp.ToString("yyyy-MM-dd");
-
-
-        // Cuando me pasan el presupuesto con dolar billete "-1" es por que debo extraerlo
-        // desde la base TC-CDA. 
-        if(miEst.estHeaderDB.dolar<0)
-        {
-            // Leo la fecha y la paso al formato que le gusta a postgre
-            string hoy=DateTime.Now.ToString("yyyy-MM-dd");
-            // Consulto el TC del dia (si existe, ojo)
-            double tipoDeCambio= await _unitOfWork.TiposDeCambio.GetByDateAsync(hoy); 
-            if(tipoDeCambio>0)
-            {   // La consulta tuvo exito ?
-                miEst.estHeaderDB.dolar=tipoDeCambio;
-            }
-            else
-            {   // FALLO, no existe el TC de la fecha mencionada*/ !!!!!!!
-                _estService.setLastError("Se solicito usar TC de la base TC_CDA, pero el dia de la fecha no tiene valor asignado");
-                return null;
-            }
-        }
-
-
-        // El objeto Estimate que se definio. 
-        EstimateV2 myEstV2=new EstimateV2();
-        // Expando el EstimateDB a un EstimateV2
-        myEstV2=dbhelper.transferDataFromDBType(miEst);
-        // Cargo las constnates de calculo.
-        myEstV2.constantes=await _cnstService.getConstantesLastVers();
-        if(myEstV2.constantes==null)
-        {
-            _estService.setLastError("No existe una instancia de constantes en tabla");
-            return null;
-        }
-        ret=await myCalc.calcBatch(myEstV2);
-        return ret;
-    }
-
+    // UPDATE PRESUPUESTO
     public async Task<EstimateV2>submitPresupuestoUpdated(int estNumber,EstimateDB miEst)
     {
         var result=0;
@@ -216,8 +193,16 @@ public class PresupuestoService:IPresupuestoService
         EstimateDB resultEDB=new EstimateDB();
         EstimateHeaderDB estHDBPrevia=new EstimateHeaderDB();
         EstimateHeaderDB readBackHeader=new EstimateHeaderDB();
+        // No usar el estNumber del JSON. OJO. Puede ser cualquiera. En gral no se le da bola. Para traer el previo
+        // consultar usando el estNumber pasado como parametro en el POST.
+        estHDBPrevia=await _unitOfWork.EstimateHeadersDB.GetByEstNumberLastVers_1ROW_Async(estNumber);
 
-        estHDBPrevia=await _unitOfWork.EstimateHeadersDB.GetByEstNumberLastVers_1ROW_Async(miEst.estHeaderDB.estnumber);
+        // Controlo que no me retrocedan el estado.
+        if(miEst.estHeaderDB.status<estHDBPrevia.status)
+        {
+             _estService.setLastError("No se puede retroceder el estado. Operacion Rechazada");
+            return null;
+        }
 
         // Nueva version usando el numero anterior.
         miEst.estHeaderDB.estnumber=estNumber;
@@ -232,67 +217,7 @@ public class PresupuestoService:IPresupuestoService
         miEst.estHeaderDB.htimestamp=DateTime.Now;
 
 
-        if(miEst.estHeaderDB.dolar<0)
-        {
-            // Leo la fecha y la paso al formato que le gusta a postgre
-            string hoy=DateTime.Now.ToString("yyyy-MM-dd");
-            // Consulto el TC del dia (si existe, ojo)
-            double tipoDeCambio= await _unitOfWork.TiposDeCambio.GetByDateAsync(hoy); 
-            if(tipoDeCambio>0)
-            {   // La consulta tuvo exito ?
-                miEst.estHeaderDB.dolar=tipoDeCambio;
-            }
-            else
-            {   // FALLO, no existe el TC de la fecha mencionada*/ !!!!!!!
-                _estService.setLastError("Se solicito usar TC de la base TC_CDA, pero el dia de la fecha no tiene valor asignado");
-                return null;
-            }
-        }
-
-        // ################################### INIT ######################################
-        
-        
-        // Expando el EstimateDB a un EstimateV2
-        myEstV2=myDBhelper.transferDataFromDBType(miEst);
-        // Cargo las constnates de calculo.
-        myEstV2.constantes=await _cnstService.getConstantesLastVers();
-        if(myEstV2.constantes==null)
-        {
-            _estService.setLastError("No existe una instancia de constantes en tabla");
-            return null;
-        }
-
-        // Ingresa las constantes a la varieble local de _estService.
-         _estService.setConstants(myEstV2.constantes);
-         // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
-         _estService.loadContenedor(myEstV2);
-
-        // Traduzco el id del pais / region en un string de 3 caracteres normalizado.
-        // Sera clave para bifurcar la logica del calculo segun los diferentes paises
-         myEstV2=await getCountry(myEstV2);
-
-
-
-        // Busca las tarifas, calcula cada uno de los gastos locales y los pasa al header segun sea
-        // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
-        // El FP solo estara disponible luego de calculado el FOB TOTAL.
-         myEstV2=await _estService.loadTarifas(myEstV2);
-         if(myEstV2==null)
-         {
-            presupError=_estService.getLastError();
-            return null;
-         }
-
-        // ################################## FIN INIT ############################################
-
-        // CALCULOS PROPIAMENTE DICHOS
-        myEstV2=await myCalc.calcBatch(myEstV2);
-        // Si los calculos fallan, no hacer nada.
-        if(myEstV2==null)
-        {
-            return null;
-        }
-
+        myEstV2=await calcularPresupuestoNewOrUpdate(miEst);
         // Le pongo la fecha / hora !!!!!!
         //ret.estHeader.hTimeStamp=DateTime.Now;
 
@@ -417,6 +342,9 @@ public class PresupuestoService:IPresupuestoService
         }*/
         // Carga los datos de la carga en EstimateV2.miCarga
         await _estService.loadContenedor(myEstV2);
+        // Traduzco el id del pais / region en un string de 3 caracteres normalizado.
+        // Sera clave para bifurcar la logica del calculo segun los diferentes paises
+         myEstV2=await getCountry(myEstV2);
 
         myEstV2=myCalc.calcReclaim(myEstV2);
         
