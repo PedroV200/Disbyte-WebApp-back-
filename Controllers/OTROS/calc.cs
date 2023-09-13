@@ -284,13 +284,13 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
     {
 
         myEstV2=_estService.CalcPesoTotal(myEstV2);
-
         if(myEstV2==null)
         {
             haltError=_estService.getLastError();
             return null;
         }
-        
+        //myEstV2.estHeader.gw_grand_total=_estService.sumPesoTotal(myEstV2);
+
         // COL K
         myEstV2=_estService.CalcCbmTotal(myEstV2);
         if(myEstV2==null)
@@ -298,18 +298,69 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
             haltError=_estService.getLastError();
             return null;
         }
+        // CELDA K43
+        //myEstV2=_estService.CalcCbmGrandTotal(myEstV2);
 
         // PRECONDICIONES PARA EL LLAMADO: CBMTOTAL Y PESOTOTAL ya calculados.
         // CELDA C10
-        myEstV2=_estService.CalcularCantContenedores(myEstV2);
+        /*myEstV2=_estService.CalcularCantContenedores(myEstV2);
+        if(myEstV2==null)
+        {
+            haltError="La tabla de contenedores no es accesible,el volumen del contenedor es 0, o el peso del contenedor es cero";
+            return null;
+        }*/
         // COL L. Calculo el fob total por articulo
-        myEstV2=_estService.CalcFobTotal(myEstV2);
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2=_estService.CalcFobTotal(myEstV2);
+        }
+        else if(myEstV2.pais=="MEX")
+        {
+            myEstV2=_estService.CalcFobTotalMEX(myEstV2);
+        }
+        else
+        {
+            ;
+        }
+        // CELDA L43. Sumo todos los fob totales. Sumatoria de L15-L41 que se copia en celda C3
+        //myEstV2.estHeader.fob_grand_total=_estService.sumFobTotal(myEstV2);
+
+        // AH - FACTOR DE PRODUCTO
+        myEstV2=_estService.CalcFactorProdTotal(myEstV2);
+        if(myEstV2==null)
+        {
+            haltError=_estService.getLastError();
+            return null;
+        }
         // CELDA C5 que es funcion del valor FOB
-        //myEstV2=_estService.CalcSeguroTotal(myEstV2);
-
-        //myEstV2=_estService.CalcFleteTotal(myEstV2);
-
-
+       /* if((myEstV2.estHeader.tarifupdate&(1<<(int)tarifaControl.freight_insurance_cost))>0)
+        {
+            myEstV2=_estService.CalcSeguroTotal(myEstV2);
+        }*/
+        // CELDA C4. Traigo la tarifa del flete desde BASE_TARIFAS por fowarder y tipo cont
+        //TarifasFwdCont myTar=await _unitOfWork.TarifasFwdContenedores.GetByFwdContTypeAsync(myEstV2.FreightFwd,myEstV2.FreightType);
+        // De la consulta me quedo con el valor del flete (se usa 60%)
+        //myEstV2.FleteTotal=await _estService.lookUpTarifaFleteCont(myEstV2);
+        /*if((myEstV2.estHeader.tarifupdate&(1<<(int)tarifaControl.freight_insurance_cost))>0)
+        {
+            if(myEstV2.pais=="ARG")
+            {
+                myEstV2=_estService.CalcFleteTotal(myEstV2);
+            }
+            else if(myEstV2.pais=="MEX")
+            {
+                myEstV2=_estService.CalcFleteTotalMEX(myEstV2);
+            }
+            else
+            {
+                ;
+            }
+            if(myEstV2==null)
+            {
+                haltError="Tarifas Flete Fowarder Inaccesible";
+                return null;
+            }
+        }*/
         // COL M. Calcula el flete ponderado a cada articulo del detalle.
         myEstV2=_estService.CalcFleteTotalByProd(myEstV2);
         if(myEstV2==null)
@@ -318,11 +369,13 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
             return null;
         }
         // COL N. Calcula el seguro ponderado a cada articulo del detalle 
+        
         myEstV2=_estService.CalcSeguro(myEstV2);
         if(myEstV2==null)
         {
             haltError="ATENCION: CalcSeguro. FOB GRAND TOTAL es 0. DOV 0 !";
         }
+        
         // COL O. Calcula el CIF que solo depende de los datos ya calculados previamente (COL L, N y M)
         myEstV2=_estService.CalcCif(myEstV2);
         // CELDA =43
@@ -332,14 +385,43 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
         // COL S, COL U, COLY, COL AA 
         // Evito consultar la base de NCM una vez por cada factor necesario. Se que son 4 los factores.
         // Los traigo en una sola consulta (una consulta x item)
-        // NCM data ya esta cargada.
+        /*if(myEstV2.pais=="ARG")
+        {
+            myEstV2=await _estService.search_NCM_DATA(myEstV2);
+        }
+        else if(myEstV2.pais=="MEX")
+        {
+            myEstV2=await _estService.search_NCM_MEX_DATA(myEstV2);
+        }
+        else
+        {
+            ;
+        }
+
+
+        if(myEstV2==null)
+        {   
+            haltError=_estService.getLastError();
+            return null;
+        }*/
         //myEstV2=await _estService.searchNcmDie(myEstV2);
         // COL T
         myEstV2=_estService.CalcDerechos(myEstV2);
         // COL U
         //myEstV2=await _estService.resolveNcmTe(myEstV2);
         // COL V
-        myEstV2=_estService.CalcTasaEstad061(myEstV2);
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2=_estService.CalcTasaEstad061(myEstV2);
+        }
+        else if(myEstV2.pais=="MEX")
+        {
+            myEstV2=_estService.CalcDTA(myEstV2);
+        }
+        else
+        {
+            ;
+        }
         // COL X
         myEstV2=_estService.CalcBaseGcias(myEstV2); 
         // COL Y
@@ -349,11 +431,16 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
         // COL AA
         //myEstV2= await _estService.searchIvaAdic(myEstV2);
         // COL AB
-        myEstV2=_estService.CalcIVA_ad_Gcias(myEstV2);
-        // COL AC
-        myEstV2=_estService.CalcImpGcias424(myEstV2);
-        // COL AD
-        myEstV2=_estService.CalcIIBB900(myEstV2); 
+
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2=_estService.CalcIVA_ad_Gcias(myEstV2);
+            // COL AC
+            myEstV2=_estService.CalcImpGcias424(myEstV2);
+            // COL AD
+            myEstV2=_estService.CalcIIBB900(myEstV2); 
+        }
+
         // COL AE
         myEstV2=_estService.CalcPrecioUnitUSS(myEstV2);
         if(myEstV2==null)
@@ -365,14 +452,19 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
         myEstV2=_estService.CalcPagado(myEstV2);
         // CELDA AF43
         myEstV2=_estService.CalcPagadoTot(myEstV2);
-        // AH
-        myEstV2=_estService.CalcFactorProdTotal(myEstV2);
-        if(myEstV2==null)
-        {
-            haltError=_estService.getLastError();
-            return null;
-        }
 
+        /*if(myEstV2.pais=="ARG")
+        {
+            myEstV2=_estService.CalcularGastosLocales(myEstV2);
+        }
+        else if(myEstV2.pais=="MEX")
+        {
+            myEstV2=_estService.CalcularGastosLocalesMEX(myEstV2);
+        }
+        else
+        {
+            ;
+        }*/
 
         // Pondera los gastos locales del header en los diferentes productos. 
         // Los gastos locales fueron extraidos de las tarifas o ya se hayaban guardados en el header
@@ -381,7 +473,7 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
 
         // SUMA todo los gastos locales y extra que ya se encuentran ponderados por articulo
         myEstV2=_estService.CalcGastos_LOC_Y_EXTRA(myEstV2);
-        // Divide el gasto calculado anterior por la cantidad de articulos de esa fila.
+        // Pondera el gasto calculado anterior x el FP y luego lo divide por la cantidad de articulos.
         myEstV2=_estService.CalcGastos_LOC_Y_EXTRA_BYPROD_UNIT(myEstV2);
         // Gastos_LOC_Y_EXTRA_U / Precio_U
         myEstV2=_estService.CalcOverhead(myEstV2);
@@ -390,6 +482,14 @@ public EstimateV2 calcReclaim(EstimateV2 myEstV2)
             haltError=_estService.getLastError();
             return null;
         }
+
+        myEstV2=_estService.CalcTotTradeFee(myEstV2);
+        if(myEstV2==null)
+        {
+            haltError=_estService.getLastError();
+            return null;
+        }
+        
         //Precio + Gastos_LOC_Y_EXTRA_U.
         myEstV2=_estService.CalcCostoUnitarioUSS(myEstV2);
         //AN
