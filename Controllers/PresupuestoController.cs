@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApiSample.Models;
 using WebApiSample.Infrastructure;
 using WebApiSample.Core;
+using Microsoft.AspNetCore.Authorization;
 namespace WebApiSample.Controllers;
 
 // LISTED 6/7/2023 11:16 AM
@@ -43,9 +44,22 @@ public class PresupuestoController : ControllerBase
 
 // Este endpoint es para un presupuesto nuevo. Notar que no se pasa el id
     [HttpPost("{id}")]
+    // Habilitar cuando este operativo el FRONT !!!!
+   /* [Authorize("update_presup:jefe_area_finanzas")]
+    [Authorize("update_presup:jefe_area_comex")]
+    [Authorize("update_presup:jefe_area_sourcing")]*/
     public async Task<ActionResult<EstimateV2>>PostUpdatedPresup(int id,EstimateDB entity)
     {
-        var result=await _presupService.submitPresupuestoUpdated(id, entity);
+
+        // HABILITAR cuando este operativo el front
+        /*Cliente miCliente=new Cliente();
+        string clientePermisos=miCliente.getClientPermisos(User.Claims.ToList());*/
+
+        // Simulo que desde el front me vinieron los sig permisos que me habiliten a operar 
+        // x todos los estados. Se testeo jefe.
+        string clientePermisos="COMFINSRCBSS";
+
+        var result=await _presupService.submitPresupuestoUpdated(id, entity,clientePermisos);
         if(result==null)
         {
             return BadRequest(_presupService.getLastErr());

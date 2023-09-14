@@ -88,9 +88,9 @@ builder.Services.AddAuthorization(options =>
 {
     //options.AddPolicy("read:sample-role-admin-messages", policy => policy.Requirements.Add(new HasScopeRequirement("read:sample-role-admin-messages", domain)));
     //options.AddPolicy("put:sample-role-admin-messages", policy => policy.Requirements.Add(new HasScopeRequirement("put:sample-role-admin-messages", domain)));
-    options.AddPolicy("tarifas:read", policy => policy.Requirements.Add(new HasScopeRequirement("tarifas:read", domain)));
-    options.AddPolicy("tarifas:update", policy => policy.Requirements.Add(new HasScopeRequirement("tarifas:update", domain)));
-    options.AddPolicy("tarifas:create", policy => policy.Requirements.Add(new HasScopeRequirement("tarifas:create", domain)));
+    options.AddPolicy("update_presup:jefe_area_comex", policy => policy.Requirements.Add(new HasScopeRequirement("update_presup:jefe_area_comex", domain)));
+    options.AddPolicy("update_presup:jefe_area_sourcing", policy => policy.Requirements.Add(new HasScopeRequirement("update_presup:jefe_area_sourcing", domain)));
+    options.AddPolicy("update_presup:jefe_area_finanzas", policy => policy.Requirements.Add(new HasScopeRequirement("update_presup:jefe_area_finanzas", domain)));
     options.AddPolicy("tarifas:delete", policy => policy.Requirements.Add(new HasScopeRequirement("tarifas:delete", domain)));
 });
 
