@@ -14,6 +14,12 @@ using System.Globalization;
 // su valor fue calculado durante el POST y guardado en flete_cost flete_cost_insurance.
 // LISTED 13_09_2023 10:36 Repara bug pais en calculo fob reclaim. Se reordena el codigo para evitar
 // repeticion. Se habilita el modo simulacion.  
+// Listed 14_09_2023 15:57. SE agregan los roles a la logica de estados. Los roles llegan en un string concatenado
+// desde el controller mismo que saca los claims. Un metodo permite saber si un permiso dado esta o no en el string
+// Se reordena create / update y sim. Se concatena en el owner los permisos usados.
+// ADVERTENCIA:
+// Cuidado con miEstV2 y miEst cuando se copian los headers de modo directo, parece mas bien la misma instancia
+// del objeto en memoria, ya que alterar el own en uno, se altera en el otro.
 
 public class PresupuestoService:IPresupuestoService
 {
@@ -59,8 +65,7 @@ public class PresupuestoService:IPresupuestoService
         EstimateDB resultEDB=new EstimateDB();
         EstimateHeaderDB readBackHeader=new EstimateHeaderDB();
 
-        // Es un presupuesto nuevo ... me aseguro que todo lo que es extragasto este en cero y los flags de update en false
-        resultEDB=myDBhelper.setDefaultEstimateDB(resultEDB);
+       
  
         miEst.estHeaderDB.estnumber=await _unitOfWork.EstimateHeadersDB.GetNextEstNumber();
         miEst.estHeaderDB.estvers=1;
@@ -68,7 +73,15 @@ public class PresupuestoService:IPresupuestoService
         // Grabo la estampa de tiempo en el header
         miEst.estHeaderDB.htimestamp=DateTime.Now;
 
-        myEstV2=await calcularPresupuestoNewOrUpdate(miEst);
+        // Expando
+        myEstV2=myDBhelper.transferDataFromDBType(miEst);
+
+        // Es un presupuesto nuevo ... me aseguro que todo lo que es extragasto este en cero y los flags de update en false
+        myEstV2=myDBhelper.setDefaultEstimateDB(myEstV2);
+
+        myEstV2=await calcularPresupuestoNewOrUpdate(myEstV2);
+
+
 
         // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
         // En la base no se guardan calculos,  por lo que debi convertir el estimate V2 a estimate DB y guardarlo.
@@ -96,17 +109,19 @@ public class PresupuestoService:IPresupuestoService
     // Una simulacion, es solo los calculos.
     public async Task<EstimateV2>simulaPresupuesto(EstimateDB miEst)
     {
-        return await calcularPresupuestoNewOrUpdate(miEst);
+        dbutils myDBhelper=new dbutils(_unitOfWork);
+        EstimateV2 miEstV2=new EstimateV2();
+        // Expando
+        miEstV2=myDBhelper.transferDataFromDBType(miEst);
+        return await calcularPresupuestoNewOrUpdate(miEstV2);
     }
 
     //  ########## CALCULOS ###########
-    // Toma un elemento estimateDB que es basicamente el json pasado como parametro
-    // los expande a un EstimaV2 y hace los calculos.
+    // Toma un EstimaV2 y hace los calculos.
     //  ###############################
-    public async Task<EstimateV2>calcularPresupuestoNewOrUpdate(EstimateDB miEst)
+    public async Task<EstimateV2>calcularPresupuestoNewOrUpdate(EstimateV2 myEstV2)
     {
         var result=0;
-        EstimateV2 myEstV2=new EstimateV2();
         dbutils myDBhelper=new dbutils(_unitOfWork);
         EstimateDB resultEDB=new EstimateDB();
         EstimateHeaderDB readBackHeader=new EstimateHeaderDB();
@@ -119,7 +134,7 @@ public class PresupuestoService:IPresupuestoService
 
         // Cuando me pasan el presupuesto con dolar billete "-1" es por que debo extraerlo
         // desde la base TC-CDA. 
-        if(miEst.estHeaderDB.dolar<0)
+        if(myEstV2.estHeader.dolar<0)
         {
             // Leo la fecha y la paso al formato que le gusta a postgre
             string hoy=DateTime.Now.ToString("yyyy-MM-dd");
@@ -127,7 +142,7 @@ public class PresupuestoService:IPresupuestoService
             double tipoDeCambio= await _unitOfWork.TiposDeCambio.GetByDateAsync(hoy); 
             if(tipoDeCambio>0)
             {   // La consulta tuvo exito ?
-                miEst.estHeaderDB.dolar=tipoDeCambio;
+                myEstV2.estHeader.dolar=tipoDeCambio;
             }
             else
             {   // FALLO, no existe el TC de la fecha mencionada*/ !!!!!!!
@@ -140,7 +155,7 @@ public class PresupuestoService:IPresupuestoService
         
         
         // Expando el EstimateDB a un EstimateV2
-        myEstV2=myDBhelper.transferDataFromDBType(miEst);
+        //myEstV2=myDBhelper.transferDataFromDBType(miEst);
         // Cargo las constnates de calculo.
         myEstV2.constantes=await _cnstService.getConstantesLastVers();
         if(myEstV2.constantes==null)
@@ -183,7 +198,7 @@ public class PresupuestoService:IPresupuestoService
     }
 
     // UPDATE PRESUPUESTO
-    public async Task<EstimateV2>submitPresupuestoUpdated(int estNumber,EstimateDB miEst)
+    public async Task<EstimateV2>submitPresupuestoUpdated(int estNumber,EstimateDB miEst,string permisos)
     {
         var result=0;
         dbutils dbhelper=new dbutils(_unitOfWork);
@@ -193,16 +208,42 @@ public class PresupuestoService:IPresupuestoService
         EstimateDB resultEDB=new EstimateDB();
         EstimateHeaderDB estHDBPrevia=new EstimateHeaderDB();
         EstimateHeaderDB readBackHeader=new EstimateHeaderDB();
+        Cliente cli=new Cliente();
         // No usar el estNumber del JSON. OJO. Puede ser cualquiera. En gral no se le da bola. Para traer el previo
         // consultar usando el estNumber pasado como parametro en el POST.
+        // Leo la ultima version del estimate. Se usara para comparar algunos cambios de valores o preservarlos ante
+        // cambios no deseados.
         estHDBPrevia=await _unitOfWork.EstimateHeadersDB.GetByEstNumberLastVers_1ROW_Async(estNumber);
 
-        // Controlo que no me retrocedan el estado.
-        if(miEst.estHeaderDB.status<estHDBPrevia.status)
+
+        // Controlo que no me retrocedan el estado, salvo el jefe.
+        if(miEst.estHeaderDB.status<estHDBPrevia.status && !cli.isGranted(permisos,cli.boss))
         {
              _estService.setLastError("No se puede retroceder el estado. Operacion Rechazada");
             return null;
         }
+
+        // ##############################################################################
+        // Control del estado VS los permisos del usuario que esta accediendo.
+        // Controlo que al estado 1 solo acceda sourcingo  jefe
+        if(miEst.estHeaderDB.status<2 && !(cli.isGranted(permisos,cli.sourcing)||cli.isGranted(permisos,cli.boss)))
+        {
+            _estService.setLastError("Usuario no habilitado para operar en el presente estado");
+            return null;
+        }
+        // Al estado 2 solo acceden comex o jefe
+        if(miEst.estHeaderDB.status==2 && !(cli.isGranted(permisos,cli.comex)||cli.isGranted(permisos,cli.boss)))
+        {
+            _estService.setLastError("Usuario no habilitado para operar en el presente estado");
+            return null;
+        }
+        // Al estado 3 solo acceden finanzas o jefe.
+        if(miEst.estHeaderDB.status==3 && !(cli.isGranted(permisos,cli.finanzas)||cli.isGranted(permisos,cli.boss)))
+        {
+            _estService.setLastError("Usuario no habilitado para operar en el presente estado");
+            return null;
+        }
+        // ##############################################################################
 
         // Nueva version usando el numero anterior.
         miEst.estHeaderDB.estnumber=estNumber;
@@ -216,68 +257,70 @@ public class PresupuestoService:IPresupuestoService
         // Grabo la estampa de tiempo en el header
         miEst.estHeaderDB.htimestamp=DateTime.Now;
 
+        // Expando
+        myEstV2=myDBhelper.transferDataFromDBType(miEst);
 
-        myEstV2=await calcularPresupuestoNewOrUpdate(miEst);
+
+        myEstV2=await calcularPresupuestoNewOrUpdate(myEstV2);
         // Le pongo la fecha / hora !!!!!!
         //ret.estHeader.hTimeStamp=DateTime.Now;
 
-        // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
-        // En la base no se guardan calculos,  por lo que debi convertir el estimate V2 a estimate DB y guardarlo.
 
-        resultEDB=myDBhelper.transferDataToDBType(myEstV2);
 
         // Atenti con la primera pregunta. Me fijo en como vino el estimate original
         // Sio su estatus era 0, pasa a 1 automaticamente por que este fue el primer upgrade
         // IGNORO el JSON.
         // Todas las demas preguntas seran en base al valor que venga del json.
-        if(miEst.estHeaderDB.status==0)
+        if(estHDBPrevia.status==0)
         {   
-            resultEDB.estHeaderDB.status=1;
+            myEstV2.estHeader.status=1;
         }
-        else if(resultEDB.estHeaderDB.status==1)
+        else if(myEstV2.estHeader.status==1)
         {   // Estado 0 y 1 perteneces a sourcing. No leo los extragastos del json
             // los piso con 0
-            resultEDB=myDBhelper.ClearExtraGastosComex(resultEDB);
-            resultEDB=myDBhelper.ClearExtraGastosFinanzas(resultEDB);
+            myEstV2=myDBhelper.ClearExtraGastosComex(myEstV2);
+            myEstV2=myDBhelper.ClearExtraGastosFinanzas(myEstV2);
         }
-        else if(resultEDB.estHeaderDB.status==2)
-        {   // Estado 2 pertenes a comex. Ellos solo pueden editar sus extragastos.
-            if(resultEDB.estHeaderDB.tarifupdate>estHDBPrevia.tarifupdate)
+        else if(myEstV2.estHeader.status==2)
+        {   // Estado 2, provisorio. Usado x Comex. Pueden congelar las tarfias pero no descongelarlas.
+            // salvo que sea jefe.
+            if(myEstV2.estHeader.tarifupdate>estHDBPrevia.tarifupdate && !cli.isGranted(permisos,cli.boss))
             {
                  _estService.setLastError("No se pueden actualizar tarifas de gloc previamente congelados. Accion Rechazada");
                 return null;
             }
-            // Los extragastos finanzas (numericos y formulas los piso con 0)
-            resultEDB=myDBhelper.ClearExtraGastosFinanzas(resultEDB);
+            // En el estado 2, Los extragastos finanzas (numericos y formulas .. NO SE PUEDEN TOCAR. Los piso con 0)
+            myEstV2=myDBhelper.ClearExtraGastosFinanzas(myEstV2);
         }
-        else if(resultEDB.estHeaderDB.status==3)
-        {   // Estdo 3 pertenece a Finanzas. Ellos solo pueden tocar sus extragastos numericos y formulas.
-            // Protejo los extragastos de COMEX. miEst es el estimate que levante de la base antes de comenzar con
+        else if(myEstV2.estHeader.status==3)
+        {   // Estdo 3, definitivo,  pertenece a Finanzas. Ellos solo pueden tocar sus extragastos numericos y formulas.
+            // Protejo los extragastos de COMEX. estHDBPrevia es el hader de la version anterior que la tengo cargada para
+            // respaldar o enmascarar aquellos datos que no no corresponda editar.
             // el update.
             
             // Preservo la seleccion de las tarifas por ID. Finanzas no puede cambiar las tarifas, solo editart los gloc
-            resultEDB.estHeaderDB.tarifasbancos_id=estHDBPrevia.tarifasbancos_id;
-            resultEDB.estHeaderDB.tarifasdepositos_id=estHDBPrevia.tarifasdepositos_id;
-            resultEDB.estHeaderDB.tarifasdespachantes_id=estHDBPrevia.tarifasdespachantes_id;
-            resultEDB.estHeaderDB.tarifasflete_id=estHDBPrevia.tarifasflete_id;
-            resultEDB.estHeaderDB.tarifasfwd_id=estHDBPrevia.tarifasfwd_id;
-            resultEDB.estHeaderDB.tarifasgestdigdoc_id=estHDBPrevia.tarifasgestdigdoc_id;
-            resultEDB.estHeaderDB.tarifaspolizas_id=estHDBPrevia.tarifaspolizas_id;
-            resultEDB.estHeaderDB.tarifasterminales_id=estHDBPrevia.tarifasterminales_id;
+            myEstV2.estHeader.tarifasbancos_id=estHDBPrevia.tarifasbancos_id;
+            myEstV2.estHeader.tarifasdepositos_id=estHDBPrevia.tarifasdepositos_id;
+            myEstV2.estHeader.tarifasdespachantes_id=estHDBPrevia.tarifasdespachantes_id;
+            myEstV2.estHeader.tarifasflete_id=estHDBPrevia.tarifasflete_id;
+            myEstV2.estHeader.tarifasfwd_id=estHDBPrevia.tarifasfwd_id;
+            myEstV2.estHeader.tarifasgestdigdoc_id=estHDBPrevia.tarifasgestdigdoc_id;
+            myEstV2.estHeader.tarifaspolizas_id=estHDBPrevia.tarifaspolizas_id;
+            myEstV2.estHeader.tarifasterminales_id=estHDBPrevia.tarifasterminales_id;
         
             // Finanzas no puede ordenar una actualizacion de tarfias desde la DB.
             // Solo habilito los bits 8 y 9 para que puedan ajustar los costos de flete y seguro.
             // El resto de los flags de update, se los anulo. Aqui no tengo en cuenta el JSON.
-            resultEDB.estHeaderDB.tarifupdate=(1<<(int)tarifaControl.freight_cost)+(1<<(int)tarifaControl.freight_insurance_cost);
-            resultEDB.estHeaderDB.tarifrecent=0;
+            myEstV2.estHeader.tarifupdate=(1<<(int)tarifaControl.freight_cost)+(1<<(int)tarifaControl.freight_insurance_cost);
+            myEstV2.estHeader.tarifrecent=0;
 
             // Preservo los gastos de comex. Ignoro los que vienen del JSON.
-            resultEDB.estHeaderDB.extrag_comex1=estHDBPrevia.extrag_comex1;
-            resultEDB.estHeaderDB.extrag_comex2=estHDBPrevia.extrag_comex2;
-            resultEDB.estHeaderDB.extrag_comex3=estHDBPrevia.extrag_comex3;
-            resultEDB.estHeaderDB.extrag_comex4=estHDBPrevia.extrag_comex4;
-            resultEDB.estHeaderDB.extrag_comex5=estHDBPrevia.extrag_comex5;
-            resultEDB.estHeaderDB.extrag_comex_notas=estHDBPrevia.extrag_comex_notas;
+            myEstV2.estHeader.extrag_comex1=estHDBPrevia.extrag_comex1;
+            myEstV2.estHeader.extrag_comex2=estHDBPrevia.extrag_comex2;
+            myEstV2.estHeader.extrag_comex3=estHDBPrevia.extrag_comex3;
+            myEstV2.estHeader.extrag_comex4=estHDBPrevia.extrag_comex4;
+            myEstV2.estHeader.extrag_comex5=estHDBPrevia.extrag_comex5;
+            myEstV2.estHeader.extrag_comex_notas=estHDBPrevia.extrag_comex_notas;
         }
         else
         {
@@ -285,6 +328,12 @@ public class PresupuestoService:IPresupuestoService
             return null;
         }
 
+        myEstV2.estHeader.own=myEstV2.estHeader.own + $" - [PERMISOS:{permisos}]";
+
+        
+        // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
+        // En la base no se guardan calculos,  por lo que debi convertir el estimate V2 a estimate DB y guardarlo.
+        resultEDB=myDBhelper.transferDataToDBType(myEstV2);
         // Guardo el header.
         result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
         // Veo que ID le asigno la base:
@@ -292,6 +341,21 @@ public class PresupuestoService:IPresupuestoService
         // Ahora si, inserto los detail uno a uno ne la base
         foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
         {
+            if(miEst.estHeaderDB.status<2)
+            {
+                ed.extrag_comex1=0;
+                ed.extrag_comex2=0;
+                ed.extrag_comex3=0;
+                ed.extrag_comex_notas="";
+            }
+            if(miEst.estHeaderDB.status<3)
+            {
+                ed.extrag_finan1=0;
+                ed.extrag_finan2=0;
+                ed.extrag_finan3=0;
+                ed.extrag_finan_notas="";
+            }
+
             ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
             ed.updated=false;                       // El calculo se hizo por completo. No hay actualizaciones epndientes. Borro el flag de cada producto.
             result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);

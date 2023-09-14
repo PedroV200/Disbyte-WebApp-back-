@@ -199,36 +199,36 @@ public class dbutils
         return estimateDB;       
     }
 
-    public EstimateDB ClearExtraGastosComex(EstimateDB miEst)
+    public EstimateV2 ClearExtraGastosComex(EstimateV2 miEst)
     {
-        miEst.estHeaderDB.extrag_comex1=0;
-        miEst.estHeaderDB.extrag_comex2=0;
-        miEst.estHeaderDB.extrag_comex3=0;
-        miEst.estHeaderDB.extrag_comex4=0;
-        miEst.estHeaderDB.extrag_comex5=0;
-        miEst.estHeaderDB.extrag_comex_notas="";
+        miEst.estHeader.extrag_comex1=0;
+        miEst.estHeader.extrag_comex2=0;
+        miEst.estHeader.extrag_comex3=0;
+        miEst.estHeader.extrag_comex4=0;
+        miEst.estHeader.extrag_comex5=0;
+        miEst.estHeader.extrag_comex_notas="";
 
         return miEst;
     }
 
-    public EstimateDB ClearExtraGastosFinanzas(EstimateDB miEst)
+    public EstimateV2 ClearExtraGastosFinanzas(EstimateV2 miEst)
     {
-        miEst.estHeaderDB.extrag_finan1=0;
-        miEst.estHeaderDB.extrag_finan2=0;
-        miEst.estHeaderDB.extrag_finan3=0;
-        miEst.estHeaderDB.extrag_finan4=0;
-        miEst.estHeaderDB.extrag_finan5=0;
-        miEst.estHeaderDB.extrag_finan_notas="";
-        miEst.estHeaderDB.extrag_finanformula1_id=0;
-        miEst.estHeaderDB.extrag_finanformula2_id=0;
-        miEst.estHeaderDB.extrag_finanformula3_id=0;
-        miEst.estHeaderDB.extrag_finanformula4_id=0;
-        miEst.estHeaderDB.extrag_finanformula5_id=0;
+        miEst.estHeader.extrag_finan1=0;
+        miEst.estHeader.extrag_finan2=0;
+        miEst.estHeader.extrag_finan3=0;
+        miEst.estHeader.extrag_finan4=0;
+        miEst.estHeader.extrag_finan5=0;
+        miEst.estHeader.extrag_finan_notas="";
+        miEst.estHeader.extrag_finanformula1_id=0;
+        miEst.estHeader.extrag_finanformula2_id=0;
+        miEst.estHeader.extrag_finanformula3_id=0;
+        miEst.estHeader.extrag_finanformula4_id=0;
+        miEst.estHeader.extrag_finanformula5_id=0;
 
         return miEst;
     }
 
-    public EstimateDB setDefaultEstimateDB(EstimateDB miEst)
+    public EstimateV2 setDefaultEstimateDB(EstimateV2 miEst)
     {
        
         miEst=ClearExtraGastosComex(miEst);
@@ -238,11 +238,11 @@ public class dbutils
         // Todos las tarifas son actualizables (bits 0 a 7)
         // fregith_cost y freight_insurance se calculan desde las tarfias (bits 8 y 9)
         // Las tarfias se actualizaran x fecha y no por ID.
-        miEst.estHeaderDB.status=0x00;
-        miEst.estHeaderDB.tarifrecent=1023;
-        miEst.estHeaderDB.tarifupdate=1023;
+        miEst.estHeader.status=0x00;
+        miEst.estHeader.tarifrecent=1023;
+        miEst.estHeader.tarifupdate=1023;
         // FIN IMPORTANTE
-        foreach(EstimateDetailDB edb in miEst.estDetailsDB)
+        foreach(EstimateDetail edb in miEst.estDetails)
         {
             edb.extrag_comex1=0;
             edb.extrag_comex2=0;

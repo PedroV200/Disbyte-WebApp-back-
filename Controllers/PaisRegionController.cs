@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using WebApiSample.Models;
 using WebApiSample.Infrastructure;
 using WebApiSample.Core;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 namespace WebApiSample.Controllers;
 
 [ApiController]
@@ -103,8 +105,15 @@ public class PaisRegionController : ControllerBase
     }
 
     [HttpGet(Name = "GetAll PaisRegion")]
+    //[Authorize("update_presup:jefe_area_finanzas")]
+    //[Authorize("update_presup:jefe_area_comex")]
+    //[Authorize("update_presup:jefe_area_sourcing")]
     public async Task<IEnumerable<PaisRegion>> GetAll()
     {
+        //Cliente miCliente=new Cliente();
+
+        //string clientePermisos=miCliente.getClientPermisos(User.Claims.ToList());
+
         try
         {
             return await _unitOfWork.PaisesRegiones.GetAllAsync();
