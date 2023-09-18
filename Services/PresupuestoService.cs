@@ -21,6 +21,7 @@ using System.Globalization;
 // Cuidado con miEstV2 y miEst cuando se copian los headers de modo directo, parece mas bien la misma instancia
 // del objeto en memoria, ya que alterar el own en uno, se altera en el otro.
 
+
 public class PresupuestoService:IPresupuestoService
 {
     
@@ -80,6 +81,11 @@ public class PresupuestoService:IPresupuestoService
         myEstV2=myDBhelper.setDefaultEstimateDB(myEstV2);
 
         myEstV2=await calcularPresupuestoNewOrUpdate(myEstV2);
+
+        if(myEstV2==null)
+        {
+            return null; 
+        }
 
 
 
@@ -179,6 +185,23 @@ public class PresupuestoService:IPresupuestoService
         // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
         // El FP solo estara disponible luego de calculado el FOB TOTAL.
          myEstV2=await _estService.loadTarifas(myEstV2);
+
+        // Si mando archivos con los IDs en 0 que otrohora tenian la opcion de recent activada, cuando los mandos
+        // sin la misma pueden ocasionar un 500. Voy a quedar bien detectando el error.
+        if(myEstV2.estHeader.tarifasbancos_id==0 ||
+           myEstV2.estHeader.tarifasdepositos_id==0 ||
+           myEstV2.estHeader.tarifasdespachantes_id==0 ||
+           myEstV2.estHeader.tarifasflete_id==0 ||
+           myEstV2.estHeader.tarifasfwd_id==0 ||
+           myEstV2.estHeader.tarifasgestdigdoc_id==0 ||
+           myEstV2.estHeader.tarifaspolizas_id==0 ||
+           myEstV2.estHeader.tarifasterminales_id==0)
+           {
+                _estService.setLastError("Uno o mas IDs (FKs) a las Tablas Tarfias es 0. Elija todas las tarfias antes de congelar !!!!");
+                return null;
+           }
+
+
          if(myEstV2==null)
          {
             presupError=_estService.getLastError();
@@ -262,6 +285,10 @@ public class PresupuestoService:IPresupuestoService
 
 
         myEstV2=await calcularPresupuestoNewOrUpdate(myEstV2);
+        if(myEstV2==null)
+        {
+            return null;
+        }
         // Le pongo la fecha / hora !!!!!!
         //ret.estHeader.hTimeStamp=DateTime.Now;
 
@@ -411,6 +438,8 @@ public class PresupuestoService:IPresupuestoService
          myEstV2=await getCountry(myEstV2);
 
         myEstV2=myCalc.calcReclaim(myEstV2);
+
+
         
         return myEstV2;      
     }
