@@ -43,12 +43,12 @@ public class PresupuestoController : ControllerBase
     }
 
 // Este endpoint es para un presupuesto nuevo. Notar que no se pasa el id
-    [HttpPost("{id}")]
+    [HttpPost("{num}")]
     // Habilitar cuando este operativo el FRONT !!!!
    /* [Authorize("update_presup:jefe_area_finanzas")]
     [Authorize("update_presup:jefe_area_comex")]
     [Authorize("update_presup:jefe_area_sourcing")]*/
-    public async Task<ActionResult<EstimateV2>>PostUpdatedPresup(int id,EstimateDB entity)
+    public async Task<ActionResult<EstimateV2>>PostUpdatedPresup(int num,EstimateDB entity)
     {
 
         // HABILITAR cuando este operativo el front
@@ -59,7 +59,7 @@ public class PresupuestoController : ControllerBase
         // x todos los estados. Se testeo jefe.
         string clientePermisos="COMFINSRCBSS";
 
-        var result=await _presupService.submitPresupuestoUpdated(id, entity,clientePermisos);
+        var result=await _presupService.submitPresupuestoUpdated(num, entity,clientePermisos);
         if(result==null)
         {
             return BadRequest(_presupService.getLastErr());
@@ -100,17 +100,17 @@ public class PresupuestoController : ControllerBase
     }
 
     
-   [HttpGet("{id}/{vers}")]
-    public async Task<ActionResult<EstimateV2>>Get(int id, int vers) 
+   [HttpGet("{num}/{vers}")]
+    public async Task<ActionResult<EstimateV2>>Get(int num, int vers) 
     {
        
         EstimateV2 myEst=new EstimateV2();
 
-        myEst= await _presupService.reclaimPresupuesto(id,vers);
+        myEst= await _presupService.reclaimPresupuesto(num,vers);
 
         if(myEst==null)
         {
-            return NotFound();
+            return BadRequest(_presupService.getLastErr());
         }
         else
         {
@@ -127,10 +127,10 @@ public class PresupuestoController : ControllerBase
         
     }
     // 6/7/2023 Se agrega este endpoint para listar todas las versiones de un presupuesto.
-    [HttpGet("{id}")]
-    public async Task<ActionResult<List<EstimateHeaderDB>>>GetVersionesFromEstimate(int id) 
+    [HttpGet("{num}")]
+    public async Task<ActionResult<List<EstimateHeaderDB>>>GetVersionesFromEstimate(int num) 
     {
-        var result=await _unitOfWork.EstimateHeadersDB.GetAllVersionsFromEstimate(id);
+        var result=await _unitOfWork.EstimateHeadersDB.GetAllVersionsFromEstimate(num);
         return result.ToList();
         
     }
