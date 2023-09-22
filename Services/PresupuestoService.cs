@@ -5,7 +5,7 @@ using WebApiSample.Models;
 using Npgsql;
 using Dapper;
 using System.Data;
-using System.Globalization;
+using System.Globalization; 
 
 
 // LISTED 9_8_2023 11:36 AM   
@@ -20,6 +20,9 @@ using System.Globalization;
 // ADVERTENCIA:
 // Cuidado con miEstV2 y miEst cuando se copian los headers de modo directo, parece mas bien la misma instancia
 // del objeto en memoria, ya que alterar el own en uno, se altera en el otro.
+// LISTED 19_09_2023 Se acomodola la propagacion de errores. Se arregla bug de enmascaramiento de tarifas no usadas en MEX
+// y el valor de tarifupdate y recent se inicializa en 255 y no en 1023. De este modo se puede ingresar ya desde la creacion
+// valores manuales para flete y seguro. 
 
 
 public class PresupuestoService:IPresupuestoService
@@ -45,7 +48,7 @@ public class PresupuestoService:IPresupuestoService
 
     public string getLastErr()
     {
-        return myCalc.haltError+presupError+_estService.getLastError();
+        return myCalc.haltError+presupError;
     }
 
 
@@ -152,7 +155,7 @@ public class PresupuestoService:IPresupuestoService
             }
             else
             {   // FALLO, no existe el TC de la fecha mencionada*/ !!!!!!!
-                _estService.setLastError("Se solicito usar TC de la base TC_CDA, pero el dia de la fecha no tiene valor asignado");
+                presupError="Se solicito usar TC de la base TC_CDA, pero el dia de la fecha no tiene valor asignado";
                 return null;
             }
         }
@@ -166,7 +169,7 @@ public class PresupuestoService:IPresupuestoService
         myEstV2.constantes=await _cnstService.getConstantesLastVers();
         if(myEstV2.constantes==null)
         {
-            _estService.setLastError("No existe una instancia de constantes en tabla");
+            presupError="No existe una instancia de constantes en tabla";
             return null;
         }
 
@@ -178,6 +181,11 @@ public class PresupuestoService:IPresupuestoService
         // Traduzco el id del pais / region en un string de 3 caracteres normalizado.
         // Sera clave para bifurcar la logica del calculo segun los diferentes paises
          myEstV2=await getCountry(myEstV2);
+         if(myEstV2.pais=="")
+         {
+            presupError="Pais no identificado";
+            return null;
+         }
 
 
 
@@ -185,6 +193,11 @@ public class PresupuestoService:IPresupuestoService
         // necesario. Luego popula todas las columnas de gastos locales ponderando por el FP.
         // El FP solo estara disponible luego de calculado el FOB TOTAL.
          myEstV2=await _estService.loadTarifas(myEstV2);
+         if(myEstV2==null)
+         {
+            presupError=_estService.getLastError();
+            return null;
+         }
 
         // Si mando archivos con los IDs en 0 que otrohora tenian la opcion de recent activada, cuando los mandos
         // sin la misma pueden ocasionar un 500. Voy a quedar bien detectando el error.
@@ -197,7 +210,7 @@ public class PresupuestoService:IPresupuestoService
            myEstV2.estHeader.tarifaspolizas_id==0 ||
            myEstV2.estHeader.tarifasterminales_id==0)
            {
-                _estService.setLastError("Uno o mas IDs (FKs) a las Tablas Tarfias es 0. Elija todas las tarfias antes de congelar !!!!");
+                presupError="Uno o mas IDs (FKs) a las Tablas Tarfias es 0. Elija todas las tarfias antes de congelar !!!!";
                 return null;
            }
 
@@ -242,7 +255,7 @@ public class PresupuestoService:IPresupuestoService
         // Controlo que no me retrocedan el estado, salvo el jefe.
         if(miEst.estHeaderDB.status<estHDBPrevia.status && !cli.isGranted(permisos,cli.boss))
         {
-             _estService.setLastError("No se puede retroceder el estado. Operacion Rechazada");
+            presupError="No se puede retroceder el estado. Operacion Rechazada";
             return null;
         }
 
@@ -251,19 +264,19 @@ public class PresupuestoService:IPresupuestoService
         // Controlo que al estado 1 solo acceda sourcingo  jefe
         if(miEst.estHeaderDB.status<2 && !(cli.isGranted(permisos,cli.sourcing)||cli.isGranted(permisos,cli.boss)))
         {
-            _estService.setLastError("Usuario no habilitado para operar en el presente estado");
+            presupError="Usuario no habilitado para operar en el presente estado";
             return null;
         }
         // Al estado 2 solo acceden comex o jefe
         if(miEst.estHeaderDB.status==2 && !(cli.isGranted(permisos,cli.comex)||cli.isGranted(permisos,cli.boss)))
         {
-            _estService.setLastError("Usuario no habilitado para operar en el presente estado");
+            presupError="Usuario no habilitado para operar en el presente estado";
             return null;
         }
         // Al estado 3 solo acceden finanzas o jefe.
         if(miEst.estHeaderDB.status==3 && !(cli.isGranted(permisos,cli.finanzas)||cli.isGranted(permisos,cli.boss)))
         {
-            _estService.setLastError("Usuario no habilitado para operar en el presente estado");
+            presupError="Usuario no habilitado para operar en el presente estado";
             return null;
         }
         // ##############################################################################
@@ -313,7 +326,7 @@ public class PresupuestoService:IPresupuestoService
             // salvo que sea jefe.
             if(myEstV2.estHeader.tarifupdate>estHDBPrevia.tarifupdate && !cli.isGranted(permisos,cli.boss))
             {
-                 _estService.setLastError("No se pueden actualizar tarifas de gloc previamente congelados. Accion Rechazada");
+                presupError="No se pueden actualizar tarifas de gloc previamente congelados. Accion Rechazada";
                 return null;
             }
             // En el estado 2, Los extragastos finanzas (numericos y formulas .. NO SE PUEDEN TOCAR. Los piso con 0)
@@ -351,7 +364,7 @@ public class PresupuestoService:IPresupuestoService
         }
         else
         {
-            _estService.setLastError("ESTADO INVALIDO !!!. Proceso DETENIDO");
+            presupError="ESTADO INVALIDO !!!. Proceso DETENIDO";
             return null;
         }
 
@@ -397,28 +410,31 @@ public class PresupuestoService:IPresupuestoService
         dbutils dbhelper=new dbutils(_unitOfWork);
         EstimateV2 myEstV2=new EstimateV2();
         EstimateDB miEst=new EstimateDB();
+        EstimateHeaderDBVista miEstHeaderV=new EstimateHeaderDBVista();
+        List<EstimateDetailDBVista> miEstDetV=new List<EstimateDetailDBVista>();
 
         // Levanto el header segun numero y version
-        miEst.estHeaderDB=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(estNumber,estVers);
+        miEstHeaderV=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersVistaAsync(estNumber,estVers);
         if(miEst.estHeaderDB ==null)
         {   // OJO
+            presupError=$"No de puede recuperar el estimate {estNumber}, vers {estVers}";
              return null;
         }
         // Con el ID del header levanto el estDetail.
-        var result=await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeadersync(miEst.estHeaderDB.id);
-        if(result==null)
+        miEstDetV=(await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeaderVistasync(miEstHeaderV.id)).ToList();
+        if(miEstDetV==null)
         {
+            presupError=$"No de puede recuperar la version {estVers} del estimate {estNumber}";
             return null;
         }
-        miEst.estDetailsDB=result.ToList();
 
         // Expando el EstimateDB a un EstimateV2
-        myEstV2=dbhelper.transferDataFromDBType(miEst);
+        myEstV2=dbhelper.transferDataFromDBTypeWithVista(miEstHeaderV,miEstDetV);
         // Cargo las constnates de calculo.
         myEstV2.constantes=await _cnstService.getConstantesLastVers();
         if(myEstV2.constantes==null)
         {
-            _estService.setLastError("No existe una instancia de constantes en tabla");
+            presupError="No existe una instancia de constantes en tabla";
             return null;
         }
         // Paso las costantes a estDetailServ via estimateService
@@ -436,6 +452,11 @@ public class PresupuestoService:IPresupuestoService
         // Traduzco el id del pais / region en un string de 3 caracteres normalizado.
         // Sera clave para bifurcar la logica del calculo segun los diferentes paises
          myEstV2=await getCountry(myEstV2);
+         if(myEstV2.pais=="")
+         {
+            presupError="Pais no identificado";
+            return null;
+         }
 
         myEstV2=myCalc.calcReclaim(myEstV2);
 

@@ -270,7 +270,21 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
         }
     }
 
-    public async Task<int> UpdateAsync(EstimateHeaderDB entity)
+    public async Task<EstimateHeaderDBVista> GetByEstNumberAnyVersVistaAsync(int estnumber, int estVers)
+    {
+        var sql = @$"select estimateheader.*, cargas.description as carga_str, po.description as paisorig, pd.description as paisdest
+                    from estimateheader
+                    inner join paisregion as po on po.id=estimateheader.fwdpaisregion_id 
+					inner join paisregion as pd on pd.id=estimateheader.paisregion_id 
+                    inner join cargas  on estimateheader.carga_id=cargas.id WHERE estnumber={estnumber} AND estVers={estVers}";
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+            return await connection.QuerySingleOrDefaultAsync<EstimateHeaderDBVista>(sql);
+        }
+    }
+
+    public async Task<int> UpdateAsync(EstimateHeaderDB entity) 
     {
         var sql = @"UPDATE estimateheader SET 
                    

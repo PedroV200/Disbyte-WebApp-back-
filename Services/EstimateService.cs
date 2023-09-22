@@ -25,6 +25,8 @@ using System.Globalization;
 // 8_9_2023 16:26 Se reparan mas bugs. Agrega bit de update para freight cost y freight insurance dado que en el sheet
 //                figuran como ajustables. Se agrega el calculo basado en exw para MEX y el total trade fee que no estaba en ARG
 //                Se repara bug en calc reclaim (await faltante en _estService_loadContenedor
+// 19_9_2023      Solo para MEX, se enmascaran los bits en tarfiaupdate que no se usan, para evitar que se busquen tarifas que 
+//                no aplican.
  
 
 
@@ -776,10 +778,21 @@ public double calcularGastosFwd(EstimateV2 miEst)
         // son FKs.
         if(miEst.pais=="MEX")
         {
+            // Para poner contentas a las FKs
             miEst.estHeader.tarifasbancos_id=1;
             miEst.estHeader.tarifasdepositos_id=1;
             miEst.estHeader.tarifasgestdigdoc_id=1;
             miEst.estHeader.tarifaspolizas_id=10;
+            // En mexico por el momento no se usan las tarfias antes enunciadas. Enmascaro los bits que comandan la busqueda de tarfia
+            // para evitar que un valor incorrecto en el jason me fuerce a buscar tarfias que no existen.
+            // Lo copio a una temporal y trabajo sobre la misma
+            int tmp=miEst.estHeader.tarifupdate;
+            tmp&=~(1<<(int)tarifaControl.tarifBanco);
+            tmp&=~(1<<(int)tarifaControl.tarifDepo);
+            tmp&=~(1<<(int)tarifaControl.tarifGestDigDoc);
+            tmp&=~(1<<(int)tarifaControl.tarifPoliza);
+            // Lo grabo de nuevo
+            miEst.estHeader.tarifupdate=tmp;
         }
 
         // Existen para las tarifas 2 campos de bit. Son 2 campos. El bit0 de los 2 campos comanda la actualizacion de tarifaBanco

@@ -49,7 +49,10 @@ public class calc
         }*/ 
 
         // Cargo la sumatoria de los factores de cada provincia segun lo requerido por los calculos 
-        myEstV2.estHeader.iibb_total=await _unitOfWork.IIBBs.GetSumFactores();
+        if(myEstV2.pais=="ARG")
+        {
+            myEstV2.estHeader.iibb_total=await _unitOfWork.IIBBs.GetSumFactores();
+        }
 
         // Hago algunas cuentas.
         // Calculo el peso total por articulo
@@ -75,11 +78,7 @@ public class calc
         // PRECONDICIONES PARA EL LLAMADO: CBMTOTAL Y PESOTOTAL ya calculados.
         // CELDA C10
         myEstV2=_estService.CalcularCantContenedores(myEstV2);
-        if(myEstV2==null)
-        {
-            haltError="La tabla de contenedores no es accesible,el volumen del contenedor es 0, o el peso del contenedor es cero";
-            return null;
-        }
+
         // COL L. Calculo el fob total por articulo
         if(myEstV2.pais=="ARG")
         {
@@ -91,7 +90,8 @@ public class calc
         }
         else
         {
-            ;
+            haltError="El pais no fue ingresado y/o detectado";
+            return null;
         }
         // CELDA L43. Sumo todos los fob totales. Sumatoria de L15-L41 que se copia en celda C3
         myEstV2.estHeader.fob_grand_total=_estService.sumFobTotal(myEstV2);
