@@ -112,3 +112,10 @@ public int id{get;set;}
     public double fobtocosto{get;set;}
     public DateTime htimestamp{get;set;}
 }
+
+
+public class EstimateDetailVistaAdditionalData
+{
+    public string ncm_str{get;set;}
+    public string proveedor{get;set;}
+}
