@@ -3,7 +3,7 @@ using WebApiSample.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 // LISTED 25_8_2023 17:39 - cambios para Version 3C
-
+// LISTED 27_09_2023 17:21
 public class dbutils
 {
     public IUnitOfWork _unitOfWork;
@@ -395,8 +395,8 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         // fregith_cost y freight_insurance se calculan desde las tarfias (bits 8 y 9)
         // Las tarfias se actualizaran x fecha y no por ID.
         miEst.estHeader.status=0x00;
-        miEst.estHeader.tarifrecent=255;
-        miEst.estHeader.tarifupdate=255;
+        //miEst.estHeader.tarifrecent=1023;
+        //miEst.estHeader.tarifupdate=1023;
         // FIN IMPORTANTE
         foreach(EstimateDetail edb in miEst.estDetails)
         {
