@@ -9,10 +9,11 @@ using System.Globalization;
 
 // LISTED 9_8_2023 15:22
 // LISTED 26_7_2023 17:03
-// LISTED 29_6_2023 17:56 
+// LISTED 29_6_2023 17:56  
 // REFACTOR agrega IDs (FKs a los maestros) para todos los proveedores (servicios u OEM) 
 // REFACTOR para tratar al proveedor de poliza igual que al resto de los proveedores (descrip / ID)
 // REFACTOR 3_8_2023 nueva version "Multiregion" basado en los sheets de Mexico y WIP Argentina
+// LIESTED 28_9_2023 Se agrega el entrypoint para consultar la historia de versiones y usuarios de un determinado estnumber
 
 
 public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
@@ -353,6 +354,27 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
             connection.Open();
             var result = await connection.ExecuteAsync(sql, entity);
             return result;
+        }
+    }
+
+    public async Task<IEnumerable<TraceUser>> GetUserTraceByEstNumberUDAsync(int estnumber)
+    {
+        string sql="";
+       
+        sql = @$"select own,
+                        estvers,
+                        estnumber,
+                        status,
+                        fob_grand_total,
+                        cif_grand_total,
+                        tarifupdate,
+                        htimestamp 
+                                from estimateHeader WHERE estnumber={estnumber} ORDER BY id DESC";
+       
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+            return await connection.QueryAsync<TraceUser>(sql);
         }
     }
 }

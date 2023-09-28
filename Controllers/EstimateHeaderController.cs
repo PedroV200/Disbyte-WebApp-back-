@@ -116,4 +116,11 @@ public class EstimateHeaderController : ControllerBase
     {
         return await _unitOfWork.EstimateHeadersDB.GetByDescripAsync(strsrch);
     }
+
+
+     [HttpGet("Trace/{estnumber}")]
+     public async Task<IEnumerable<TraceUser>> GetTraceUser(int estnumber) 
+     {
+        return await _unitOfWork.EstimateHeadersDB.GetUserTraceByEstNumberUDAsync(estnumber);
+     }
 }
