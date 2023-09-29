@@ -168,6 +168,19 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
             return await connection.QueryAsync<EstimateDetailDBVista>(sql);
         }
     }
+    public async Task<IEnumerable<EstimateDetailDBVista>>GetAllByIdEstHeaderVistaMexsync(int Id)
+    {
+        var sql = @$"select estimatedetails.*, ncm_mex.code as ncm_str, proveedores.description as proveedor
+                    from estimatedetails
+                    inner join ncm_mex on estimatedetails.ncm_id=ncm_mex.id 
+                    inner join proveedores  on estimatedetails.proveedores_id=proveedores.id WHERE estimateheader_id={Id}";
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+
+            return await connection.QueryAsync<EstimateDetailDBVista>(sql);
+        }
+    }
 
 
     public async Task<EstimateDetailDB> GetByIdAsync(int Id)
