@@ -18,6 +18,7 @@ public class TarifasFleteRepository : ITarifasFleteRepository
     }
     public async Task<int> AddAsync(TarifasFlete entity)
     {
+        entity.htimestamp=DateTime.Now;
         string tmpString=entity.htimestamp.ToString("yyyy-MM-dd hh:mm:ss");
         //var sql = $"INSERT INTO tarifasdepositos (depo, contype, descarga, ingreso, totingreso, carga, armado, egreso, totegreso) VALUES ('{entity.depo}','{entity.contype}','{entity.descarga.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.ingreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.totingreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.carga.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.armado.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.egreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}','{entity.totegreso.ToString(CultureInfo.CreateSpecificCulture("en-US"))}')";
         var sql = $@"INSERT INTO tarifasflete 
