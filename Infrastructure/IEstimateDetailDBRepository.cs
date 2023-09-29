@@ -6,6 +6,7 @@ public interface IEstimateDetailDBRepository : IGenericRepository<EstimateDetail
 {
      Task<IEnumerable<EstimateDetailDB>>GetAllByIdEstHeadersync(int code);
      public Task<IEnumerable<EstimateDetailDBVista>>GetAllByIdEstHeaderVistasync(int Id);
+     public Task<IEnumerable<EstimateDetailDBVista>>GetAllByIdEstHeaderVistaMexsync(int Id);
       public Task<int> DeleteByIdEstHeaderAsync(int IdEstHeader);
       public Task<int> ClearFlagsByEstimateHeaderIdAsync(int id);
      

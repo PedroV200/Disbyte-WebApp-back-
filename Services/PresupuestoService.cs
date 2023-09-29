@@ -1,6 +1,6 @@
 namespace WebApiSample.Core;
 
-using WebApiSample.Infrastructure;
+using WebApiSample.Infrastructure; 
 using WebApiSample.Models;
 using Npgsql;
 using Dapper;
@@ -420,8 +420,18 @@ public class PresupuestoService:IPresupuestoService
             presupError=$"No de puede recuperar el estimate {estNumber}, vers {estVers}";
              return null;
         }
+
+        string miPais=await getCountry(miEstHeaderV);
+
         // Con el ID del header levanto el estDetail.
-        miEstDetV=(await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeaderVistasync(miEstHeaderV.id)).ToList();
+        if(miPais=="MEX")
+        {
+            miEstDetV=(await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeaderVistaMexsync(miEstHeaderV.id)).ToList();
+        }
+        else
+        {
+            miEstDetV=(await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeaderVistasync(miEstHeaderV.id)).ToList();
+        }
         if(miEstDetV==null)
         {
             presupError=$"No de puede recuperar la version {estVers} del estimate {estNumber}";
@@ -494,6 +504,36 @@ public class PresupuestoService:IPresupuestoService
         miEst.pais="";
         }
         return miEst;
+    }
+
+    public async Task<string> getCountry(EstimateHeaderDBVista miEstHV)
+    {
+        PaisRegion pais=await _unitOfWork.PaisesRegiones.GetByIdAsync(miEstHV.paisregion_id);
+        string pais_str=pais.description;
+        if(pais_str.ToUpper().Contains("BRA"))
+        {
+            return "BRA";
+        }
+        else if(pais_str.ToUpper().Contains("MEX"))
+        {
+            return "MEX";       
+        }
+        else if(pais_str.ToUpper().Contains("ARG"))
+        {
+            return "ARG";
+        }
+        else if(pais_str.ToUpper().Contains("USA")||(pais_str.ToUpper().Contains("ESTADOS")))
+        {
+            return "USA";
+        }
+        else if(pais_str.ToUpper().Contains("COL"))
+        {
+            return "COL";
+        }
+        else
+        {
+        return "";
+        }
     }
 
 }
