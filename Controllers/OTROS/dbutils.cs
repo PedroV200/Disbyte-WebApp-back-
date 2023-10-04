@@ -133,6 +133,10 @@ public class dbutils
             tmp.costo_u_est = edb.costo_u_est;
             tmp.costo_u_prov = edb.costo_u_prov;
             tmp.costo_u = edb.costo_u;
+            tmp.updated = edb.updated;
+            tmp.purchaseorder = edb.purchaseorder;
+            tmp.productowner = edb.productowner;
+            tmp.detailorder = edb.detailorder;
             tmp.htimestamp = edb.htimestamp;
             if(edb.updated)
             {
@@ -222,6 +226,8 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         myEstV2.estHeader.freight_cost = miEstHeadV.freight_cost;
         myEstV2.estHeader.freight_insurance_cost = miEstHeadV.freight_insurance_cost;
         myEstV2.estHeader.iibb_total = miEstHeadV.iibb_total;
+        myEstV2.estHeader.project = miEstHeadV.project;
+        myEstV2.estHeader.tarifonmex_id = miEstHeadV.tarifonmex_id;
         myEstV2.estHeader.htimestamp = miEstHeadV.htimestamp;
         // Datos adicionales, que son propios del headerDBVista, pero incompatibles con headerDB. Se guardan en campos sueltos
         // en el EstimateV2, y que son public en el json.
@@ -276,6 +282,10 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.costo_u_est = edb.costo_u_est;
             tmp.costo_u_prov = edb.costo_u_prov;
             tmp.costo_u = edb.costo_u;
+            tmp.updated = edb.updated;
+            tmp.purchaseorder = edb.purchaseorder;
+            tmp.productowner = edb.productowner;
+            tmp.detailorder = edb.detailorder;
             tmp.htimestamp = edb.htimestamp;
 
             if(edb.updated)
@@ -347,6 +357,10 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.costo_u_est = ed.costo_u_est;
             tmp.costo_u_prov = ed.costo_u_prov;
             tmp.costo_u = ed.costo_u;
+            tmp.updated = ed.updated;
+            tmp.purchaseorder = ed.purchaseorder;
+            tmp.productowner = ed.productowner;
+            tmp.detailorder = ed.detailorder;
             tmp.htimestamp = ed.htimestamp;
             tmp.htimestamp=DateTime.Now;
             //tmp.htimestamp=ed.htimestamp;

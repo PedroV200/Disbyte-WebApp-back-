@@ -91,7 +91,9 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                     freight_cost,
                     freight_insurance_cost,
                     iibb_total,
-                htimestamp) 
+                    project,
+                    tarifonmex_id,
+                    htimestamp) 
                             VALUES 
                                     ('{entity.description}',
                                      {entity.estnumber},
@@ -151,6 +153,8 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                                     '{entity.freight_cost.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                     '{entity.freight_insurance_cost.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                     '{entity.iibb_total.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
+                                    '{entity.project}',
+                                     {entity.tarifonmex_id},
                                     '{tmpString}')";
 
  
@@ -346,7 +350,9 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                         cantidad_contenedores = @cantidad_contenedores,
                         freight_cost = @freight_cost,
                         freight_insurance_cost = @freight_insurance_cost,
-                        iibb_total = @iibb_total,          
+                        iibb_total = @iibb_total,
+                        project = @project,
+                        tarifonmex_id = @tarifonmex_id,
                         htimestamp = @htimestamp
                              WHERE Id = @Id"; 
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
