@@ -61,6 +61,9 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                 costo_u_prov,
                 costo_u,
                 updated,
+                purchaseorder,
+                productowner,
+                detailorder,
                 htimestamp
                         ) VALUES 
                 (
@@ -99,7 +102,10 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                 '{entity.costo_u_est.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                 '{entity.costo_u_prov.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                 '{entity.costo_u.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
-                '{entity.updated}',
+                '{entity.updated}',               
+                '{entity.purchaseorder}',
+                '{entity.productowner}',
+                 {entity.detailorder},                
                 '{tmpString}'
                 )";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
@@ -233,6 +239,12 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                     costo_u_est = @costo_u_est,
                     costo_u_prov = @costo_u_prov,
                     costo_u = @costo_u,
+                    updated = @updated,
+                    proyecto = @proyecto,
+                    purchaseorder = @purchaseorder,
+                    productowner = @productowner,
+                    detailorder = @ detailorder,
+                    tarifonmex_id = @tarifonmex_id,
                     htimestamp = @htimestamp
                              WHERE id = @id";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))

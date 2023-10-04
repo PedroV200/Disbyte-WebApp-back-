@@ -39,6 +39,9 @@ public class EstimateDetailDB
     public  double costo_u_prov{get;set;}
     public double costo_u{get;set;}
     public bool updated{get;set;}
+    public string purchaseorder{get;set;}
+    public string productowner{get;set;}
+    public int detailorder{get;set;}
     public DateTime htimestamp{get;set;}
 } 
 
@@ -82,6 +85,9 @@ public class EstimateDetailDBVista
     public  double costo_u_prov{get;set;}
     public double costo_u{get;set;}
     public bool updated{get;set;}
+    public string purchaseorder{get;set;}
+    public string productowner{get;set;}
+    public int detailorder{get;set;}
     public DateTime htimestamp{get;set;}
     public string ncm_str{get;set;}
     public string proveedor{get;set;}

@@ -62,6 +62,8 @@ public class EstimateHeaderDB
     public double freight_cost{get;set;}
     public double freight_insurance_cost{get;set;}
     public double iibb_total{get;set;}
+    public string project{get;set;}
+    public int tarifonmex_id{get;set;}
     public DateTime htimestamp{get;set;}
 }
 
@@ -127,6 +129,8 @@ public class EstimateHeaderDBVista
     public double freight_cost{get;set;}
     public double freight_insurance_cost{get;set;}
     public double iibb_total{get;set;}
+    public string project{get;set;}
+    public int tarifonmex_id{get;set;}
     public DateTime htimestamp{get;set;}
 
     public string carga_str{get;set;}

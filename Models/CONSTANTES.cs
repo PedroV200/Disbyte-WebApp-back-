@@ -19,17 +19,17 @@
     public double CNST_SEGURO_PORCT{get;set;}
     public double CNST_ARANCEL_SIM{get;set;}
     public double CNST_FREIGHT_PORCT_ARG{get;set;}
-    public double CNST_SP1{get;set;}
-    public double CNST_SP2{get;set;}
-    public double CNST_SP3{get;set;}
-    public double CNST_SP4{get;set;}
-    public double CNST_SP5{get;set;}
-    public double CNST_SP6{get;set;}
-    public double CNST_SP7{get;set;}
-    public double CNST_SP8{get;set;}
-    public double CNST_SP9{get;set;}
-    public double CNST_SP10{get;set;}
-    public double CNST_SP11{get;set;}
+    public int paisreg_china_shezhen{get;set;}
+    public int paisreg_mex_guad{get;set;}
+    public int carga20{get;set;}
+    public int carga220{get;set;}
+    public int carga40{get;set;}
+    public int carga240{get;set;}
+    public int fwdtte_id{get;set;}
+    public int flete_id{get;set;}
+    public int terminal_id{get;set;}
+    public int despachantes_id{get;set;}
+    public int trucksemi_id{get;set;}
     public double CNST_SP12{get;set;}
 
     public DateTime hTimeStamp {get; set;}
