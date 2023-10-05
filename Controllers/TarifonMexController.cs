@@ -37,6 +37,17 @@ public class TarifonMexController : ControllerBase
         return res;
      }
 
+     [HttpGet("{carga_id}")]
+     public async Task<ActionResult<GastosLocales>>tarifonGetByCarga(int carga_id)
+     {
+        var res=await _tarifonmexService.getGloc(carga_id);
+        if(res==null)
+        {
+             return BadRequest(_tarifonmexService.getLastErr()); 
+        }
+        return res;
+     }
+
     [HttpPost]
     public async Task<IActionResult>Post(TarifonMex entity)
     {

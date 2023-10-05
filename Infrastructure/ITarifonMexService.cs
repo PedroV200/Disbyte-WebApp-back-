@@ -7,4 +7,5 @@ public interface ITarifonMexService : IGenericService<TarifonMex>
     public Task<TarifonMex>getTarifon();
     public Task<bool>putTarifon(TarifonMex miTarifom);
     public string getLastErr();
+    public Task<GastosLocales>getGloc(int carga_id);
 }

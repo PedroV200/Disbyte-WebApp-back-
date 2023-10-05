@@ -40,7 +40,8 @@ public class UnitOfWork : IUnitOfWork
                       ITarifasBancoRepository MiTarifBancos,
                       ITarifasDespachanteRepository MiTarifDespa, 
                       ITarifasFleteRepository MiTarifFlete,
-                      ITarifasGestDigDocRepository MiTarifGestDigDoc                     
+                      ITarifasGestDigDocRepository MiTarifGestDigDoc  
+                      //ITarifonMexRepository MiTarifonMX                   
                       )
     {
         Products = productRepository;
@@ -81,6 +82,7 @@ public class UnitOfWork : IUnitOfWork
         TarifBancos = MiTarifBancos;
         TarifDespa = MiTarifDespa;
         TarifGestDigDoc = MiTarifGestDigDoc;
+        //TarifonMX = MiTarifonMX;
 
     }
 
@@ -118,6 +120,8 @@ public class UnitOfWork : IUnitOfWork
     public ITarifasBancoRepository TarifBancos {get;}
     public ITarifasDespachanteRepository TarifDespa {get;}
     public ITarifasGestDigDocRepository  TarifGestDigDoc {get;}
+
+    //public ITarifonMexRepository TarifonMX {get;}
     public ICnstRepository Constantes{get;}
     public IUsuarioRepository Usuarios { get; }
     public IDespachanteRepository Despachantes { get;}
