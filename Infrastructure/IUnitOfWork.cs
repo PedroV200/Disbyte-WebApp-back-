@@ -34,6 +34,8 @@ public interface IUnitOfWork
     ITarifasDespachanteRepository TarifDespa {get;}
     ITarifasGestDigDocRepository TarifGestDigDoc {get;}
 
+    //ITarifonMexRepository TarifonMX {get;}
+
     ICnstRepository Constantes {get;}
     //ITarifasSeguroRepository TarifasSeguros {get;}
     //ITarifasTerminalRepository TarifasTerminales {get;}

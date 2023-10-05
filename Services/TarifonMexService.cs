@@ -20,7 +20,9 @@ using System.Net.WebSockets;
 // Hay que entender que por contemaplar todas las cargas y las tablas catalogar x carga (ademas de pais region), una entrada del tarifon 
 // generar entre 2 o 4 ingresos consecutivos a una tabla, por ejemplo, el caso de flete, por que el tarifon muestra los costos para 4 tipos
 // de carga, mas el modelo de Tarifa de Flete, un registro solo puede tener un tipo de carga asociado.
-// Uso tercer riel, compremos con cateniaria.
+// Ten tercer riel, compre con pantografo.
+// LISTED 5_10_2023 Se agrega un endpoint que solo devuelve los gastos locales segun la carga acotando la cantidad de consultas.
+// Ese endpoint es para consumir durante una creacion o actualuzacion de presupuesto, una vez que se ha seleccionado la carga.
 
 public class TarifonMexService:ITarifonMexService
 {
@@ -38,6 +40,89 @@ public class TarifonMexService:ITarifonMexService
     {
         return haltError;
     }
+
+
+
+    public async Task<GastosLocales>getGloc(int carga_id)
+    {
+        Tarifas misTarifas=new Tarifas();
+        GastosLocales misGloc=new GastosLocales();
+        CONSTANTES misConst=new CONSTANTES();
+
+        string hoy=DateTime.Now.ToString("yyyy-MM-dd");
+
+        misConst=await _unitOfWork.Constantes.GetLastIdAsync();
+        if(misConst==null)
+        {
+            haltError="TarifonMEX: Entrada a la tabla de constantes no encontrada";
+            return null;
+        }
+
+        misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByNearestDateAsync(hoy,misConst.paisreg_mex_guad);
+        if(misTarifas.tDespa==null)         
+        { 
+            haltError=$"La tarifa Despa mas prox no encontrada"; 
+            return null;
+        }
+        //Despa
+        misGloc.gloc_despachante_fijo=misTarifas.tDespa.cargo_fijo;
+        misGloc.gloc_despachante_var=misTarifas.tDespa.cargo_variable;
+        misGloc.gloc_despachante_otro1=misTarifas.tDespa.clasificacion;
+        misGloc.gloc_despachante_otro2=misTarifas.tDespa.consultoria;
+
+
+        if((carga_id==misConst.carga20)||(carga_id==misConst.carga220)||(carga_id==misConst.carga40)||(carga_id==misConst.carga240))
+        {
+            //Flete y descarga 1*20FT
+            misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy, carga_id, misConst.paisreg_mex_guad);
+            if(misTarifas.tFlete==null)         
+            { 
+                haltError=$"La tarifa Flete para car ID: {carga_id} mas prox no encontrada"; 
+                return null;
+            }
+            misGloc.flete_interno=misTarifas.tFlete.flete_interno;
+            misGloc.gasto_descarga_depo=misTarifas.tFlete.descarga_depo;
+
+            // Las proximas tarfias no conocen los tipos dobles 2*20FT o 2*40HQ. Eso solo ocurre con el flete y en mexico
+            // Aca si la carga es un 2* lo paso al correspondiente tipo sencillo
+            if(carga_id==misConst.carga220)
+            {
+                carga_id=misConst.carga20;
+            }
+            if(carga_id==misConst.carga240)
+            {
+                carga_id=misConst.carga40;
+            }
+
+            misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,carga_id, misConst.paisreg_mex_guad, misConst.paisreg_china_shezhen);
+            if(misTarifas.tFwd==null)        
+            { 
+                haltError=$"Tartifon MEX: Tarifa Flete internacional mas reciente para carga ID:{carga_id} no encontrada)"; 
+                return null;
+            } 
+            misGloc.freight_charge=misTarifas.tFwd.costo;
+            misGloc.gloc_fwd=misTarifas.tFwd.costo_local;
+            misGloc.insurance_charge=misTarifas.tFwd.seguro_porct;
+
+            misTarifas.tTerminal=await _unitOfWork.TarifTerminal.GetByNearestDateAsync(hoy,carga_id, misConst.paisreg_mex_guad);
+            if(misTarifas.tTerminal==null)        
+            { 
+                haltError=$"La tarifa Terminal para carga con ID {carga_id} mas prox no encontrada"; 
+                return null;
+            } 
+            misGloc.gasto_terminal=misTarifas.tTerminal.gasto_fijo;
+
+            misGloc.htimestamp=misTarifas.tTerminal.htimestamp;
+
+            return misGloc;
+        }
+        else
+        {
+            haltError=$"Carga con ID: {carga_id} no soportada. Cargas soportadas: 20FT, 40HQ, 2*20FT, 2*40HQ";
+            return null;
+        }        
+    }
+
 
     // Consulta todas las tablas de tarifas y segun el caso en diferentes carga para generar un row del tarifario de MEX.
     // Esto acarrea una gran cantidad de consultas dado que las tablas se organizaron x carga y region pero mejorara la usabilida
