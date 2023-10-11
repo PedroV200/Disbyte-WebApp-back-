@@ -9,7 +9,7 @@ using System.Data;
 using System.Globalization;
 using System.Net.WebSockets;
 
-// LISTED 4_10_2023
+// LISTED 4_10_2023 
 // Tarifon entrega y salva un modelo de datos que es identico a un roq de la master tablrs de MEX
 // Al decidirse que el modelo actual de 8 tarifas debi mantenerse, se crea un servicio que recopila toda la info
 // de las diferentes tarifas consultadas (consultada por mas reciente), solo para MEX, GUADALAJARA y para todos los tipos de carga 
