@@ -21,6 +21,10 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
     } 
     public async Task<int> AddAsync(EstimateDetailDB entity)
     {
+
+        /*public string comercial_invoice{get;set;}
+    public string proforma_invoice{get;set;}
+    public int embarque{get;set;}*/
         string tmpString=entity.htimestamp.ToString("yyyy-MM-dd hh:mm:ss");
         var sql = $@"INSERT INTO estimatedetails 
         (
@@ -63,6 +67,9 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                 updated,
                 purchaseorder,
                 productowner,
+                comercial_invoice,
+                proforma_invoice,
+                embarque,
                 detailorder,
                 htimestamp
                         ) VALUES 
@@ -105,6 +112,9 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                 '{entity.updated}',               
                 '{entity.purchaseorder}',
                 '{entity.productowner}',
+                '{entity.comercial_invoice}',
+                '{entity.proforma_invoice}',
+                '{entity.embarque}',
                  {entity.detailorder},                
                 '{tmpString}'
                 )";
@@ -243,6 +253,9 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                     proyecto = @proyecto,
                     purchaseorder = @purchaseorder,
                     productowner = @productowner,
+                    comercial_invoice = @comercial_invoice,
+                    proforma_invoice = @proforma_invoice,
+                    embarque = @embarque,   
                     detailorder = @ detailorder,
                     tarifonmex_id = @tarifonmex_id,
                     htimestamp = @htimestamp

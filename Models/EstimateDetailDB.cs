@@ -1,5 +1,6 @@
 namespace WebApiSample.Models;
 
+// LISTED 11_10_2023 Se agregan camos embarque, CI y PI, conforme meeting 9_10_2023
 public class EstimateDetailDB
 {
     public int id{get;set;}
@@ -41,6 +42,9 @@ public class EstimateDetailDB
     public bool updated{get;set;}
     public string purchaseorder{get;set;}
     public string productowner{get;set;}
+    public string comercial_invoice{get;set;}
+    public string proforma_invoice{get;set;}
+    public string embarque{get;set;}
     public int detailorder{get;set;}
     public DateTime htimestamp{get;set;}
 } 
@@ -87,6 +91,9 @@ public class EstimateDetailDBVista
     public bool updated{get;set;}
     public string purchaseorder{get;set;}
     public string productowner{get;set;}
+    public string comercial_invoice{get;set;}
+    public string proforma_invoice{get;set;}
+    public string embarque{get;set;}
     public int detailorder{get;set;}
     public DateTime htimestamp{get;set;}
     public string ncm_str{get;set;}

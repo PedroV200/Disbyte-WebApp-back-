@@ -3,7 +3,7 @@ using WebApiSample.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 // LISTED 25_8_2023 17:39 - cambios para Version 3C
-// LISTED 27_09_2023 17:21
+// LISTED 27_09_2023 17:21 
 public class dbutils
 {
     public IUnitOfWork _unitOfWork;
@@ -136,6 +136,9 @@ public class dbutils
             tmp.updated = edb.updated;
             tmp.purchaseorder = edb.purchaseorder;
             tmp.productowner = edb.productowner;
+            tmp.comercial_invoice = edb.comercial_invoice;
+            tmp.proforma_invoice=edb.proforma_invoice;
+            tmp.embarque=edb.embarque;
             tmp.detailorder = edb.detailorder;
             tmp.htimestamp = edb.htimestamp;
             if(edb.updated)
@@ -285,6 +288,9 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.updated = edb.updated;
             tmp.purchaseorder = edb.purchaseorder;
             tmp.productowner = edb.productowner;
+            tmp.comercial_invoice = edb.comercial_invoice;
+            tmp.proforma_invoice = edb.proforma_invoice;
+            tmp.embarque = edb.embarque;
             tmp.detailorder = edb.detailorder;
             tmp.htimestamp = edb.htimestamp;
 
@@ -360,6 +366,9 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.updated = ed.updated;
             tmp.purchaseorder = ed.purchaseorder;
             tmp.productowner = ed.productowner;
+            tmp.comercial_invoice = ed.comercial_invoice;
+            tmp.proforma_invoice = ed.proforma_invoice;
+            tmp.embarque = ed.embarque;
             tmp.detailorder = ed.detailorder;
             tmp.htimestamp = ed.htimestamp;
             tmp.htimestamp=DateTime.Now;

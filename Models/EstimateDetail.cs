@@ -65,6 +65,10 @@ public int id{get;set;}
     public bool updated{get;set;} 
     public string purchaseorder{get;set;}
     public string productowner{get;set;}
+
+    public string comercial_invoice{get;set;}
+    public string proforma_invoice{get;set;}
+    public string embarque{get;set;}
     public int detailorder{get;set;}
     // VALORES CALCULADOS
     public int ctns{get;set;}

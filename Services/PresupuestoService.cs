@@ -5,7 +5,8 @@ using WebApiSample.Models;
 using Npgsql;
 using Dapper;
 using System.Data;
-using System.Globalization; 
+using System.Globalization;
+using System.Diagnostics.Metrics;
 
 
 // LISTED 9_8_2023 11:36 AM    
@@ -23,6 +24,7 @@ using System.Globalization;
 // LISTED 19_09_2023 Se acomodola la propagacion de errores. Se arregla bug de enmascaramiento de tarifas no usadas en MEX
 // y el valor de tarifupdate y recent se inicializa en 255 y no en 1023. De este modo se puede ingresar ya desde la creacion
 // valores manuales para flete y seguro. 
+// LISTED 11_10_2023 Se agrega Enumerador a los articulos, tanto en create como en update (solo los art nuevos)
 
 
 public class PresupuestoService:IPresupuestoService
@@ -104,9 +106,14 @@ public class PresupuestoService:IPresupuestoService
         result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
         // Veo que ID le asigno la base:
         readBackHeader=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(resultEDB.estHeaderDB.estnumber,miEst.estHeaderDB.estvers);
+        
+        // Cada articulo tiene x defecto un ID que lse sera unico a lo largo de todas las versiones. Se le agina ACA. Es automatico y transparente al usuario
+        int enumerador=1112;
         // Ahora si, inserto los detail uno a uno ne la base
         foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
         {
+            ed.detailorder=enumerador;
+            enumerador++;
             ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
             ed.updated=false;                       // El calculo se hizo por completo. No hay actualizaciones epndientes. Borro el flag de cada producto.
             result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
@@ -378,9 +385,22 @@ public class PresupuestoService:IPresupuestoService
         result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
         // Veo que ID le asigno la base:
         readBackHeader=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(resultEDB.estHeaderDB.estnumber,miEst.estHeaderDB.estvers);
+        // El enumerador, su valor base, es DIFERENTE en cada version. Con esto garantizo que si debo asignar un ID a un prod nuevo (agregado)
+        // jamas usare un ID que figure en versiones antriores, ya que seria el ID -  1000.
+        int enumerador=1112+(1000*resultEDB.estHeaderDB.estvers);
         // Ahora si, inserto los detail uno a uno ne la base
         foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
         {
+            // Durante un update, pueden haber AGREGADO UN PRODUCTO. Es IMPERATIVO que el front lo mande detail order en 0 para indicar 
+            // esto y poder darle un ID;
+            // Le asigno un numero. Enumerador es funcion de la version. Jamas concidira con codigos usados en versiones anteriores.
+            if(ed.detailorder<1112)    
+            {
+                ed.detailorder=enumerador;
+            }
+
+            enumerador++;
+
             if(miEst.estHeaderDB.status<2)
             {
                 ed.extrag_comex1=0;
