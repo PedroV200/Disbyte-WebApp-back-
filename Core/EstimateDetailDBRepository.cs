@@ -69,7 +69,7 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                 productowner,
                 comercial_invoice,
                 proforma_invoice,
-                embarque,
+                proveedor_prov,
                 detailorder,
                 htimestamp
                         ) VALUES 
@@ -100,8 +100,8 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                 '{entity.extrag_comex2.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                 '{entity.extrag_comex3.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                 '{entity.extrag_comex_notas}',
-                '{entity.extrag_local1.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
-                '{entity.extrag_local2.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
+                '{entity.extrag_src1.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
+                '{entity.extrag_src2.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                 '{entity.extrag_finan1.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                 '{entity.extrag_finan2.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                 '{entity.extrag_finan3.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
@@ -114,7 +114,7 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                 '{entity.productowner}',
                 '{entity.comercial_invoice}',
                 '{entity.proforma_invoice}',
-                '{entity.embarque}',
+                '{entity.proveedor_prov}',
                  {entity.detailorder},                
                 '{tmpString}'
                 )";
@@ -240,8 +240,8 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                     extrag_comex2 = @extrag_comex2,
                     extrag_comex3 = @extrag_comex3,
                     extrag_comex_notas = @extrag_comex_notas,
-                    extrag_local1 = @extrag_local1,
-                    extrag_local2 = @extrag_local2,
+                    extrag_src1 = @extrag_src1,
+                    extrag_src2 = @extrag_src2,
                     extrag_finan1 = @extrag_finan1,
                     extrag_finan2 = @extrag_finan2,
                     extrag_finan3 = @extrag_finan3,
@@ -250,14 +250,12 @@ public class EstimateDetailDBRepository : IEstimateDetailDBRepository
                     costo_u_prov = @costo_u_prov,
                     costo_u = @costo_u,
                     updated = @updated,
-                    proyecto = @proyecto,
                     purchaseorder = @purchaseorder,
                     productowner = @productowner,
                     comercial_invoice = @comercial_invoice,
-                    proforma_invoice = @proforma_invoice,
-                    embarque = @embarque,   
+                    proforma_invoice = @proforma_invoice,  
+                    proveedor_prov = @proveedor_prov,
                     detailorder = @ detailorder,
-                    tarifonmex_id = @tarifonmex_id,
                     htimestamp = @htimestamp
                              WHERE id = @id";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))

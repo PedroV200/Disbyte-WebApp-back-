@@ -3,6 +3,8 @@ namespace WebApiSample.Models;
 // VERSION II Ago 2023
 // MODELO DE DATOS QUE SE ENVIA AL FRONT.
 // Este modelo de datos representa la planilla de precosteo.
+// LISTED 12_10_2023 Los extrag globales comex (ponderados en este caso) pasan de 5 a 3, los 2 librerados se asignan a extrag_src
+//                   Se crea lugaer para el noveno gloc "descarga"
 public class EstimateDetail
 {
     // VALORES DADOS o ajustables
@@ -37,12 +39,12 @@ public int id{get;set;}
     public double gloc_despachantes{get;set;}
     public double gloc_bancos{get;set;}
     public double gloc_gestdigdoc{get;set;}
-
+    public double gloc_descarga{get;set;}
+    public double extrag_glob_src1{get;set;}
+    public double extrag_glob_src2{get;set;}
     public double extrag_glob_comex1{get;set;}
     public double extrag_glob_comex2{get;set;}
     public double extrag_glob_comex3{get;set;}
-    public double extrag_glob_comex4{get;set;}
-    public double extrag_glob_comex5{get;set;}
 
     public double extrag_glob_finan1{get;set;}
     public double extrag_glob_finan2{get;set;}
@@ -53,8 +55,8 @@ public int id{get;set;}
     public double extrag_comex2{get;set;}
     public double extrag_comex3{get;set;}
     public string extrag_comex_notas{get;set;}
-    public double extrag_local1{get;set;}
-    public double extrag_local2{get;set;}
+    public double extrag_src1{get;set;}
+    public double extrag_src2{get;set;}
     public double extrag_finan1{get;set;}
     public double extrag_finan2{get;set;}
     public double extrag_finan3{get;set;}
@@ -68,7 +70,7 @@ public int id{get;set;}
 
     public string comercial_invoice{get;set;}
     public string proforma_invoice{get;set;}
-    public string embarque{get;set;}
+    public string proveedor_prov{get;set;}
     public int detailorder{get;set;}
     // VALORES CALCULADOS
     public int ctns{get;set;}

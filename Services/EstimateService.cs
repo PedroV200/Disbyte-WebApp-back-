@@ -27,6 +27,7 @@ using System.Globalization;
 //                Se repara bug en calc reclaim (await faltante en _estService_loadContenedor
 // 19_9_2023      Solo para MEX, se enmascaran los bits en tarfiaupdate que no se usan, para evitar que se busquen tarifas que 
 //                no aplican.
+// 12_10_2023     Se agrega el noveno gloc, el de descarga, que antes se contabilizaba como parte del flete local.
  
 
 
@@ -436,6 +437,7 @@ public class EstimateService: IEstimateService
             ed.gloc_gestdigdoc=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_gestdigdoc);
             ed.gloc_polizas=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_polizas);
             ed.gloc_terminales=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_terminales);
+            ed.gloc_descarga=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.gloc_descarga);
         }
         return miEst;
     }
@@ -444,11 +446,11 @@ public class EstimateService: IEstimateService
     {
         foreach(EstimateDetail ed in miEst.estDetails)
         {
+            ed.extrag_glob_src1=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_src1);
+            ed.extrag_glob_src2=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_src2);
             ed.extrag_glob_comex1=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex1);
             ed.extrag_glob_comex2=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex2);
             ed.extrag_glob_comex3=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex3);
-            ed.extrag_glob_comex4=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex4);
-            ed.extrag_glob_comex5=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_comex5);
             ed.extrag_glob_finan1=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_finan1);
             ed.extrag_glob_finan2=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_finan2);
             ed.extrag_glob_finan3=_estDetServices.CalcGastosProyPond(ed,miEst.estHeader.extrag_finan3);
@@ -586,7 +588,12 @@ public double calcularGastosFwd(EstimateV2 miEst)
     // Yo aca lo sumo al flete interno, como ocurre en ARG.
     public double calcularGastosTteLocalMEX(EstimateV2 miEst)
     {
-        return miEst.misTarifas.tFlete.flete_interno + miEst.misTarifas.tFlete.descarga_depo;
+        return miEst.misTarifas.tFlete.flete_interno;
+    }
+
+    public double calcularGastosTteLocalDescargaMEX(EstimateV2 miEst)
+    {
+        return miEst.misTarifas.tFlete.descarga_depo;
     }
 
     public double calcularGastosCustodia(EstimateV2 miEst)
@@ -1058,6 +1065,8 @@ public double calcularGastosFwd(EstimateV2 miEst)
             }
             // Guardo el gasto en el header
             miEst.estHeader.gloc_flete=tmp;
+            tmp=calcularGastosTteLocalDescargaMEX(miEst);
+            miEst.estHeader.gloc_descarga=tmp;
         }
         if((miEst.estHeader.tarifupdate&(1<<(int)tarifaControl.tarifasFwd))>0)
         {
@@ -1086,7 +1095,8 @@ public double calcularGastosFwd(EstimateV2 miEst)
          miEst.estHeader.gastos_loc_total = miEst.estHeader.gloc_despachantes+
                                             miEst.estHeader.gloc_flete+
                                             miEst.estHeader.gloc_fwd+
-                                            miEst.estHeader.gloc_terminales;
+                                            miEst.estHeader.gloc_terminales+
+                                            miEst.estHeader.gloc_descarga;
 
         return miEst;
     }
