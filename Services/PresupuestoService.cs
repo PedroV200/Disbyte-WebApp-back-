@@ -108,7 +108,7 @@ public class PresupuestoService:IPresupuestoService
         readBackHeader=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(resultEDB.estHeaderDB.estnumber,miEst.estHeaderDB.estvers);
         
         // Cada articulo tiene x defecto un ID que lse sera unico a lo largo de todas las versiones. Se le agina ACA. Es automatico y transparente al usuario
-        int enumerador=1112;
+        int enumerador=111200000;
         // Ahora si, inserto los detail uno a uno ne la base
         foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
         {
@@ -338,6 +338,10 @@ public class PresupuestoService:IPresupuestoService
             }
             // En el estado 2, Los extragastos finanzas (numericos y formulas .. NO SE PUEDEN TOCAR. Los piso con 0)
             myEstV2=myDBhelper.ClearExtraGastosFinanzas(myEstV2);
+            // Preservo los extrag de sourcing:
+            myEstV2.estHeader.extrag_src1=estHDBPrevia.extrag_src1;
+            myEstV2.estHeader.extrag_src2=estHDBPrevia.extrag_src2;
+            myEstV2.estHeader.extrag_src_notas=estHDBPrevia.extrag_src_notas;
         }
         else if(myEstV2.estHeader.status==3)
         {   // Estdo 3, definitivo,  pertenece a Finanzas. Ellos solo pueden tocar sus extragastos numericos y formulas.
@@ -362,11 +366,12 @@ public class PresupuestoService:IPresupuestoService
             myEstV2.estHeader.tarifrecent=0;
 
             // Preservo los gastos de comex. Ignoro los que vienen del JSON.
+            myEstV2.estHeader.extrag_src1=estHDBPrevia.extrag_src1;
+            myEstV2.estHeader.extrag_src2=estHDBPrevia.extrag_src2;
+            myEstV2.estHeader.extrag_src_notas=estHDBPrevia.extrag_src_notas;
             myEstV2.estHeader.extrag_comex1=estHDBPrevia.extrag_comex1;
             myEstV2.estHeader.extrag_comex2=estHDBPrevia.extrag_comex2;
             myEstV2.estHeader.extrag_comex3=estHDBPrevia.extrag_comex3;
-            myEstV2.estHeader.extrag_comex4=estHDBPrevia.extrag_comex4;
-            myEstV2.estHeader.extrag_comex5=estHDBPrevia.extrag_comex5;
             myEstV2.estHeader.extrag_comex_notas=estHDBPrevia.extrag_comex_notas;
         }
         else
@@ -387,14 +392,14 @@ public class PresupuestoService:IPresupuestoService
         readBackHeader=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(resultEDB.estHeaderDB.estnumber,miEst.estHeaderDB.estvers);
         // El enumerador, su valor base, es DIFERENTE en cada version. Con esto garantizo que si debo asignar un ID a un prod nuevo (agregado)
         // jamas usare un ID que figure en versiones antriores, ya que seria el ID -  1000.
-        int enumerador=1112+(1000*resultEDB.estHeaderDB.estvers);
+        int enumerador=111200000+(1000*resultEDB.estHeaderDB.estvers);
         // Ahora si, inserto los detail uno a uno ne la base
         foreach(EstimateDetailDB ed in resultEDB.estDetailsDB)
         {
             // Durante un update, pueden haber AGREGADO UN PRODUCTO. Es IMPERATIVO que el front lo mande detail order en 0 para indicar 
             // esto y poder darle un ID;
             // Le asigno un numero. Enumerador es funcion de la version. Jamas concidira con codigos usados en versiones anteriores.
-            if(ed.detailorder<1112)    
+            if(ed.detailorder==0)    
             {
                 ed.detailorder=enumerador;
             }

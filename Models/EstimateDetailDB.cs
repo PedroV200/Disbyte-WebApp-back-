@@ -1,6 +1,8 @@
 namespace WebApiSample.Models;
 
 // LISTED 11_10_2023 Se agregan camos embarque, CI y PI, conforme meeting 9_10_2023
+// LISTED 12_10_2023 Se agrega campo provvedor_prov (provisorio) para aquellos prod que no tienen un proveedor ingresado en la nomina de proveddores.
+//                   Se los extrag por articulo, los llamados local1 y local2 se pasan a llamar src1 y src2 (son para sourcing)
 public class EstimateDetailDB
 {
     public int id{get;set;}
@@ -30,8 +32,8 @@ public class EstimateDetailDB
     public double extrag_comex2{get;set;}
     public double extrag_comex3{get;set;}
     public string extrag_comex_notas{get;set;}
-    public double extrag_local1{get;set;}
-    public double extrag_local2{get;set;}
+    public double extrag_src1{get;set;}
+    public double extrag_src2{get;set;}
     public double extrag_finan1{get;set;}
     public double extrag_finan2{get;set;}
     public double extrag_finan3{get;set;}
@@ -44,7 +46,7 @@ public class EstimateDetailDB
     public string productowner{get;set;}
     public string comercial_invoice{get;set;}
     public string proforma_invoice{get;set;}
-    public string embarque{get;set;}
+    public string proveedor_prov{get;set;}
     public int detailorder{get;set;}
     public DateTime htimestamp{get;set;}
 } 
@@ -79,8 +81,8 @@ public class EstimateDetailDBVista
     public double extrag_comex2{get;set;}
     public double extrag_comex3{get;set;}
     public string extrag_comex_notas{get;set;}
-    public double extrag_local1{get;set;}
-    public double extrag_local2{get;set;}
+    public double extrag_src1{get;set;}
+    public double extrag_src2{get;set;}
     public double extrag_finan1{get;set;}
     public double extrag_finan2{get;set;}
     public double extrag_finan3{get;set;}
@@ -93,7 +95,8 @@ public class EstimateDetailDBVista
     public string productowner{get;set;}
     public string comercial_invoice{get;set;}
     public string proforma_invoice{get;set;}
-    public string embarque{get;set;}
+    public string proveedor_prov{get;set;}
+    //public string embarque{get;set;}
     public int detailorder{get;set;}
     public DateTime htimestamp{get;set;}
     public string ncm_str{get;set;}

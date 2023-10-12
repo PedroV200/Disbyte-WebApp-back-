@@ -1,6 +1,8 @@
 namespace WebApiSample.Models;
 
 // CONFORME FINDINGS FROM MEET 29_8_2023
+// 12_10_2023 De los 5 extra gastos comex, 2 se pasan a sourcing. Se agrega campo de notas para los extrag sourcing
+// Se agrega campo embarque. Antes se agregan prj y un potencial puntero a entrada de tarifonmex (actualmente en desuso)
 
 public class EstimateHeaderDB
 { 
@@ -32,11 +34,13 @@ public class EstimateHeaderDB
     public double gloc_despachantes{get;set;}
     public double gloc_bancos{get;set;}
     public double gloc_gestdigdoc{get;set;}
+    public double gloc_descarga{get;set;}
+    public double extrag_src1{get;set;}
+    public double extrag_src2{get;set;}
+    public string extrag_src_notas{get;set;}
     public double extrag_comex1{get;set;}
     public double extrag_comex2{get;set;}
     public double extrag_comex3{get;set;}
-    public double extrag_comex4{get;set;}
-    public double extrag_comex5{get;set;}
     public string extrag_comex_notas{get;set;}
     public int extrag_finanformula1_id{get;set;}
     public int extrag_finanformula2_id{get;set;}
@@ -64,6 +68,7 @@ public class EstimateHeaderDB
     public double freight_insurance_cost{get;set;}
     public double iibb_total{get;set;}
     public string project{get;set;}
+    public string embarque{get;set;}
     public int tarifonmex_id{get;set;}
     public DateTime htimestamp{get;set;}
 }
@@ -99,11 +104,13 @@ public class EstimateHeaderDBVista
     public double gloc_despachantes{get;set;}
     public double gloc_bancos{get;set;}
     public double gloc_gestdigdoc{get;set;}
+    public double gloc_descarga{get;set;}
+    public double extrag_src1{get;set;}
+    public double extrag_src2{get;set;}
+    public string extrag_src_notas{get;set;}
     public double extrag_comex1{get;set;}
     public double extrag_comex2{get;set;}
     public double extrag_comex3{get;set;}
-    public double extrag_comex4{get;set;}
-    public double extrag_comex5{get;set;}
     public string extrag_comex_notas{get;set;}
     public int extrag_finanformula1_id{get;set;}
     public int extrag_finanformula2_id{get;set;}
@@ -131,6 +138,7 @@ public class EstimateHeaderDBVista
     public double freight_insurance_cost{get;set;}
     public double iibb_total{get;set;}
     public string project{get;set;}
+    public string embarque{get;set;}
     public int tarifonmex_id{get;set;}
     public DateTime htimestamp{get;set;}
 

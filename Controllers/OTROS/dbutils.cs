@@ -124,8 +124,8 @@ public class dbutils
             tmp.extrag_comex2 =	 edb.extrag_comex2;
             tmp.extrag_comex3 =	 edb.extrag_comex3;
             tmp.extrag_comex_notas = edb.extrag_comex_notas;
-            tmp.extrag_local1 = edb.extrag_local1;
-            tmp.extrag_local2 = edb.extrag_local2;
+            tmp.extrag_src1 = edb.extrag_src1;
+            tmp.extrag_src2 = edb.extrag_src2;
             tmp.extrag_finan1 = edb.extrag_finan1;
             tmp.extrag_finan2 = edb.extrag_finan2;
             tmp.extrag_finan3 = edb.extrag_finan3;
@@ -138,7 +138,7 @@ public class dbutils
             tmp.productowner = edb.productowner;
             tmp.comercial_invoice = edb.comercial_invoice;
             tmp.proforma_invoice=edb.proforma_invoice;
-            tmp.embarque=edb.embarque;
+            tmp.proveedor_prov=edb.proveedor_prov;
             tmp.detailorder = edb.detailorder;
             tmp.htimestamp = edb.htimestamp;
             if(edb.updated)
@@ -198,11 +198,12 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         myEstV2.estHeader.gloc_despachantes	= miEstHeadV.gloc_despachantes;
         myEstV2.estHeader.gloc_bancos =	miEstHeadV.gloc_bancos;
         myEstV2.estHeader.gloc_gestdigdoc =	miEstHeadV.gloc_gestdigdoc;
+        myEstV2.estHeader.extrag_src1	= miEstHeadV.extrag_src1;
+        myEstV2.estHeader.extrag_src2	= miEstHeadV.extrag_src2;
+        myEstV2.estHeader.extrag_src_notas = miEstHeadV.extrag_src_notas;
         myEstV2.estHeader.extrag_comex1	= miEstHeadV.extrag_comex1;
         myEstV2.estHeader.extrag_comex2	= miEstHeadV.extrag_comex2;
         myEstV2.estHeader.extrag_comex3	= miEstHeadV.extrag_comex3;
-        myEstV2.estHeader.extrag_comex4	= miEstHeadV.extrag_comex4;
-        myEstV2.estHeader.extrag_comex5	= miEstHeadV.extrag_comex5;
         myEstV2.estHeader.extrag_comex_notas = miEstHeadV.extrag_comex_notas;
         myEstV2.estHeader.extrag_finanformula1_id = miEstHeadV.extrag_finanformula1_id;
         myEstV2.estHeader.extrag_finanformula2_id = miEstHeadV.extrag_finanformula2_id;
@@ -230,6 +231,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         myEstV2.estHeader.freight_insurance_cost = miEstHeadV.freight_insurance_cost;
         myEstV2.estHeader.iibb_total = miEstHeadV.iibb_total;
         myEstV2.estHeader.project = miEstHeadV.project;
+        myEstV2.estHeader.embarque=miEstHeadV.embarque;
         myEstV2.estHeader.tarifonmex_id = miEstHeadV.tarifonmex_id;
         myEstV2.estHeader.htimestamp = miEstHeadV.htimestamp;
         // Datos adicionales, que son propios del headerDBVista, pero incompatibles con headerDB. Se guardan en campos sueltos
@@ -276,8 +278,8 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.extrag_comex2 =	 edb.extrag_comex2;
             tmp.extrag_comex3 =	 edb.extrag_comex3;
             tmp.extrag_comex_notas = edb.extrag_comex_notas;
-            tmp.extrag_local1 = edb.extrag_local1;
-            tmp.extrag_local2 = edb.extrag_local2;
+            tmp.extrag_src1 = edb.extrag_src1;
+            tmp.extrag_src2 = edb.extrag_src2;
             tmp.extrag_finan1 = edb.extrag_finan1;
             tmp.extrag_finan2 = edb.extrag_finan2;
             tmp.extrag_finan3 = edb.extrag_finan3;
@@ -290,7 +292,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.productowner = edb.productowner;
             tmp.comercial_invoice = edb.comercial_invoice;
             tmp.proforma_invoice = edb.proforma_invoice;
-            tmp.embarque = edb.embarque;
+            tmp.proveedor_prov = edb.proveedor_prov;
             tmp.detailorder = edb.detailorder;
             tmp.htimestamp = edb.htimestamp;
 
@@ -354,8 +356,8 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.extrag_comex2 =	 ed.extrag_comex2;
             tmp.extrag_comex3 =	 ed.extrag_comex3;
             tmp.extrag_comex_notas = ed.extrag_comex_notas;
-            tmp.extrag_local1 = ed.extrag_local1;
-            tmp.extrag_local2 = ed.extrag_local2;
+            tmp.extrag_src1 = ed.extrag_src1;
+            tmp.extrag_src2 = ed.extrag_src2;
             tmp.extrag_finan1 = ed.extrag_finan1;
             tmp.extrag_finan2 = ed.extrag_finan2;
             tmp.extrag_finan3 = ed.extrag_finan3;
@@ -368,9 +370,9 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.productowner = ed.productowner;
             tmp.comercial_invoice = ed.comercial_invoice;
             tmp.proforma_invoice = ed.proforma_invoice;
-            tmp.embarque = ed.embarque;
+            tmp.proveedor_prov=ed.proveedor_prov;
             tmp.detailorder = ed.detailorder;
-            tmp.htimestamp = ed.htimestamp;
+            //tmp.htimestamp = ed.htimestamp;
             tmp.htimestamp=DateTime.Now;
             //tmp.htimestamp=ed.htimestamp;
             estimateDB.estDetailsDB.Add(tmp);
@@ -378,13 +380,20 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         return estimateDB;       
     }
 
+    public EstimateV2 ClearExtraGastosSrc(EstimateV2 miEst)
+    {
+        miEst.estHeader.extrag_src1=0;
+        miEst.estHeader.extrag_src2=0;
+        miEst.estHeader.extrag_src_notas="";
+
+        return miEst;
+    }
+
     public EstimateV2 ClearExtraGastosComex(EstimateV2 miEst)
     {
         miEst.estHeader.extrag_comex1=0;
         miEst.estHeader.extrag_comex2=0;
         miEst.estHeader.extrag_comex3=0;
-        miEst.estHeader.extrag_comex4=0;
-        miEst.estHeader.extrag_comex5=0;
         miEst.estHeader.extrag_comex_notas="";
 
         return miEst;
@@ -410,6 +419,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
     public EstimateV2 setDefaultEstimateDB(EstimateV2 miEst)
     {
        
+        miEst=ClearExtraGastosSrc(miEst);
         miEst=ClearExtraGastosComex(miEst);
         miEst=ClearExtraGastosFinanzas(miEst);
         // IMPORTANTE !!!!! 
@@ -431,8 +441,8 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             edb.extrag_finan2=0;
             edb.extrag_finan3=0;
             edb.extrag_finan_notas="";
-            edb.extrag_local1=0;
-            edb.extrag_local2=0;
+            edb.extrag_src1=0;
+            edb.extrag_src2=0;
             edb.updated=false;
         }
         return miEst;

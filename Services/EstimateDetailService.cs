@@ -284,6 +284,7 @@ public class EstimateDetailService: IEstimateDetailService
         tmp+=estD.gloc_gestdigdoc;
         tmp+=estD.gloc_polizas;
         tmp+=estD.gloc_terminales;
+        tmp+=estD.gloc_descarga; 
         // Sumo los extragastos que son por producto.
         tmp+=estD.extrag_comex1;
         tmp+=estD.extrag_comex2;
@@ -291,19 +292,19 @@ public class EstimateDetailService: IEstimateDetailService
         tmp+=estD.extrag_finan1;
         tmp+=estD.extrag_finan2;
         tmp+=estD.extrag_finan3;
-        tmp+=estD.extrag_local1;
-        tmp+=estD.extrag_local2;
+        tmp+=estD.extrag_src1;
+        tmp+=estD.extrag_src2;
         // Sumo los extragastos globales que vienen desde el header y ya fueron ponderados.
+        tmp+=estD.extrag_glob_src1;
+        tmp+=estD.extrag_glob_src2;
         tmp+=estD.extrag_glob_comex1;
         tmp+=estD.extrag_glob_comex2;
         tmp+=estD.extrag_glob_comex3;
-        tmp+=estD.extrag_glob_comex4;
-        tmp+=estD.extrag_glob_comex5;
         tmp+=estD.extrag_glob_finan1;
         tmp+=estD.extrag_glob_finan2;
         tmp+=estD.extrag_glob_finan3;
         tmp+=estD.extrag_glob_finan4;
-        tmp+=estD.extrag_glob_comex5;
+        tmp+=estD.extrag_glob_finan5;
         return tmp;
     }
 
