@@ -198,6 +198,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         myEstV2.estHeader.gloc_despachantes	= miEstHeadV.gloc_despachantes;
         myEstV2.estHeader.gloc_bancos =	miEstHeadV.gloc_bancos;
         myEstV2.estHeader.gloc_gestdigdoc =	miEstHeadV.gloc_gestdigdoc;
+        myEstV2.estHeader.gloc_descarga = miEstHeadV.gloc_descarga;
         myEstV2.estHeader.extrag_src1	= miEstHeadV.extrag_src1;
         myEstV2.estHeader.extrag_src2	= miEstHeadV.extrag_src2;
         myEstV2.estHeader.extrag_src_notas = miEstHeadV.extrag_src_notas;
