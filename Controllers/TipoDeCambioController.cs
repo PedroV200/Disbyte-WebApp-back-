@@ -8,10 +8,10 @@ namespace WebApiSample.Controllers;
 [Route("[controller]")]
 public class TipoDeCambioController : ControllerBase
 {
-    private readonly ILogger<ProductsController> _logger;
+    private readonly ILogger<TipoDeCambioController> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
-    public TipoDeCambioController(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
+    public TipoDeCambioController(ILogger<TipoDeCambioController> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;

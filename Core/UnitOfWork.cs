@@ -5,7 +5,7 @@ using WebApiSample.Models;
 
 public class UnitOfWork : IUnitOfWork
 {
-    public UnitOfWork(IProductRepository productRepository, 
+    public UnitOfWork(
                       IIIBBrepository IIBBrepository,
                       INCMrepository NCMrepository,
                       INCM_MexRepository NCM_MexRepo,
@@ -40,11 +40,11 @@ public class UnitOfWork : IUnitOfWork
                       ITarifasBancoRepository MiTarifBancos,
                       ITarifasDespachanteRepository MiTarifDespa, 
                       ITarifasFleteRepository MiTarifFlete,
-                      ITarifasGestDigDocRepository MiTarifGestDigDoc  
-                      //ITarifonMexRepository MiTarifonMX                   
+                      ITarifasGestDigDocRepository MiTarifGestDigDoc,  
+                      //ITarifonMexRepository MiTarifonMX  
+                      IProductoRepository misProds                 
                       )
     {
-        Products = productRepository;
         IIBBs = IIBBrepository;
         NCMs = NCMrepository;
         NCM_MEXs=NCM_MexRepo;
@@ -83,10 +83,10 @@ public class UnitOfWork : IUnitOfWork
         TarifDespa = MiTarifDespa;
         TarifGestDigDoc = MiTarifGestDigDoc;
         //TarifonMX = MiTarifonMX;
+        Productos = misProds;
 
     }
 
-    public IProductRepository Products { get; } 
     public IIIBBrepository IIBBs { get; } 
     public INCMrepository NCMs { get;}
     public INCM_MexRepository NCM_MEXs { get;}
@@ -126,5 +126,7 @@ public class UnitOfWork : IUnitOfWork
     public IUsuarioRepository Usuarios { get; }
     public IDespachanteRepository Despachantes { get;}
     public IPaisRegionRepository PaisesRegiones {get;}
+
+    public IProductoRepository Productos {get;}
 
 }

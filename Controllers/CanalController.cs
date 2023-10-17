@@ -8,10 +8,10 @@ namespace WebApiSample.Controllers;
 [Route("[controller]")]
 public class CanalController : ControllerBase
 {
-    private readonly ILogger<ProductsController> _logger;
+    private readonly ILogger<CanalController> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CanalController(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
+    public CanalController(ILogger<CanalController> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;

@@ -11,10 +11,10 @@ namespace WebApiSample.Controllers
 
     public class TruckSemiController : ControllerBase
     {
-        private readonly ILogger<ProductsController> _logger;
+        private readonly ILogger<TruckSemiController> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public TruckSemiController(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
+        public TruckSemiController(ILogger<TruckSemiController> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;

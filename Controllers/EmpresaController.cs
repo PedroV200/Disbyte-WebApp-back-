@@ -9,10 +9,10 @@ namespace WebApiSample.Controllers
     [Route("[controller]")]
     public class EmpresaController : ControllerBase
     {
-        private readonly ILogger<ProductsController> _logger;
+        private readonly ILogger<EmpresaController> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public EmpresaController(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
+        public EmpresaController(ILogger<EmpresaController> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;

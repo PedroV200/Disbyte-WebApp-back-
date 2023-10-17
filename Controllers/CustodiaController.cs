@@ -8,10 +8,10 @@ namespace WebApiSample.Controllers;
 [Route("[controller]")]
 public class CustodiaController : ControllerBase
 {
-    private readonly ILogger<ProductsController> _logger;
+    private readonly ILogger<CustodiaController> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CustodiaController(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
+    public CustodiaController(ILogger<CustodiaController> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;

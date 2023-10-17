@@ -4,5 +4,6 @@ namespace WebApiSample.Infrastructure;
 
 public interface IImportService : IGenericService<TableModel>
 {
-   public void fopen(string fileName);
+   public void ImportNCM_Mex(string fileName);
+   public void ImportProductos(string fileName);
 }

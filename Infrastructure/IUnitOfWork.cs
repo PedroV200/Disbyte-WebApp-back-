@@ -4,7 +4,6 @@ namespace WebApiSample.Infrastructure;
 
 public interface IUnitOfWork
 {
-    IProductRepository  Products { get; }
     IIIBBrepository     IIBBs {get; }
     INCMrepository      NCMs {get; }
     IBancoRepository    Bancos {get; }
@@ -47,5 +46,7 @@ public interface IUnitOfWork
     IDespachanteRepository Despachantes { get; }
     IPaisRegionRepository PaisesRegiones {get;}
     INCM_MexRepository NCM_MEXs {get;}
+
+    IProductoRepository Productos {get;}
     
 }
