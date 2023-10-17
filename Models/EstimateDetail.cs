@@ -4,7 +4,7 @@ namespace WebApiSample.Models;
 // MODELO DE DATOS QUE SE ENVIA AL FRONT.
 // Este modelo de datos representa la planilla de precosteo.
 // LISTED 12_10_2023 Los extrag globales comex (ponderados en este caso) pasan de 5 a 3, los 2 librerados se asignan a extrag_src
-//                   Se crea lugaer para el noveno gloc "descarga"
+//                   Se crea lugaer para el noveno gloc "descarga"  
 public class EstimateDetail
 {
     // VALORES DADOS o ajustables

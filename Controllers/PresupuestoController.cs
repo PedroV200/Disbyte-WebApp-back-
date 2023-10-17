@@ -16,15 +16,18 @@ public class PresupuestoController : ControllerBase
     private readonly IEstimateService _estService;
     private readonly IPresupuestoService _presupService;
 
+    private readonly IImportService _importService;
+
 
     private calc myCalc;
 
-    public PresupuestoController(ILogger<PresupuestoController> logger, IUnitOfWork unitOfWork,IEstimateService estService, IPresupuestoService presupService)
+    public PresupuestoController(ILogger<PresupuestoController> logger, IUnitOfWork unitOfWork,IEstimateService estService, IPresupuestoService presupService, IImportService importService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _estService = estService;
         _presupService=presupService;
+        _importService=importService;
     }
 
 // Este endpoint es para un presupuesto nuevo. Notar que no se pasa el id
@@ -140,6 +143,14 @@ public class PresupuestoController : ControllerBase
     {
         dbutils dbHelper=new dbutils(_unitOfWork);
         return await dbHelper.deleteEstimateByNumByVers(estNumber,estVers);
+    }
+
+
+    [HttpGet("/importa")]
+    public async Task<ActionResult<bool>>Importa(int num, int vers) 
+    {
+       _importService.fopen("/Users/pedroaste/Downloads/FCLV4.xlsx");
+       return true;
     }
    
 }
