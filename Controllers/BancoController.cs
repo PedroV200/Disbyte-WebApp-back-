@@ -15,10 +15,10 @@ namespace WebApiSample.Controllers;
 [Route("[controller]")]
 public class BancoController : ControllerBase
 {
-    private readonly ILogger<ProductsController> _logger;
+    private readonly ILogger<BancoController> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
-    public BancoController(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
+    public BancoController(ILogger<BancoController> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;

@@ -10,6 +10,13 @@ using IronXL;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;    
 
+// LISTED 17_10_2023
+// Funcion para Importacion de Productos de XLS.
+// 12_10_2023 Funcion para importacion del NCM Mex desde XLS.
+// NOTA: NO USAR CSV (en la facciones aranc ... a veces vuela los puntos y lo toma como un numero) 
+// INVOCACION: 
+// Se llama desde /Presupuesto/Importa/ (get, sin params)) (Se usa al swagger UI como boton para comandar la importacion)
+
 public class ImportService: IImportService
 {
     IUnitOfWork _unitOfWork;
@@ -21,7 +28,7 @@ public class ImportService: IImportService
         _unitOfWork=miUWork;
     }
 
-    public async void fopen(string fileName)
+    public async void ImportNCM_Mex(string fileName)
     {
         NumberFormatInfo nfi = new NumberFormatInfo();
         nfi.NumberDecimalSeparator = ".";
@@ -95,6 +102,81 @@ public class ImportService: IImportService
             Console.WriteLine();
         }
     }
+
+
+
+    public async void ImportProductos(string fileName)
+    {
+        int limite=0;
+        NumberFormatInfo nfi = new NumberFormatInfo();
+        nfi.NumberDecimalSeparator = ".";
+        WorkBook workbook = WorkBook.Load(fileName);
+        WorkSheet ws = workbook.DefaultWorkSheet;
+        DataTable dt = ws.ToDataTable(true);//parse sheet1 of sample.xlsx file into datatable
+        List<csvNcmMex> tablaNcmMex = new List<csvNcmMex>();
+
+        limite=0;
+        foreach (DataRow row in dt.Rows) //access rows
+        {
+
+            limite++;
+
+            double tmpDouble;
+            int tmpInt;
+            csvProductos tmp=new csvProductos();
+
+            tmp.codigo=row[0].ToString();
+            tmp.name=row[1].ToString();
+
+            if(double.TryParse(row[2].ToString(),nfi,out tmpDouble))
+                tmp.alto=tmpDouble;
+            if(double.TryParse(row[3].ToString(),nfi,out tmpDouble))
+                tmp.largo=tmpDouble; 
+            if(double.TryParse(row[4].ToString(),nfi,out tmpDouble))
+                tmp.peso=tmpDouble; 
+            if(double.TryParse(row[5].ToString(),nfi,out tmpDouble))
+                tmp.profundidad=tmpDouble;         
+
+            tmp.tipodeproducto=row[6].ToString();
+
+            if(double.TryParse(row[7].ToString(),nfi,out tmpDouble))
+                tmp.volumen=tmpDouble;    
+
+            if(int.TryParse(row[8].ToString(),out tmpInt))
+                tmp.unidadesporbulto=tmpInt;    
+
+            tmp.categoriacompleta=row[9].ToString();    
+
+            Producto miProducto=new Producto();
+
+
+            miProducto.codigo=tmp.codigo;
+            miProducto.name=tmp.name;
+            miProducto.alto=tmp.alto;
+            miProducto.largo=tmp.largo;
+            miProducto.peso=tmp.peso;
+            miProducto.profundidad=tmp.profundidad;
+            miProducto.tipodeproducto=tmp.tipodeproducto;
+            miProducto.volumen=tmp.volumen;
+            miProducto.unidadesporbulto=tmp.unidadesporbulto;
+            miProducto.categoriacompleta=tmp.categoriacompleta;
+
+            await _unitOfWork.Productos.AddAsync(miProducto);
+            
+            
+            if(miProducto.codigo=="" || miProducto.name=="")
+            {
+                break;
+            }
+
+            for (int i = 0; i < dt.Columns.Count; i++) //access columns of corresponding row
+            {
+                Console.Write(row[i] + "  ");                                        
+            }
+
+            Console.WriteLine($"REGISTRO: {limite}");
+        }
+    }
 }
 
 
@@ -109,4 +191,17 @@ public class csvNcmMex{
     public string docAduanera{get;set;}
     public string lealtadCom{get;set;}
     public string docDepo{get;set;}
+}
+
+public class csvProductos{
+    public string codigo {get;set;}
+    public string name {get;set;}
+    public double alto{get;set;}
+    public double largo{get;set;}
+    public double peso{get;set;}
+    public double profundidad{get;set;}
+    public string tipodeproducto{get;set;}
+    public double volumen{get;set;}
+    public int unidadesporbulto{get;set;}
+    public string categoriacompleta{get;set;}
 }

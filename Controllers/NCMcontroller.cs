@@ -8,10 +8,10 @@ namespace WebApiSample.Controllers;
 [Route("[controller]")]
 public class NCMcontroller : ControllerBase
 {
-    private readonly ILogger<ProductsController> _logger;
+    private readonly ILogger<NCMcontroller> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
-    public NCMcontroller(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
+    public NCMcontroller(ILogger<NCMcontroller> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;

@@ -6,7 +6,6 @@ public static class ServiceRegistration
 {
     public static void AddInfrastructure(this IServiceCollection services)
     {
-        services.AddTransient<IProductRepository, ProductRepository>();
         services.AddTransient<IIIBBrepository, IIBBRepository>();
         services.AddTransient<INCMrepository, NCMrepository>();
         services.AddTransient<INCM_MexRepository, NCM_MexRepository>();
@@ -47,5 +46,6 @@ public static class ServiceRegistration
         services.AddTransient<ITarifasBancoRepository, TarifasBancoRepository>();
         services.AddTransient<ITarifasDespachanteRepository, TarifasDespachanteRepository>();
         services.AddTransient<ITarifasGestDigDocRepository, TarifasGestDigDocRepository>();
+        services.AddTransient<IProductoRepository, ProductoRepository>();
     }
 }

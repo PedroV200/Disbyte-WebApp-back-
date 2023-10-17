@@ -10,10 +10,10 @@ namespace WebApiSample.Controllers;
 [Route("[controller]")]
 public class FwdtteController : ControllerBase
 {
-    private readonly ILogger<ProductsController> _logger;
+    private readonly ILogger<FwdtteController> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
-    public FwdtteController(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
+    public FwdtteController(ILogger<FwdtteController> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
