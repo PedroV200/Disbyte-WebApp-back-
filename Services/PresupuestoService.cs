@@ -446,7 +446,7 @@ public class PresupuestoService:IPresupuestoService
              return null;
         }
 
-            
+        string miPais=await getCountry(miEstHeaderV);
 
         // Con el ID del header levanto el estDetail.
         if(miPais=="MEX")
