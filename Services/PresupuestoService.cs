@@ -25,6 +25,8 @@ using System.Diagnostics.Metrics;
 // y el valor de tarifupdate y recent se inicializa en 255 y no en 1023. De este modo se puede ingresar ya desde la creacion
 // valores manuales para flete y seguro. 
 // LISTED 11_10_2023 Se agrega Enumerador a los articulos, tanto en create como en update (solo los art nuevos)
+// LIESTED 18_20_2023. En submitupload, el if para el estado 0 es solo para pasarlo automaticamente a 1, sin lugar
+// a que entre en la logica de estados y gastos (antes parte del else/if de la logica de estados)
 
 
 public class PresupuestoService:IPresupuestoService
@@ -322,7 +324,8 @@ public class PresupuestoService:IPresupuestoService
         {   
             myEstV2.estHeader.status=1;
         }
-        else if(myEstV2.estHeader.status==1)
+
+        if(myEstV2.estHeader.status==1)
         {   // Estado 0 y 1 perteneces a sourcing. No leo los extragastos del json
             // los piso con 0
             myEstV2=myDBhelper.ClearExtraGastosComex(myEstV2);
