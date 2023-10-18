@@ -126,6 +126,7 @@ public class dbutils
             tmp.extrag_comex_notas = edb.extrag_comex_notas;
             tmp.extrag_src1 = edb.extrag_src1;
             tmp.extrag_src2 = edb.extrag_src2;
+            tmp.extrag_src_notas = edb.extrag_src_notas;
             tmp.extrag_finan1 = edb.extrag_finan1;
             tmp.extrag_finan2 = edb.extrag_finan2;
             tmp.extrag_finan3 = edb.extrag_finan3;
@@ -281,6 +282,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.extrag_comex_notas = edb.extrag_comex_notas;
             tmp.extrag_src1 = edb.extrag_src1;
             tmp.extrag_src2 = edb.extrag_src2;
+            tmp.extrag_src_notas = edb.extrag_src_notas;
             tmp.extrag_finan1 = edb.extrag_finan1;
             tmp.extrag_finan2 = edb.extrag_finan2;
             tmp.extrag_finan3 = edb.extrag_finan3;
@@ -359,6 +361,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             tmp.extrag_comex_notas = ed.extrag_comex_notas;
             tmp.extrag_src1 = ed.extrag_src1;
             tmp.extrag_src2 = ed.extrag_src2;
+            tmp.extrag_src_notas = ed.extrag_src_notas;
             tmp.extrag_finan1 = ed.extrag_finan1;
             tmp.extrag_finan2 = ed.extrag_finan2;
             tmp.extrag_finan3 = ed.extrag_finan3;
@@ -444,6 +447,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             edb.extrag_finan_notas="";
             edb.extrag_src1=0;
             edb.extrag_src2=0;
+            edb.extrag_src_notas="";
             edb.updated=false;
         }
         return miEst;
