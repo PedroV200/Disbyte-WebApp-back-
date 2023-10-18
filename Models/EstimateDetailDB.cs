@@ -34,6 +34,7 @@ public class EstimateDetailDB
     public string extrag_comex_notas{get;set;}
     public double extrag_src1{get;set;}
     public double extrag_src2{get;set;}
+    public string extrag_src_notas{get;set;}
     public double extrag_finan1{get;set;}
     public double extrag_finan2{get;set;}
     public double extrag_finan3{get;set;}
@@ -83,6 +84,7 @@ public class EstimateDetailDBVista
     public string extrag_comex_notas{get;set;}
     public double extrag_src1{get;set;}
     public double extrag_src2{get;set;}
+    public string extrag_src_notas{get;set;}
     public double extrag_finan1{get;set;}
     public double extrag_finan2{get;set;}
     public double extrag_finan3{get;set;}
