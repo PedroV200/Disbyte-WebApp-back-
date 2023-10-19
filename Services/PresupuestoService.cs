@@ -28,6 +28,7 @@ using System.Diagnostics.Metrics;
 // LIESTED 18_20_2023. En submitupload, el if para el estado 0 es solo para pasarlo automaticamente a 1, sin lugar
 // a que entre en la logica de estados y gastos (antes parte del else/if de la logica de estados)
 // LISTED 18_10_2023 Repara faltantes en extrag_src y src_notas 
+// LISTED 19_10_2023 Repara bug en estimateheader que no enviaba en el query el estag_src_notas.
 
 
 public class PresupuestoService:IPresupuestoService
