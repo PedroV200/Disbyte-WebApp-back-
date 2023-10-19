@@ -13,7 +13,8 @@ using System.Globalization;
 // REFACTOR agrega IDs (FKs a los maestros) para todos los proveedores (servicios u OEM) 
 // REFACTOR para tratar al proveedor de poliza igual que al resto de los proveedores (descrip / ID)
 // REFACTOR 3_8_2023 nueva version "Multiregion" basado en los sheets de Mexico y WIP Argentina
-// LIESTED 28_9_2023 Se agrega el entrypoint para consultar la historia de versiones y usuarios de un determinado estnumber
+// LISTED 28_9_2023 Se agrega el entrypoint para consultar la historia de versiones y usuarios de un determinado estnumber
+// LISTED 19_10_2023 Repara bug en estimateheader que no enviaba en el query el estag_src_notas.
 
 
 public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
@@ -63,6 +64,7 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                     gloc_descarga,
                     extrag_src1,
                     extrag_src2,
+                    extrag_src_notas,
                     extrag_comex1,
                     extrag_comex2,
                     extrag_comex3,
@@ -127,6 +129,7 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                                     '{entity.gloc_descarga.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                     '{entity.extrag_src1.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                     '{entity.extrag_src2.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
+                                    '{entity.extrag_src_notas}',
                                     '{entity.extrag_comex1.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                     '{entity.extrag_comex2.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                     '{entity.extrag_comex3.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
@@ -327,6 +330,7 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                         gloc_descarga = @gloc_descarga,
                         extrag_src1 = @extrag_src1,
                         extrag_src2 = @extrag_src2,
+                        extrag_src_notas = @extrag_src_notas,
                         extrag_comex1 = @extrag_comex1,
                         extrag_comex2 = @extrag_comex2,
                         extrag_comex3 = @extrag_comex3,
