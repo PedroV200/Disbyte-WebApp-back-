@@ -29,6 +29,7 @@ using System.Diagnostics.Metrics;
 // a que entre en la logica de estados y gastos (antes parte del else/if de la logica de estados)
 // LISTED 18_10_2023 Repara faltantes en extrag_src y src_notas 
 // LISTED 19_10_2023 Repara bug en estimateheader que no enviaba en el query el estag_src_notas.
+// LISTED 19_10_2023 await faltante en loadContenedor.  
 
 
 public class PresupuestoService:IPresupuestoService
@@ -187,7 +188,7 @@ public class PresupuestoService:IPresupuestoService
         // Ingresa las constantes a la varieble local de _estService.
          _estService.setConstants(myEstV2.constantes);
          // est service carga los datos del contenedor referenciado en una variable de la clase para su posterior uso
-         _estService.loadContenedor(myEstV2);
+         await _estService.loadContenedor(myEstV2);
 
         // Traduzco el id del pais / region en un string de 3 caracteres normalizado.
         // Sera clave para bifurcar la logica del calculo segun los diferentes paises
@@ -392,7 +393,15 @@ public class PresupuestoService:IPresupuestoService
         // En la base no se guardan calculos,  por lo que debi convertir el estimate V2 a estimate DB y guardarlo.
         resultEDB=myDBhelper.transferDataToDBType(myEstV2);
         // Guardo el header.
-        result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
+        try
+        {
+            result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);            
+        }
+        catch (Exception ex)
+        {
+            presupError=$"Error al insertar cabecera en tabla estimateHeaderDB";
+            return null;
+        }
         // Veo que ID le asigno la base:
         readBackHeader=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersAsync(resultEDB.estHeaderDB.estnumber,miEst.estHeaderDB.estvers);
         // El enumerador, su valor base, es DIFERENTE en cada version. Con esto garantizo que si debo asignar un ID a un prod nuevo (agregado)
@@ -427,8 +436,16 @@ public class PresupuestoService:IPresupuestoService
             }
 
             ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
-            ed.updated=false;                       // El calculo se hizo por completo. No hay actualizaciones epndientes. Borro el flag de cada producto.
-            result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
+            ed.updated=false;  
+            try
+            {                     // El calculo se hizo por completo. No hay actualizaciones epndientes. Borro el flag de cada producto.
+                result+=await _unitOfWork.EstimateDetailsDB.AddAsync(ed);
+            }
+            catch(Exception ex)
+            {
+                presupError=$"Error al insertar en tabla estimatedetail el siguiente art: {ed.description}";
+                return null;                
+            }
         }
         
         return myEstV2;    
