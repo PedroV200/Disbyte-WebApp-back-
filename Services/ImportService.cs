@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 // NOTA: NO USAR CSV (en la facciones aranc ... a veces vuela los puntos y lo toma como un numero) 
 // INVOCACION: 
 // Se llama desde /Presupuesto/Importa/ (get, sin params)) (Se usa al swagger UI como boton para comandar la importacion)
+// 23_10_2023 Corrige importacion de los datos NCM, ya que el XLS usa coma como separador decimal. Ademas en el XLS son valores/100
+// pero el NCM original eran los valores porcentuales, ej 16% = 16 (y no 0.16). Auditado OK contra FLC MEX PRJ017 
 
 public class ImportService: IImportService
 {
@@ -31,7 +33,7 @@ public class ImportService: IImportService
     public async void ImportNCM_Mex(string fileName)
     {
         NumberFormatInfo nfi = new NumberFormatInfo();
-        nfi.NumberDecimalSeparator = ".";
+        nfi.NumberDecimalSeparator = ",";
         WorkBook workbook = WorkBook.Load(fileName);
         WorkSheet ws = workbook.DefaultWorkSheet;
         DataTable dt = ws.ToDataTable(true);//parse sheet1 of sample.xlsx file into datatable
@@ -45,11 +47,11 @@ public class ImportService: IImportService
             tmp.fraccionArancelaria=row[0].ToString();
 
             if(double.TryParse(row[1].ToString().Split('%')[0],nfi,out tmpDouble))
-                tmp.igi=tmpDouble;
+                tmp.igi=tmpDouble*100.0;
             if(double.TryParse(row[2].ToString().Split('%')[0],nfi,out tmpDouble))
-                tmp.iva=tmpDouble; 
+                tmp.iva=tmpDouble*100.0; 
             if(double.TryParse(row[3].ToString().Split('%')[0],nfi,out tmpDouble))
-                tmp.dta=tmpDouble;    
+                tmp.dta=tmpDouble*100.0;    
 
             tmp.gravAcuerdo=row[4].ToString();
             tmp.bk=row[5].ToString();
@@ -94,10 +96,10 @@ public class ImportService: IImportService
 
 
 
-            for (int i = 0; i < dt.Columns.Count; i++) //access columns of corresponding row
-            {
-                Console.Write(row[i] + "  ");                                        
-            }
+            //for (int i = 0; i < dt.Columns.Count; i++) //access columns of corresponding row
+            //{
+                Console.Write(/*row[i] + "  "*/ "IGI: " + miNCMMex.igi + " DTA: " + miNCMMex.dta + " IVA: " + miNCMMex.iva);                                        
+            //}
 
             Console.WriteLine();
         }

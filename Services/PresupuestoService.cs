@@ -30,6 +30,7 @@ using System.Diagnostics.Metrics;
 // LISTED 18_10_2023 Repara faltantes en extrag_src y src_notas 
 // LISTED 19_10_2023 Repara bug en estimateheader que no enviaba en el query el estag_src_notas.
 // LISTED 19_10_2023 await faltante en loadContenedor.  
+// LiSTED 23_10_2023 Se pasiva la logica de estados.
 
 
 public class PresupuestoService:IPresupuestoService
@@ -263,7 +264,7 @@ public class PresupuestoService:IPresupuestoService
         // cambios no deseados.
         estHDBPrevia=await _unitOfWork.EstimateHeadersDB.GetByEstNumberLastVers_1ROW_Async(estNumber);
 
-
+/*
         // Controlo que no me retrocedan el estado, salvo el jefe.
         if(miEst.estHeaderDB.status<estHDBPrevia.status && !cli.isGranted(permisos,cli.boss))
         {
@@ -292,7 +293,7 @@ public class PresupuestoService:IPresupuestoService
             return null;
         }
         // ##############################################################################
-
+*/
         // Nueva version usando el numero anterior.
         miEst.estHeaderDB.estnumber=estNumber;
         miEst.estHeaderDB.estvers=await _unitOfWork.EstimateHeadersDB.GetNextEstVersByEstNumber(estNumber);
@@ -314,16 +315,14 @@ public class PresupuestoService:IPresupuestoService
         {
             return null;
         }
-        // Le pongo la fecha / hora !!!!!!
-        //ret.estHeader.hTimeStamp=DateTime.Now;
-
-
 
         // Atenti con la primera pregunta. Me fijo en como vino el estimate original
         // Sio su estatus era 0, pasa a 1 automaticamente por que este fue el primer upgrade
         // IGNORO el JSON.
         // Todas las demas preguntas seran en base al valor que venga del json.
-        if(estHDBPrevia.status==0)
+
+
+        /*if(estHDBPrevia.status==0)
         {   
             myEstV2.estHeader.status=1;
         }
@@ -384,7 +383,7 @@ public class PresupuestoService:IPresupuestoService
         {
             presupError="ESTADO INVALIDO !!!. Proceso DETENIDO";
             return null;
-        }
+        }*/
 
         myEstV2.estHeader.own=myEstV2.estHeader.own + $" - [PERMISOS:{permisos}]";
 
@@ -420,7 +419,7 @@ public class PresupuestoService:IPresupuestoService
 
             enumerador++;
 
-            if(miEst.estHeaderDB.status<2)
+            /*if(miEst.estHeaderDB.status<2)
             {
                 ed.extrag_comex1=0;
                 ed.extrag_comex2=0;
@@ -433,7 +432,7 @@ public class PresupuestoService:IPresupuestoService
                 ed.extrag_finan2=0;
                 ed.extrag_finan3=0;
                 ed.extrag_finan_notas="";
-            }
+            }*/
 
             ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
             ed.updated=false;  

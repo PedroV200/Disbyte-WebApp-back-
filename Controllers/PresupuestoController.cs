@@ -149,8 +149,8 @@ public class PresupuestoController : ControllerBase
     [HttpGet("/importa")]
     public async Task<ActionResult<bool>>Importa(int num, int vers) 
     {
-       //_importService.ImportNCM_Mex("/Users/pedroaste/Downloads/FCLV4.xlsx");
-       _importService.ImportProductos("/Users/pedroaste/Downloads/Productos.xlsx");
+       _importService.ImportNCM_Mex("/Users/pedroaste/Downloads/FCLV4.xlsx");
+       //_importService.ImportProductos("/Users/pedroaste/Downloads/Productos.xlsx");
        return true;
     }
    
