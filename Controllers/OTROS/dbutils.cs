@@ -233,6 +233,11 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         myEstV2.estHeader.freight_insurance_cost = miEstHeadV.freight_insurance_cost;
         myEstV2.estHeader.iibb_total = miEstHeadV.iibb_total;
         myEstV2.estHeader.project = miEstHeadV.project;
+        myEstV2.estHeader.bl=miEstHeadV.bl;
+        myEstV2.estHeader.fecha_embarque=miEstHeadV.fecha_embarque;
+        myEstV2.estHeader.pedimiento=miEstHeadV.pedimiento;
+        myEstV2.estHeader.fecha_pedimiento=miEstHeadV.fecha_pedimiento;
+        myEstV2.estHeader.avatar_url=miEstHeadV.avatar_url;
         myEstV2.estHeader.embarque=miEstHeadV.embarque;
         myEstV2.estHeader.tarifonmex_id = miEstHeadV.tarifonmex_id;
         myEstV2.estHeader.htimestamp = miEstHeadV.htimestamp;

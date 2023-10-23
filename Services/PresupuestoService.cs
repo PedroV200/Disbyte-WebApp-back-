@@ -385,7 +385,7 @@ public class PresupuestoService:IPresupuestoService
             return null;
         }*/
 
-        myEstV2.estHeader.own=myEstV2.estHeader.own + $" - [PERMISOS:{permisos}]";
+        myEstV2.estHeader.own=myEstV2.estHeader.own /*+ $" - [PERMISOS:{permisos}]"*/;
 
         
         // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
@@ -481,6 +481,77 @@ public class PresupuestoService:IPresupuestoService
         if(miEstDetV==null)
         {
             presupError=$"No de puede recuperar la version {estVers} del estimate {estNumber}";
+            return null;
+        }
+
+        // Expando el EstimateDB a un EstimateV2
+        myEstV2=dbhelper.transferDataFromDBTypeWithVista(miEstHeaderV,miEstDetV);
+        // Cargo las constnates de calculo.
+        myEstV2.constantes=await _cnstService.getConstantesLastVers();
+        if(myEstV2.constantes==null)
+        {
+            presupError="No existe una instancia de constantes en tabla";
+            return null;
+        }
+        // Paso las costantes a estDetailServ via estimateService
+        _estService.setConstants(myEstV2.constantes);
+
+        // Por el momento reclaim tarifas no hace mucho. Los GLOC ya fueron calculados.
+        myEstV2=_estService.reclaimTarifas(myEstV2);
+        /*if(myEstV2==null)
+        {
+            presupError=_estService.getLastError();
+            return null;
+        }*/
+        // Carga los datos de la carga en EstimateV2.miCarga
+        await _estService.loadContenedor(myEstV2);
+        // Traduzco el id del pais / region en un string de 3 caracteres normalizado.
+        // Sera clave para bifurcar la logica del calculo segun los diferentes paises
+         myEstV2=await getCountry(myEstV2);
+         if(myEstV2.pais=="")
+         {
+            presupError="Pais no identificado";
+            return null;
+         }
+
+        myEstV2=myCalc.calcReclaim(myEstV2);
+
+
+        
+        return myEstV2;      
+    }
+
+
+    public async Task<EstimateV2>reclaimPresupuestoLatestBySection(int estNumber,int code)
+    {
+        dbutils dbhelper=new dbutils(_unitOfWork);
+        EstimateV2 myEstV2=new EstimateV2();
+        EstimateDB miEst=new EstimateDB();
+        EstimateHeaderDBVista miEstHeaderV=new EstimateHeaderDBVista();
+        List<EstimateDetailDBVista> miEstDetV=new List<EstimateDetailDBVista>();
+
+        // Levanto el header segun numero y version
+        miEstHeaderV=await _unitOfWork.EstimateHeadersDB.GetByEstNumberLastVersBySectionVistaAsync(estNumber,code);
+        if(miEst.estHeaderDB ==null)
+        {   // OJO
+            presupError=$"No de puede recuperar el estimate {estNumber}, vers {code}";
+             return null;
+        }
+
+        string miPais=await getCountry(miEstHeaderV);
+
+        // Con el ID del header levanto el estDetail.
+        if(miPais=="MEX")
+        {
+            miEstDetV=(await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeaderVistaMexsync(miEstHeaderV.id)).ToList();
+        }
+        else
+        {
+            miEstDetV=(await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeaderVistasync(miEstHeaderV.id)).ToList();
+        }
+        if(miEstDetV==null)
+        {
+            presupError=$"No de puede recuperar la version {code} del estimate {estNumber}";
             return null;
         }
 

@@ -121,6 +121,24 @@ public class PresupuestoController : ControllerBase
         }
     }
 
+    [HttpGet("/dpto/{num}/{code}")]
+    public async Task<ActionResult<EstimateV2>>GetLatestBySection(int num, int code) 
+    {
+       
+        EstimateV2 myEst=new EstimateV2();
+
+        myEst= await _presupService.reclaimPresupuestoLatestBySection(num,code);
+
+        if(myEst==null || code>3)
+        {
+            return BadRequest(_presupService.getLastErr());
+        }
+        else
+        {
+            return myEst;
+        }
+    }
+
 
    [HttpGet]
     public async Task<ActionResult<List<EstimateHeaderDB>>>GetHeaders() 
