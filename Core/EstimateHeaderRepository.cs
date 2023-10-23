@@ -27,9 +27,16 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
     public async Task<int> AddAsync(EstimateHeaderDB entity)
     {
 
+
+
+
+
         // Convierto la fecha al formato que postgre acepta. Le molesta AAAA/MM//dd. Tiene que ser AAAA-MM-dd
         //entity.hTimeStamp=DateTime.Now;
-        string tmpString=entity.htimestamp.ToString("yyyy-MM-dd hh:mm:ss");
+        string tmpString=entity.htimestamp.ToString("yyyy-MM-dd HH:mm:ss");
+        string fechaEmbarque=entity.fecha_embarque.ToString("yyyy-MM-dd HH:mm:ss");
+        string fechaPedimiento=entity.fecha_pedimiento.ToString("yyyy-MM-dd HH:mm:ss");
+
         //entity.hTimeStamp=DateOnly.FromDateTime(DateTime.Now);
         var sql = $@"INSERT INTO estimateheader 
                 (  
@@ -96,6 +103,11 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                     iibb_total,
                     project,
                     embarque,
+                    bl,
+                    fecha_embarque,
+                    pedimiento,
+                    fecha_pedimiento,
+                    avatar_url,
                     tarifonmex_id,
                     htimestamp) 
                             VALUES 
@@ -161,6 +173,11 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                                     '{entity.iibb_total.ToString(CultureInfo.CreateSpecificCulture("en-US"))}',
                                     '{entity.project}',
                                     '{entity.embarque}',
+                                    '{entity.bl}',
+                                    '{fechaEmbarque}',
+                                    '{entity.pedimiento}',
+                                    '{fechaPedimiento}',
+                                    '{entity.avatar_url}',
                                      {entity.tarifonmex_id},
                                     '{tmpString}')";
 
@@ -282,6 +299,20 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
         }
     }
 
+    public async Task<EstimateHeaderDBVista>GetByEstNumberLastVersBySectionVistaAsync(int estnumber, int code)
+    {
+        var sql = @$"select estimateheader.*, cargas.description as carga_str, po.description as paisorig, pd.description as paisdest
+                    from estimateheader
+                    inner join paisregion as po on po.id=estimateheader.fwdpaisregion_id 
+					inner join paisregion as pd on pd.id=estimateheader.paisregion_id 
+                    inner join cargas  on estimateheader.carga_id=cargas.id WHERE estnumber={estnumber} AND status={code} ORDER BY estvers DESC LIMIT 1";
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+            return await connection.QuerySingleOrDefaultAsync<EstimateHeaderDBVista>(sql);
+        }
+    }
+
     public async Task<EstimateHeaderDBVista> GetByEstNumberAnyVersVistaAsync(int estnumber, int estVers)
     {
         var sql = @$"select estimateheader.*, cargas.description as carga_str, po.description as paisorig, pd.description as paisdest
@@ -295,10 +326,17 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
             return await connection.QuerySingleOrDefaultAsync<EstimateHeaderDBVista>(sql);
         }
     }
-
+/*public string bl{get;set;}
+    public DateTime fecha_embarque{get;set;}
+    public string pedimiento{get;set;}
+    public DateTime fecha_pedimiento{get;set;}
+    public string avatar_url{get;set;}*/
     public async Task<int> UpdateAsync(EstimateHeaderDB entity) 
     {
-        var sql = @"UPDATE estimateheader SET 
+        string fechaEmbarque=entity.fecha_embarque.ToString("yyyy-MM-dd HH:mm:ss");
+        string fechaPedimiento=entity.fecha_pedimiento.ToString("yyyy-MM-dd HH:mm:ss");
+        
+        var sql = @$"UPDATE estimateheader SET 
                    
                         description = @description,
                         estnumber = @estnumber,
@@ -361,6 +399,12 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                         freight_insurance_cost = @freight_insurance_cost,
                         iibb_total = @iibb_total,
                         project = @project,
+                        embarque = @embarque,
+                        bl = @bl,
+                        fecha_embarque = @{fechaEmbarque},
+                        pedimiento = @pedimiento,
+                        fecha_pedimiento = @{fechaPedimiento},
+                        avatar_url = @avatar_url,
                         tarifonmex_id = @tarifonmex_id,
                         htimestamp = @htimestamp
                              WHERE Id = @Id"; 

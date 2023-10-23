@@ -30,6 +30,7 @@ using System.Diagnostics.Metrics;
 // LISTED 18_10_2023 Repara faltantes en extrag_src y src_notas 
 // LISTED 19_10_2023 Repara bug en estimateheader que no enviaba en el query el estag_src_notas.
 // LISTED 19_10_2023 await faltante en loadContenedor.  
+// LiSTED 23_10_2023 Se pasiva la logica de estados.
 
 
 public class PresupuestoService:IPresupuestoService
@@ -263,7 +264,7 @@ public class PresupuestoService:IPresupuestoService
         // cambios no deseados.
         estHDBPrevia=await _unitOfWork.EstimateHeadersDB.GetByEstNumberLastVers_1ROW_Async(estNumber);
 
-
+/*
         // Controlo que no me retrocedan el estado, salvo el jefe.
         if(miEst.estHeaderDB.status<estHDBPrevia.status && !cli.isGranted(permisos,cli.boss))
         {
@@ -292,7 +293,7 @@ public class PresupuestoService:IPresupuestoService
             return null;
         }
         // ##############################################################################
-
+*/
         // Nueva version usando el numero anterior.
         miEst.estHeaderDB.estnumber=estNumber;
         miEst.estHeaderDB.estvers=await _unitOfWork.EstimateHeadersDB.GetNextEstVersByEstNumber(estNumber);
@@ -314,16 +315,14 @@ public class PresupuestoService:IPresupuestoService
         {
             return null;
         }
-        // Le pongo la fecha / hora !!!!!!
-        //ret.estHeader.hTimeStamp=DateTime.Now;
-
-
 
         // Atenti con la primera pregunta. Me fijo en como vino el estimate original
         // Sio su estatus era 0, pasa a 1 automaticamente por que este fue el primer upgrade
         // IGNORO el JSON.
         // Todas las demas preguntas seran en base al valor que venga del json.
-        if(estHDBPrevia.status==0)
+
+
+        /*if(estHDBPrevia.status==0)
         {   
             myEstV2.estHeader.status=1;
         }
@@ -384,9 +383,9 @@ public class PresupuestoService:IPresupuestoService
         {
             presupError="ESTADO INVALIDO !!!. Proceso DETENIDO";
             return null;
-        }
+        }*/
 
-        myEstV2.estHeader.own=myEstV2.estHeader.own + $" - [PERMISOS:{permisos}]";
+        myEstV2.estHeader.own=myEstV2.estHeader.own /*+ $" - [PERMISOS:{permisos}]"*/;
 
         
         // lo que me deuvelve la rutina de calculo es un EstimateV2, cuyo Detail es mucho mas extenso
@@ -420,7 +419,7 @@ public class PresupuestoService:IPresupuestoService
 
             enumerador++;
 
-            if(miEst.estHeaderDB.status<2)
+            /*if(miEst.estHeaderDB.status<2)
             {
                 ed.extrag_comex1=0;
                 ed.extrag_comex2=0;
@@ -433,7 +432,7 @@ public class PresupuestoService:IPresupuestoService
                 ed.extrag_finan2=0;
                 ed.extrag_finan3=0;
                 ed.extrag_finan_notas="";
-            }
+            }*/
 
             ed.estimateheader_id=readBackHeader.id; // El ID que la base le asigno al header que acabo de insertar.
             ed.updated=false;  
@@ -482,6 +481,77 @@ public class PresupuestoService:IPresupuestoService
         if(miEstDetV==null)
         {
             presupError=$"No de puede recuperar la version {estVers} del estimate {estNumber}";
+            return null;
+        }
+
+        // Expando el EstimateDB a un EstimateV2
+        myEstV2=dbhelper.transferDataFromDBTypeWithVista(miEstHeaderV,miEstDetV);
+        // Cargo las constnates de calculo.
+        myEstV2.constantes=await _cnstService.getConstantesLastVers();
+        if(myEstV2.constantes==null)
+        {
+            presupError="No existe una instancia de constantes en tabla";
+            return null;
+        }
+        // Paso las costantes a estDetailServ via estimateService
+        _estService.setConstants(myEstV2.constantes);
+
+        // Por el momento reclaim tarifas no hace mucho. Los GLOC ya fueron calculados.
+        myEstV2=_estService.reclaimTarifas(myEstV2);
+        /*if(myEstV2==null)
+        {
+            presupError=_estService.getLastError();
+            return null;
+        }*/
+        // Carga los datos de la carga en EstimateV2.miCarga
+        await _estService.loadContenedor(myEstV2);
+        // Traduzco el id del pais / region en un string de 3 caracteres normalizado.
+        // Sera clave para bifurcar la logica del calculo segun los diferentes paises
+         myEstV2=await getCountry(myEstV2);
+         if(myEstV2.pais=="")
+         {
+            presupError="Pais no identificado";
+            return null;
+         }
+
+        myEstV2=myCalc.calcReclaim(myEstV2);
+
+
+        
+        return myEstV2;      
+    }
+
+
+    public async Task<EstimateV2>reclaimPresupuestoLatestBySection(int estNumber,int code)
+    {
+        dbutils dbhelper=new dbutils(_unitOfWork);
+        EstimateV2 myEstV2=new EstimateV2();
+        EstimateDB miEst=new EstimateDB();
+        EstimateHeaderDBVista miEstHeaderV=new EstimateHeaderDBVista();
+        List<EstimateDetailDBVista> miEstDetV=new List<EstimateDetailDBVista>();
+
+        // Levanto el header segun numero y version
+        miEstHeaderV=await _unitOfWork.EstimateHeadersDB.GetByEstNumberLastVersBySectionVistaAsync(estNumber,code);
+        if(miEst.estHeaderDB ==null)
+        {   // OJO
+            presupError=$"No de puede recuperar el estimate {estNumber}, vers {code}";
+             return null;
+        }
+
+        string miPais=await getCountry(miEstHeaderV);
+
+        // Con el ID del header levanto el estDetail.
+        if(miPais=="MEX")
+        {
+            miEstDetV=(await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeaderVistaMexsync(miEstHeaderV.id)).ToList();
+        }
+        else
+        {
+            miEstDetV=(await _unitOfWork.EstimateDetailsDB.GetAllByIdEstHeaderVistasync(miEstHeaderV.id)).ToList();
+        }
+        if(miEstDetV==null)
+        {
+            presupError=$"No de puede recuperar la version {code} del estimate {estNumber}";
             return null;
         }
 

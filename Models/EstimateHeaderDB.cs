@@ -3,6 +3,7 @@ namespace WebApiSample.Models;
 // CONFORME FINDINGS FROM MEET 29_8_2023
 // 12_10_2023 De los 5 extra gastos comex, 2 se pasan a sourcing. Se agrega campo de notas para los extrag sourcing
 // Se agrega campo embarque. Antes se agregan prj y un potencial puntero a entrada de tarifonmex (actualmente en desuso)
+// LISTED 23_10_2023: Se agregan campos del meeting 20_10_2023 (bl, fecha embarque, pedimiento, fecha pedimiento, y avatar_url)
 
 public class EstimateHeaderDB
 { 
@@ -69,6 +70,11 @@ public class EstimateHeaderDB
     public double iibb_total{get;set;}
     public string project{get;set;}
     public string embarque{get;set;}
+    public string bl{get;set;}
+    public DateTime fecha_embarque{get;set;}
+    public string pedimiento{get;set;}
+    public DateTime fecha_pedimiento{get;set;}
+    public string avatar_url{get;set;}
     public int tarifonmex_id{get;set;}
     public DateTime htimestamp{get;set;}
 }
@@ -139,6 +145,11 @@ public class EstimateHeaderDBVista
     public double iibb_total{get;set;}
     public string project{get;set;}
     public string embarque{get;set;}
+    public string bl{get;set;}
+    public DateTime fecha_embarque{get;set;}
+    public string pedimiento{get;set;}
+    public DateTime fecha_pedimiento{get;set;}
+    public string avatar_url{get;set;}
     public int tarifonmex_id{get;set;}
     public DateTime htimestamp{get;set;}
 

@@ -121,6 +121,24 @@ public class PresupuestoController : ControllerBase
         }
     }
 
+    [HttpGet("/dpto/{num}/{code}")]
+    public async Task<ActionResult<EstimateV2>>GetLatestBySection(int num, int code) 
+    {
+       
+        EstimateV2 myEst=new EstimateV2();
+
+        myEst= await _presupService.reclaimPresupuestoLatestBySection(num,code);
+
+        if(myEst==null || code>3)
+        {
+            return BadRequest(_presupService.getLastErr());
+        }
+        else
+        {
+            return myEst;
+        }
+    }
+
 
    [HttpGet]
     public async Task<ActionResult<List<EstimateHeaderDB>>>GetHeaders() 
@@ -149,8 +167,8 @@ public class PresupuestoController : ControllerBase
     [HttpGet("/importa")]
     public async Task<ActionResult<bool>>Importa(int num, int vers) 
     {
-       //_importService.ImportNCM_Mex("/Users/pedroaste/Downloads/FCLV4.xlsx");
-       _importService.ImportProductos("/Users/pedroaste/Downloads/Productos.xlsx");
+       _importService.ImportNCM_Mex("/Users/pedroaste/Downloads/FCLV4.xlsx");
+       //_importService.ImportProductos("/Users/pedroaste/Downloads/Productos.xlsx");
        return true;
     }
    
