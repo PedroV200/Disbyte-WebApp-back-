@@ -436,7 +436,9 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         // Todos las tarifas son actualizables (bits 0 a 7)
         // fregith_cost y freight_insurance se calculan desde las tarfias (bits 8 y 9)
         // Las tarfias se actualizaran x fecha y no por ID.
-        miEst.estHeader.status=0x00;
+                    //miEst.estHeader.status=0x00;
+
+        miEst.estHeader.status=1;            
         //miEst.estHeader.tarifrecent=1023;
         //miEst.estHeader.tarifupdate=1023;
         // FIN IMPORTANTE
