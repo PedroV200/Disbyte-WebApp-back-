@@ -23,6 +23,7 @@ using System.Net.WebSockets;
 // Ten tercer riel, compre con pantografo.
 // LISTED 5_10_2023 Se agrega un endpoint que solo devuelve los gastos locales segun la carga acotando la cantidad de consultas.
 // Ese endpoint es para consumir durante una creacion o actualuzacion de presupuesto, una vez que se ha seleccionado la carga.
+// LISTED 24_10_2023: Se incorpora la logica que calcula los gastos en casos de cargas dobles.  
 
 public class TarifonMexService:ITarifonMexService
 {
@@ -45,6 +46,7 @@ public class TarifonMexService:ITarifonMexService
 
     public async Task<GastosLocales>getGloc(int carga_id)
     {
+        int carga_id_q=0;
         Tarifas misTarifas=new Tarifas();
         GastosLocales misGloc=new GastosLocales();
         CONSTANTES misConst=new CONSTANTES();
@@ -85,34 +87,52 @@ public class TarifonMexService:ITarifonMexService
 
             // Las proximas tarfias no conocen los tipos dobles 2*20FT o 2*40HQ. Eso solo ocurre con el flete y en mexico
             // Aca si la carga es un 2* lo paso al correspondiente tipo sencillo
+            carga_id_q=carga_id;
             if(carga_id==misConst.carga220)
             {
-                carga_id=misConst.carga20;
+                carga_id_q=misConst.carga20;
             }
             if(carga_id==misConst.carga240)
             {
-                carga_id=misConst.carga40;
+                carga_id_q=misConst.carga40;
             }
 
-            misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,carga_id, misConst.paisreg_mex_guad, misConst.paisreg_china_shezhen);
+            misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,carga_id_q, misConst.paisreg_mex_guad, misConst.paisreg_china_shezhen);
             if(misTarifas.tFwd==null)        
             { 
-                haltError=$"Tartifon MEX: Tarifa Flete internacional mas reciente para carga ID:{carga_id} no encontrada)"; 
+                haltError=$"Tartifon MEX: Tarifa Flete internacional mas reciente para carga ID:{carga_id_q} no encontrada)"; 
                 return null;
             } 
+
             misGloc.freight_charge=misTarifas.tFwd.costo;
             misGloc.gloc_fwd=misTarifas.tFwd.costo_local;
             misGloc.insurance_charge=misTarifas.tFwd.seguro_porct;
 
-            misTarifas.tTerminal=await _unitOfWork.TarifTerminal.GetByNearestDateAsync(hoy,carga_id, misConst.paisreg_mex_guad);
+            misTarifas.tTerminal=await _unitOfWork.TarifTerminal.GetByNearestDateAsync(hoy,carga_id_q, misConst.paisreg_mex_guad);
             if(misTarifas.tTerminal==null)        
             { 
-                haltError=$"La tarifa Terminal para carga con ID {carga_id} mas prox no encontrada"; 
+                haltError=$"La tarifa Terminal para carga con ID {carga_id_q} mas prox no encontrada"; 
                 return null;
             } 
             misGloc.gasto_terminal=misTarifas.tTerminal.gasto_fijo;
 
             misGloc.htimestamp=misTarifas.tTerminal.htimestamp;
+
+            if(carga_id==misConst.carga220 || carga_id==misConst.carga240)
+            {
+                misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy, carga_id_q, misConst.paisreg_mex_guad);
+                if(misTarifas.tFlete==null)         
+                { 
+                    haltError=$"La tarifa Flete para car ID: {carga_id} mas prox no encontrada"; 
+                    return null;
+                }
+                misGloc.gasto_descarga_depo=misTarifas.tFlete.descarga_depo;
+
+                misGloc.gasto_descarga_depo=misGloc.gasto_descarga_depo*2;
+                misGloc.gloc_fwd=misGloc.gloc_fwd*2;
+                misGloc.gasto_terminal=misGloc.gasto_terminal*2;
+                misGloc.freight_charge=misGloc.freight_charge*2;
+            }
 
             return misGloc;
         }
