@@ -30,7 +30,8 @@ using System.Diagnostics.Metrics;
 // LISTED 18_10_2023 Repara faltantes en extrag_src y src_notas 
 // LISTED 19_10_2023 Repara bug en estimateheader que no enviaba en el query el estag_src_notas.
 // LISTED 19_10_2023 await faltante en loadContenedor.  
-// LiSTED 23_10_2023 Se pasiva la logica de estados.
+// LISTED 23_10_2023 Se pasiva la logica de estados.
+// LISTED 24_10_2023 El estado por defecto ern la creacion se fija en 1.
 
 
 public class PresupuestoService:IPresupuestoService
@@ -106,7 +107,8 @@ public class PresupuestoService:IPresupuestoService
         resultEDB=myDBhelper.transferDataToDBType(myEstV2);
         // Fijo el estado en 0. Es un presupuesto nuevo, no me importa lo que me manden en el JSON.
         // el presupuesto nuevo arranca con estado 0. 
-        resultEDB.estHeaderDB.status=0;
+        //resultEDB.estHeaderDB.status=0;
+        resultEDB.estHeaderDB.status=1;
 
         // Guardo el header.
         result=await _unitOfWork.EstimateHeadersDB.AddAsync(resultEDB.estHeaderDB);
@@ -532,7 +534,7 @@ public class PresupuestoService:IPresupuestoService
 
         // Levanto el header segun numero y version
         miEstHeaderV=await _unitOfWork.EstimateHeadersDB.GetByEstNumberLastVersBySectionVistaAsync(estNumber,code);
-        if(miEst.estHeaderDB ==null)
+        if(miEstHeaderV ==null)
         {   // OJO
             presupError=$"No de puede recuperar el estimate {estNumber}, vers {code}";
              return null;

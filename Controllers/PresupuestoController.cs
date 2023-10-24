@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 namespace WebApiSample.Controllers;
 
 // LISTED 6/7/2023 11:16 AM
+// LISTED 24_10_2023 09:29 AM Se completa el metodo /dpto/estnum. Entrega una lista con 3 estimates, que son el mas moderno de cada estado para 
+// numero de estimate pasado como parametro.  
 
 [ApiController]
 [Route("[controller]")]
@@ -121,22 +123,56 @@ public class PresupuestoController : ControllerBase
         }
     }
 
-    [HttpGet("/dpto/{num}/{code}")]
-    public async Task<ActionResult<EstimateV2>>GetLatestBySection(int num, int code) 
+    // Este metodo no devuelve codigo de error. Un fallo en un query inserta un estimateV2 dummy en la lista.
+    // Este metodo devuelve una lista de estimateV2. OJO
+    [HttpGet("/recentlist/{num}/")]
+    public async Task<ActionResult<List<EstimateV2>>>GetLatestBySection(int num) 
     {
        
-        EstimateV2 myEst=new EstimateV2();
+        List<EstimateV2> myEstV2List=new List<EstimateV2>();
+        EstimateV2 myEstV2Stat1=new EstimateV2();
+        EstimateV2 myEstV2Stat2=new EstimateV2();
+        EstimateV2 myEstV2Stat3=new EstimateV2();
+        EstimateV2 myEstV2dummy=new EstimateV2();
 
-        myEst= await _presupService.reclaimPresupuestoLatestBySection(num,code);
+        // Este es un estimateV2 dummy para el front. No puedo poner null. Mando un estimate con su estHeader_id en -1 y "SINDATOS" en la 
+        // descripcion.
+        myEstV2dummy.estHeader.id=-1;
+        myEstV2dummy.estHeader.description="SINDATOS";
 
-        if(myEst==null || code>3)
+        // Consulto los 3 estados. Cada consulta me genera un estimate.
+        myEstV2Stat1= await _presupService.reclaimPresupuestoLatestBySection(num,1);
+        myEstV2Stat2= await _presupService.reclaimPresupuestoLatestBySection(num,2);
+        myEstV2Stat3= await _presupService.reclaimPresupuestoLatestBySection(num,3); 
+
+        // Inserto las 3 consultas en una lista. A medida que inserto voy preguntando. Si el query devolvio null
+        // inserto el estimate dummy. Si no inserto el resultado del query.
+        if(myEstV2Stat1==null)
         {
-            return BadRequest(_presupService.getLastErr());
+            myEstV2List.Add(myEstV2dummy);
         }
         else
         {
-            return myEst;
+            myEstV2List.Add(myEstV2Stat1);
         }
+        if(myEstV2Stat2==null)
+        {
+            myEstV2List.Add(myEstV2dummy);
+        }
+        else
+        {
+            myEstV2List.Add(myEstV2Stat2);
+        }
+        if(myEstV2Stat3==null)
+        {
+            myEstV2List.Add(myEstV2dummy);
+        }
+        else
+        {
+            myEstV2List.Add(myEstV2Stat3);
+        }
+        // Retorno una Lista. Ojo. No es un estimateV2, es un array de EstimateV2.
+        return myEstV2List;        
     }
 
 
