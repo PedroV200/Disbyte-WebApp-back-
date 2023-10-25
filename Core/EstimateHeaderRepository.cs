@@ -416,6 +416,16 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
         }
     }
 
+    public async Task<IEnumerable<string>>GetOwnersList()
+    {
+        var sql = $"select DISTINCT own from estimateheader";
+        using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+            return await connection.QueryAsync<string>(sql);
+        }
+    }
+
     public async Task<IEnumerable<TraceUser>> GetUserTraceByEstNumberUDAsync(int estnumber)
     {
         string sql="";
