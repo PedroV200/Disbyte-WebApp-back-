@@ -32,6 +32,7 @@ using System.Diagnostics.Metrics;
 // LISTED 19_10_2023 await faltante en loadContenedor.  
 // LISTED 23_10_2023 Se pasiva la logica de estados.
 // LISTED 24_10_2023 El estado por defecto ern la creacion se fija en 1.
+// LISTED 25_10_2023 Se desactiva el resto de la inicializacion x defecto en el create salvo lo notificado en 24_10_2023
 
 
 public class PresupuestoService:IPresupuestoService

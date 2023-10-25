@@ -428,9 +428,9 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
     public EstimateV2 setDefaultEstimateDB(EstimateV2 miEst)
     {
        
-        miEst=ClearExtraGastosSrc(miEst);
+        /*miEst=ClearExtraGastosSrc(miEst);
         miEst=ClearExtraGastosComex(miEst);
-        miEst=ClearExtraGastosFinanzas(miEst);
+        miEst=ClearExtraGastosFinanzas(miEst);*/
         // IMPORTANTE !!!!! 
         // Valores por defecto: Estodo 0.
         // Todos las tarifas son actualizables (bits 0 a 7)
@@ -442,7 +442,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
         //miEst.estHeader.tarifrecent=1023;
         //miEst.estHeader.tarifupdate=1023;
         // FIN IMPORTANTE
-        foreach(EstimateDetail edb in miEst.estDetails)
+        /*foreach(EstimateDetail edb in miEst.estDetails)
         {
             edb.extrag_comex1=0;
             edb.extrag_comex2=0;
@@ -456,7 +456,7 @@ public EstimateV2 transferDataFromDBTypeWithVista(EstimateHeaderDBVista miEstHea
             edb.extrag_src2=0;
             edb.extrag_src_notas="";
             edb.updated=false;
-        }
+        }*/
         return miEst;
     } 
 }

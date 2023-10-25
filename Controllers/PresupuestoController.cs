@@ -7,7 +7,8 @@ namespace WebApiSample.Controllers;
 
 // LISTED 6/7/2023 11:16 AM
 // LISTED 24_10_2023 09:29 AM Se completa el metodo /dpto/estnum. Entrega una lista con 3 estimates, que son el mas moderno de cada estado para 
-// numero de estimate pasado como parametro.  
+// numero de estimate pasado como parametro. 
+// Se Agrego el endpoint para comnsultar la lista de los usuarios del presupuesto 
 
 [ApiController]
 [Route("[controller]")]
@@ -207,5 +208,14 @@ public class PresupuestoController : ControllerBase
        //_importService.ImportProductos("/Users/pedroaste/Downloads/Productos.xlsx");
        return true;
     }
+
+   [HttpGet("owners/")]
+    public async Task<ActionResult<List<string>>>GetOwners() 
+    {
+        var result=await _unitOfWork.EstimateHeadersDB.GetOwnersList();
+        return result.ToList();
+        
+    }
+
    
 }
