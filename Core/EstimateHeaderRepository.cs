@@ -416,13 +416,13 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
         }
     }
 
-    public async Task<IEnumerable<string>>GetOwnersList()
+    public async Task<IEnumerable<OwnPresup>>GetOwnersList()
     {
-        var sql = $"select DISTINCT own from estimateheader";
+        var sql = $"select DISTINCT ON(own) own,id from estimateheader";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();
-            return await connection.QueryAsync<string>(sql);
+            return await connection.QueryAsync<OwnPresup>(sql);
         }
     }
 

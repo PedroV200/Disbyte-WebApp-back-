@@ -23,4 +23,10 @@
         public string region {get;set;}
         
     }
+
+    public class OwnPresup
+    {
+        public int id{get;set;}
+        public string own{get;set;}
+    }
 }

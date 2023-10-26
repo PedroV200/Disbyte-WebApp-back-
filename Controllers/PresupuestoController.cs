@@ -210,7 +210,7 @@ public class PresupuestoController : ControllerBase
     }
 
    [HttpGet("owners/")]
-    public async Task<ActionResult<List<string>>>GetOwners() 
+    public async Task<ActionResult<List<OwnPresup>>>GetOwners() 
     {
         var result=await _unitOfWork.EstimateHeadersDB.GetOwnersList();
         return result.ToList();
