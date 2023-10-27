@@ -46,12 +46,14 @@ public class ImportService: IImportService
 
             tmp.fraccionArancelaria=row[0].ToString();
 
+            /*    SOLO NET 7
             if(double.TryParse(row[1].ToString().Split('%')[0],nfi,out tmpDouble))
                 tmp.igi=tmpDouble*100.0;
             if(double.TryParse(row[2].ToString().Split('%')[0],nfi,out tmpDouble))
                 tmp.iva=tmpDouble*100.0; 
             if(double.TryParse(row[3].ToString().Split('%')[0],nfi,out tmpDouble))
                 tmp.dta=tmpDouble*100.0;    
+                */
 
             tmp.gravAcuerdo=row[4].ToString();
             tmp.bk=row[5].ToString();
@@ -90,7 +92,7 @@ public class ImportService: IImportService
             miNCMMex.sp1=0;
             miNCMMex.bsp1=false;  
             miNCMMex.otras_notas="";    
-            await _unitOfWork.NCM_MEXs.AddAsync(miNCMMex);
+            //await _unitOfWork.NCM_MEXs.AddAsync(miNCMMex);
             tablaNcmMex.Add(tmp); 
                         
 
@@ -130,6 +132,7 @@ public class ImportService: IImportService
             tmp.codigo=row[0].ToString();
             tmp.name=row[1].ToString();
 
+            /* SOLO NET 7
             if(double.TryParse(row[2].ToString(),nfi,out tmpDouble))
                 tmp.alto=tmpDouble;
             if(double.TryParse(row[3].ToString(),nfi,out tmpDouble))
@@ -137,12 +140,13 @@ public class ImportService: IImportService
             if(double.TryParse(row[4].ToString(),nfi,out tmpDouble))
                 tmp.peso=tmpDouble; 
             if(double.TryParse(row[5].ToString(),nfi,out tmpDouble))
-                tmp.profundidad=tmpDouble;         
+                tmp.profundidad=tmpDouble;         */
 
             tmp.tipodeproducto=row[6].ToString();
 
+            /* SOLO NET 7
             if(double.TryParse(row[7].ToString(),nfi,out tmpDouble))
-                tmp.volumen=tmpDouble;    
+                tmp.volumen=tmpDouble;   */ 
 
             if(int.TryParse(row[8].ToString(),out tmpInt))
                 tmp.unidadesporbulto=tmpInt;    

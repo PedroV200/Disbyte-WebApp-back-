@@ -18,7 +18,7 @@ public class NCM_MexController : ControllerBase
     }
 
     [HttpPost(Name = "Post NCM_Mex")]
-    public async Task<IActionResult>Post(NCM_Mex entity)
+    public async Task<IActionResult>Post(NCM_Mex_py entity)
     {
         try
         {
@@ -38,15 +38,15 @@ public class NCM_MexController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult>Put(int id,NCM_Mex entity)
+    public async Task<IActionResult>Put(int id,NCM_Mex_py entity)
     {
         try
         {
             // Controlo que el id sea consistente.
-            if (id!=entity.id)
+            /*if (id!=entity.id)
             {
                 return BadRequest();
-            }
+            }*/
             var result=await _unitOfWork.NCM_MEXs.UpdateAsync(entity);
             // Si la operacion devolvio 0 filas .... es por que no le pegue al id.
             if(result==0)
@@ -83,7 +83,7 @@ public class NCM_MexController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<NCM_Mex> Get(int id)
+    public async Task<NCM_Mex_py> Get(int id)
     {
         try
         {
@@ -96,7 +96,7 @@ public class NCM_MexController : ControllerBase
     }
 
     [HttpGet(Name = "GetAll_NCM_Mex")]
-    public async Task<IEnumerable<NCM_Mex>> GetAll()
+    public async Task<IEnumerable<NCM_Mex_py>> GetAll()
     {
         return await _unitOfWork.NCM_MEXs.GetAllAsync();
     }

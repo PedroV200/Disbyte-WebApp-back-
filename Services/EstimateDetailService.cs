@@ -40,9 +40,9 @@ public class EstimateDetailService: IEstimateDetailService
         return null;
     }
 
-    public async Task<NCM_Mex> lookUp_NCM_MEX_Data(EstimateDetail estDetails)
+    public async Task<NCM_Mex_py> lookUp_NCM_MEX_Data(EstimateDetail estDetails)
     {
-        NCM_Mex myNCM=await _unitOfWork.NCM_MEXs.GetByIdAsync(estDetails.ncm_id); 
+        NCM_Mex_py myNCM=await _unitOfWork.NCM_MEXs.GetByIdAsync(estDetails.ncm_id); 
         if(myNCM!=null)
         {
             return myNCM;

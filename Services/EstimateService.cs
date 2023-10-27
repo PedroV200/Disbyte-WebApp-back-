@@ -241,7 +241,7 @@ public class EstimateService: IEstimateService
 
     public async Task<EstimateV2>search_NCM_MEX_DATA(EstimateV2 est)
     {
-        NCM_Mex myNCM=new NCM_Mex();
+        NCM_Mex_py myNCM=new NCM_Mex_py();
 
         foreach(EstimateDetail ed in est.estDetails)
         {  
@@ -251,9 +251,9 @@ public class EstimateService: IEstimateService
                 haltError=$"FALLO NCM='{ed.ncm_id}', DET= '{ed.description}";
                 return null;
            }
-           ed.ncm_arancel=myNCM.igi/100.0;
-           ed.ncm_te_dta_otro=myNCM.dta/100.0;
-           ed.ncm_iva=myNCM.iva/100.0;
+           ed.ncm_arancel=myNCM.igi;
+           ed.ncm_te_dta_otro=myNCM.dta;
+           ed.ncm_iva=myNCM.iva;
         }
         return est;
     }

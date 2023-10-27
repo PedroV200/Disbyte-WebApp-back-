@@ -18,3 +18,21 @@ public class NCM_Mex
     public string otras_notas{get;set;}
     public DateTime htimestamp{get;set;}
 }
+
+
+
+public class NCM_Mex_py
+{
+    public int id {get;set;}
+    public string code {get;set;}
+    public double igi {get;set;}
+    public double iva{get;set;}
+    public double dta{get;set;}
+    public string gravamenes_acuerdo {get;set;}
+    public string bk {get;set;}
+    public string description{get;set;}
+    public string documentacion_obligatoria_instancia_aduanera {get;set;}
+    public string lealtad_comercial {get;set;}
+    public string documentacion_requerida_para_ingreso_a_deposito {get;set;}
+    public DateTime last_update{get;set;}
+}
