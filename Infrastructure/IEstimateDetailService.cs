@@ -84,6 +84,6 @@ public interface IEstimateDetailService : IGenericService<EstimateDetail>
 
     public Task<NCM> lookUp_NCM_Data(EstimateDetail estDetails);
 
-    public Task<NCM_Mex> lookUp_NCM_MEX_Data(EstimateDetail estDetails);
+    public Task<NCM_Mex_py> lookUp_NCM_MEX_Data(EstimateDetail estDetails);
 
 }
