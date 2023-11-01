@@ -10,7 +10,14 @@ class BuildDateService: IBuilDateService
         public string getBuildDate()
         {
             var buildTime = GetLinkerTime(Assembly.GetEntryAssembly());
-            string tmp="(c)Disbyte 2023, BUILD: (FECHA: "+buildTime.Date.ToString("yyyy-MM-dd")+" - HORA: "+buildTime.Hour.ToString()+":"+buildTime.Minute.ToString()+":"+buildTime.Second.ToString()+")";
+            string tmp="(c)Disbyte 2023, BUILD: (FECHA: " +buildTime.Date.ToString("yyyy-MM-dd")+" - HORA: "+buildTime.Hour.ToString("00")+":"+buildTime.Minute.ToString("00")+":"+buildTime.Second.ToString("00")+")"
+                        +"\r\n"+
+@$"
+MEMORIA DE CAMBIOS:
+31_10_2023: Se crea un entindad especifica para el tarifario de MEX en lugar de distribuir 
+el tarifario entre las 8 tables dado que no permite la importacion ni mostrar historicos                                        
+
+                                ";
             return tmp;//+buildTime.Date.ToString("yyyy-MM-dd")+" "+buildTime.TimeOfDay.ToString("HH:mm:ss");
         }
 
