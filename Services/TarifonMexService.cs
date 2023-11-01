@@ -23,7 +23,9 @@ using System.Net.WebSockets;
 // Ten tercer riel, compre con pantografo.
 // LISTED 5_10_2023 Se agrega un endpoint que solo devuelve los gastos locales segun la carga acotando la cantidad de consultas.
 // Ese endpoint es para consumir durante una creacion o actualuzacion de presupuesto, una vez que se ha seleccionado la carga.
-// LISTED 24_10_2023: Se incorpora la logica que calcula los gastos en casos de cargas dobles.  
+// LISTED 24_10_2023: Se incorpora la logica que calcula los gastos en casos de cargas dobles. 
+// LISTED 31_10_2023: Nace una entidad esepcifica para Mexico, evitando la altisima ineficiencia del tarifon.
+// Se Conserva el servicio para atender cualquier calculo entre la tarifa y lod GLOC que se envien al front 
 
 public class TarifonMexService:ITarifonMexService
 {
@@ -47,7 +49,7 @@ public class TarifonMexService:ITarifonMexService
     public async Task<GastosLocales>getGloc(int carga_id)
     {
         int carga_id_q=0;
-        Tarifas misTarifas=new Tarifas();
+        TarifasMex misTarifas=new TarifasMex();
         GastosLocales misGloc=new GastosLocales();
         CONSTANTES misConst=new CONSTANTES();
 
@@ -56,91 +58,65 @@ public class TarifonMexService:ITarifonMexService
         misConst=await _unitOfWork.Constantes.GetLastIdAsync();
         if(misConst==null)
         {
-            haltError="TarifonMEX: Entrada a la tabla de constantes no encontrada";
+            haltError="Tarifasmex: Entrada a la tabla de constantes no encontrada";
             return null;
         }
 
-        misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByNearestDateAsync(hoy,misConst.paisreg_mex_guad);
-        if(misTarifas.tDespa==null)         
-        { 
-            haltError=$"La tarifa Despa mas prox no encontrada"; 
-            return null;
-        }
-        //Despa
-        misGloc.gloc_despachante_fijo=misTarifas.tDespa.cargo_fijo;
-        misGloc.gloc_despachante_var=misTarifas.tDespa.cargo_variable;
-        misGloc.gloc_despachante_otro1=misTarifas.tDespa.clasificacion;
-        misGloc.gloc_despachante_otro2=misTarifas.tDespa.consultoria;
-
-
-        if((carga_id==misConst.carga20)||(carga_id==misConst.carga220)||(carga_id==misConst.carga40)||(carga_id==misConst.carga240))
+        misTarifas=await _unitOfWork.TarifasMexico.GetByNearestDateAsync(hoy);
+         if(misConst==null)
         {
-            //Flete y descarga 1*20FT
-            misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy, carga_id, misConst.paisreg_mex_guad);
-            if(misTarifas.tFlete==null)         
-            { 
-                haltError=$"La tarifa Flete para car ID: {carga_id} mas prox no encontrada"; 
-                return null;
-            }
-            misGloc.flete_interno=misTarifas.tFlete.flete_interno;
-            misGloc.gasto_descarga_depo=misTarifas.tFlete.descarga_depo;
+            haltError=$"Tarifasmex: No es posible encontrar una tarifa cercana a la fecha: {hoy}";
+            return null;
+        }
 
-            // Las proximas tarfias no conocen los tipos dobles 2*20FT o 2*40HQ. Eso solo ocurre con el flete y en mexico
-            // Aca si la carga es un 2* lo paso al correspondiente tipo sencillo
-            carga_id_q=carga_id;
-            if(carga_id==misConst.carga220)
-            {
-                carga_id_q=misConst.carga20;
-            }
-            if(carga_id==misConst.carga240)
-            {
-                carga_id_q=misConst.carga40;
-            }
+        //Gastos Despachante
+        misGloc.gloc_despachante_fijo=misTarifas.despa_fijo;
+        misGloc.gloc_despachante_var=misTarifas.despa_var;
+        misGloc.gloc_despachante_otro1=misTarifas.despa_clasific;
+        misGloc.gloc_despachante_otro2=misTarifas.despa_consult;
+        //Seguro del embarque
+        misGloc.insurance_charge=misTarifas.seguro;
 
-            misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,carga_id_q, misConst.paisreg_mex_guad, misConst.paisreg_china_shezhen);
-            if(misTarifas.tFwd==null)        
-            { 
-                haltError=$"Tartifon MEX: Tarifa Flete internacional mas reciente para carga ID:{carga_id_q} no encontrada)"; 
-                return null;
-            } 
-
-            misGloc.freight_charge=misTarifas.tFwd.costo;
-            misGloc.gloc_fwd=misTarifas.tFwd.costo_local;
-            misGloc.insurance_charge=misTarifas.tFwd.seguro_porct;
-
-            misTarifas.tTerminal=await _unitOfWork.TarifTerminal.GetByNearestDateAsync(hoy,carga_id_q, misConst.paisreg_mex_guad);
-            if(misTarifas.tTerminal==null)        
-            { 
-                haltError=$"La tarifa Terminal para carga con ID {carga_id_q} mas prox no encontrada"; 
-                return null;
-            } 
-            misGloc.gasto_terminal=misTarifas.tTerminal.gasto_fijo;
-
-            misGloc.htimestamp=misTarifas.tTerminal.htimestamp;
-
-            if(carga_id==misConst.carga220 || carga_id==misConst.carga240)
-            {
-                misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy, carga_id_q, misConst.paisreg_mex_guad);
-                if(misTarifas.tFlete==null)         
-                { 
-                    haltError=$"La tarifa Flete para car ID: {carga_id} mas prox no encontrada"; 
-                    return null;
-                }
-                misGloc.gasto_descarga_depo=misTarifas.tFlete.descarga_depo;
-
-                misGloc.gasto_descarga_depo=misGloc.gasto_descarga_depo*2;
-                misGloc.gloc_fwd=misGloc.gloc_fwd*2;
-                misGloc.gasto_terminal=misGloc.gasto_terminal*2;
-                misGloc.freight_charge=misGloc.freight_charge*2;
-            }
-
-            return misGloc;
+        //Gastos que varian con la carga
+        if(carga_id==misConst.carga20)
+        {
+            misGloc.gasto_terminal=misTarifas.terminal_1p20ft;
+            misGloc.gasto_descarga_depo=misTarifas.descarga_meli_1p20ft_guad;
+            misGloc.freight_charge=misTarifas.flete_1p20ft;
+            misGloc.gloc_fwd=misTarifas.gloc_fwd_1p20ft;
+            misGloc.flete_interno=misTarifas.fleteint_1p20ft_guad;
+            
+        }
+        else if(carga_id==misConst.carga220)    // Los tipos 2*20 y 2*40 tienen un gastos definido para el  flete local 
+        {                                       // El resto consite en multiplicar x 2 los gastos de una carga simple
+            misGloc.gasto_terminal=2*misTarifas.terminal_1p20ft;
+            misGloc.gasto_descarga_depo=2*misTarifas.descarga_meli_1p20ft_guad;
+            misGloc.freight_charge=2*misTarifas.flete_1p20ft;
+            misGloc.gloc_fwd=2*misTarifas.gloc_fwd_1p20ft;
+            misGloc.flete_interno=misTarifas.fleteint_2p20ft_guad;
+        }
+        else if(carga_id==misConst.carga40)
+        {
+            misGloc.gasto_terminal=misTarifas.terminal_1p40sthq;
+            misGloc.gasto_descarga_depo=misTarifas.descarga_meli_1p40sthq_guad;
+            misGloc.freight_charge=misTarifas.flete_1p40sthq;
+            misGloc.gloc_fwd=misTarifas.gloc_fwd_1p40sthq;
+            misGloc.flete_interno=misTarifas.fleteint_1p40sthq_guad;
+        }
+        else if(carga_id==misConst.carga240)
+        {
+            misGloc.gasto_terminal=2*misTarifas.terminal_1p40sthq;
+            misGloc.gasto_descarga_depo=2-misTarifas.descarga_meli_1p40sthq_guad;
+            misGloc.freight_charge=2*misTarifas.flete_1p40sthq;
+            misGloc.gloc_fwd=2*misTarifas.gloc_fwd_1p40sthq;
+            misGloc.flete_interno=misTarifas.fleteint_2p40sthq_guad;
         }
         else
         {
-            haltError=$"Carga con ID: {carga_id} no soportada. Cargas soportadas: 20FT, 40HQ, 2*20FT, 2*40HQ";
+            haltError=$"Tarifasmex: carga {carga_id} NO DEFINIDA";
             return null;
-        }        
+        }
+        return misGloc;
     }
 
 
@@ -152,106 +128,33 @@ public class TarifonMexService:ITarifonMexService
     public async Task<TarifonMex> getTarifon()
     {
         //#### RREGLAR !!! => misTarifasByDate=await _unitOfWork.TarifasPorFecha.GetByIdAsync(miEst.estHeader.tarifasbydateid);
-
-        Tarifas misTarifas=new Tarifas();
+        TarifasMex misTarifas=new TarifasMex();
         TarifonMex tarifonMX=new TarifonMex();
-        CONSTANTES misConst=new CONSTANTES();
-
         string hoy=DateTime.Now.ToString("yyyy-MM-dd");
 
-        misConst=await _unitOfWork.Constantes.GetLastIdAsync();
-        if(misConst==null)
-        {
-            haltError="TarifonMEX: Entrada a la tabla de constantes no encontrada";
-            return null;
-        }
+        misTarifas=await _unitOfWork.TarifasMexico.GetByNearestDateAsync(hoy);
 
-        misTarifas.tDespa=await _unitOfWork.TarifDespa.GetByNearestDateAsync(hoy,misConst.paisreg_mex_guad);
-        if(misTarifas.tDespa==null)         
-        { 
-            haltError=$"La tarifa Despa mas prox no encontrada"; 
-            return null;
-        }
-        //Despa
-        tarifonMX.despa_fijo=misTarifas.tDespa.cargo_fijo;
-        tarifonMX.despa_var=misTarifas.tDespa.cargo_variable;
-        tarifonMX.despa_clasific_oper=misTarifas.tDespa.clasificacion;
-        tarifonMX.despa_consult_compl=misTarifas.tDespa.consultoria;
 
-        //Flete internacional 20FT
-        misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,misConst.carga20, misConst.paisreg_mex_guad, misConst.paisreg_china_shezhen);
-        if(misTarifas.tFwd==null)        
-        { 
-            haltError="Tartifon MEX: Tarifa Flete internacional mas reciente 20FT no encontrada)"; 
-            return null;
-        } 
-        tarifonMX.flete_internacional_20ft=misTarifas.tFwd.costo;
-        tarifonMX.gastosLocales_20ft=misTarifas.tFwd.costo_local;
-        //Flete internacional 40ST/HQ
-        misTarifas.tFwd=await _unitOfWork.TarifFwd.GetByNearestDateAsync(hoy,misConst.carga40, misConst.paisreg_mex_guad, misConst.paisreg_china_shezhen);
-        if(misTarifas.tTerminal==null)        
-        { 
-            haltError="Tartifon MEX: Tarifa flete internacional mas reciente 40ST/HQ no encontrada)"; 
-            return null;
-        } 
-        tarifonMX.flete_internacional_40sthq=misTarifas.tFwd.costo;
-        tarifonMX.gastosLocales_40sthq=misTarifas.tFwd.costo_local;
-        //Seguro (cualquier entrada de la tabla tarfia de flete internacional lo tiene, es el mismo valor)
-        tarifonMX.seguro=misTarifas.tFwd.seguro_porct;
-
-        //Terminal 20FT
-        misTarifas.tTerminal=await _unitOfWork.TarifTerminal.GetByNearestDateAsync(hoy, misConst.carga20, misConst.paisreg_mex_guad);
-        if(misTarifas.tTerminal==null)        
-        { 
-            haltError=$"La tarifa Terminal para 20FT mas prox no encontrada"; 
-            return null;
-        } 
-        tarifonMX.terminal_20ft=misTarifas.tTerminal.gasto_fijo;
-        //Terminal 40FT
-        misTarifas.tTerminal=await _unitOfWork.TarifTerminal.GetByNearestDateAsync(hoy, misConst.carga40, misConst.paisreg_mex_guad);
-        if(misTarifas.tTerminal==null)        
-        { 
-            haltError=$"La tarifa Terminal para 40HQ mas prox no encontrada"; 
-            return null;
-        } 
-        tarifonMX.terminal_40sthq=misTarifas.tTerminal.gasto_fijo;
-
-        //Flete y descarga 1*20FT
-        misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy, misConst.carga20, misConst.paisreg_mex_guad);
-        if(misTarifas.tFlete==null)         
-        { 
-            haltError=$"La tarifa Flete 1p20ft mas prox no encontrada"; 
-            return null;
-        }
-        tarifonMX.flete_interno_1p20ft_guad=misTarifas.tFlete.flete_interno;
-        tarifonMX.descarga_meli_20ft_guad=misTarifas.tFlete.descarga_depo;
-        //Flete y descarga 2*20FT
-        misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy, misConst.carga220, misConst.paisreg_mex_guad);
-        if(misTarifas.tFlete==null)         
-        { 
-            haltError=$"La tarifa Flete 2p20ft mas prox no encontrada"; 
-            return null;
-        }
-        tarifonMX.flete_interno_2p20ft_guad=misTarifas.tFlete.flete_interno;
-        //Flete y descarga 1*40FT
-        misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy, misConst.carga40, misConst.paisreg_mex_guad);
-        if(misTarifas.tFlete==null)         
-        { 
-            haltError=$"La tarifa Flete 1p40sthq mas prox no encontrada"; 
-            return null;
-        }
-        tarifonMX.flete_interno_1p40sthq_guad=misTarifas.tFlete.flete_interno;
-        tarifonMX.descarga_meli_40sthq_guad=misTarifas.tFlete.descarga_depo;
-        //Flete y descarga 2*40FT
-        misTarifas.tFlete=await _unitOfWork.TarifFlete.GetByNearestDateAsync(hoy, misConst.carga240, misConst.paisreg_mex_guad);
-        if(misTarifas.tFlete==null)         
-        { 
-            haltError=$"La tarifa Flete 2p40sthq mas prox no encontrada"; 
-            return null;
-        }
-        tarifonMX.flete_interno_2p40sthq_guad=misTarifas.tFlete.flete_interno;
-
-        tarifonMX.htimestamp=misTarifas.tDespa.htimestamp;
+        tarifonMX.htimestamp=misTarifas.fecha;
+        tarifonMX.flete_internacional_20ft=misTarifas.flete_1p20ft;
+        tarifonMX.flete_internacional_40sthq=misTarifas.flete_1p40sthq;
+        tarifonMX.seguro=misTarifas.seguro;
+        tarifonMX.gastosLocales_20ft=misTarifas.gloc_fwd_1p20ft;
+        tarifonMX.gastosLocales_40sthq=misTarifas.gloc_fwd_1p40sthq;
+        tarifonMX.terminal_20ft=misTarifas.terminal_1p20ft;
+        tarifonMX.terminal_40sthq=misTarifas.terminal_1p40sthq;
+        tarifonMX.flete_interno_1p40sthq_guad=misTarifas.fleteint_1p40sthq_guad;
+        tarifonMX.flete_interno_1p20ft_guad=misTarifas.fleteint_1p20ft_guad;
+        tarifonMX.flete_interno_2p40sthq_guad=misTarifas.fleteint_2p40sthq_guad;
+        tarifonMX.flete_interno_2p20ft_guad=misTarifas.fleteint_2p20ft_guad;
+        tarifonMX.flete_interno_2p40sthq_cdmx=misTarifas.fleteint_2p40sthq_cdmx;
+        tarifonMX.flete_interno_2p20ft_cdmx=misTarifas.fleteint_2p20ft_cdmx;
+        tarifonMX.descarga_meli_40sthq_guad=misTarifas.descarga_meli_1p40sthq_guad;
+        tarifonMX.descarga_meli_20ft_guad=misTarifas.descarga_meli_1p20ft_guad;
+        tarifonMX.despa_fijo=misTarifas.despa_fijo;
+        tarifonMX.despa_var=misTarifas.despa_var;
+        tarifonMX.despa_clasific_oper=misTarifas.despa_clasific;
+        tarifonMX.despa_consult_compl=misTarifas.despa_consult;
         
         return tarifonMX;
     }

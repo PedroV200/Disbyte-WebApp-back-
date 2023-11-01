@@ -47,6 +47,7 @@ public static class ServiceRegistration
         services.AddTransient<ITarifasBancoRepository, TarifasBancoRepository>();
         services.AddTransient<ITarifasDespachanteRepository, TarifasDespachanteRepository>();
         services.AddTransient<ITarifasGestDigDocRepository, TarifasGestDigDocRepository>();
+        services.AddTransient<ITarifasMexRepository,TarifasMexRepository>();
         services.AddTransient<IProductoRepository, ProductoRepository>();
     }
 }
