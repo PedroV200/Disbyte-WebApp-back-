@@ -460,7 +460,7 @@ public class PresupuestoService:IPresupuestoService
         EstimateV2 myEstV2=new EstimateV2();
         EstimateDB miEst=new EstimateDB();
         EstimateHeaderDBVista miEstHeaderV=new EstimateHeaderDBVista();
-        List<EstimateDetailDBVista> miEstDetV=new List<EstimateDetailDBVista>();
+        List<EstimateDetailDBVista> miEstDetV=new List<EstimateDetailDBVista>(); 
 
         // Levanto el header segun numero y version
         miEstHeaderV=await _unitOfWork.EstimateHeadersDB.GetByEstNumberAnyVersVistaAsync(estNumber,estVers);
