@@ -242,8 +242,11 @@ public class calc
         myEstV2=_estService.registrarGastosLocalesPorProducto(myEstV2);
         myEstV2=_estService.registrarExtraGastosGlobalesPorProducto(myEstV2);
 
+
         // SUMA todo los gastos locales y extra que ya se encuentran ponderados por articulo
         myEstV2=_estService.CalcGastos_LOC_Y_EXTRA(myEstV2);
+        // Grand Total de los gastos locales
+        myEstV2=_estService.CalcularTotalExtraGastos(myEstV2);
         // Pondera el gasto calculado anterior x el FP y luego lo divide por la cantidad de articulos.
         myEstV2=_estService.CalcGastos_LOC_Y_EXTRA_BYPROD_UNIT(myEstV2);
         // Gastos_LOC_Y_EXTRA_U / Precio_U

@@ -134,6 +134,7 @@ foreach (var key in requiredVars)
         throw new Exception($"Config variable missing: {key}.");
     }
 }
+  
 
 // app.Urls.Add($"http://+:{app.Configuration.GetValue<string>("PORT")}");
 

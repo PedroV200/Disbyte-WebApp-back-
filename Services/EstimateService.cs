@@ -653,6 +653,17 @@ public double calcularGastosFwd(EstimateV2 miEst)
         return est;
     }
 
+    public EstimateV2 CalcularTotalExtraGastos(EstimateV2 est)
+    {
+        double tmp=0;
+        foreach(EstimateDetail ed in est.estDetails)
+        {
+            tmp+=ed.totalgastos_loc_y_extra;
+        }
+        est.estHeader.extragastos_total=tmp;
+        return est;
+    }
+
 
     
 
