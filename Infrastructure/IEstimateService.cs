@@ -105,6 +105,7 @@ public interface IEstimateService : IGenericService<EstimateV2>
     public EstimateV2 reclaimTarifas(EstimateV2 miEst);
     public Task<EstimateV2> loadContenedor(EstimateV2 miEst);
     public EstimateV2 CalcularGastosLocales(EstimateV2 miEst);
+    public EstimateV2 CalcularTotalExtraGastos(EstimateV2 est);
     public EstimateV2 CalcularGastosLocalesMEX(EstimateV2 miEst);
 
     }

@@ -276,7 +276,7 @@ public class EstimateDetailService: IEstimateDetailService
         tmp=0;
         //tmp=estD.precio_u;
         // Gastos locales ponderados 
-        tmp+=estD.gloc_bancos;
+        /*tmp+=estD.gloc_bancos;
         tmp+=estD.gloc_depositos;
         tmp+=estD.gloc_despachantes;
         tmp+=estD.gloc_flete;
@@ -284,7 +284,7 @@ public class EstimateDetailService: IEstimateDetailService
         tmp+=estD.gloc_gestdigdoc;
         tmp+=estD.gloc_polizas;
         tmp+=estD.gloc_terminales;
-        tmp+=estD.gloc_descarga; 
+        tmp+=estD.gloc_descarga; */
         // Sumo los extragastos que son por producto.
         tmp+=estD.extrag_comex1;
         tmp+=estD.extrag_comex2;
