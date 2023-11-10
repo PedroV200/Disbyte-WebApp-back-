@@ -108,7 +108,7 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                     pedimiento,
                     fecha_pedimiento,
                     avatar_url,
-                    tarifonmex_id,
+                    limite_carga,
                     htimestamp) 
                             VALUES 
                                     ('{entity.description}',
@@ -178,7 +178,7 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                                     '{entity.pedimiento}',
                                     '{fechaPedimiento}',
                                     '{entity.avatar_url}',
-                                     {entity.tarifonmex_id},
+                                     {entity.limite_carga},
                                     '{tmpString}')";
 
  
@@ -405,7 +405,7 @@ public class EstimateHeaderDBRepository : IEstimateHeaderDBRepository
                         pedimiento = @pedimiento,
                         fecha_pedimiento = @{fechaPedimiento},
                         avatar_url = @avatar_url,
-                        tarifonmex_id = @tarifonmex_id,
+                        limite_carga = @limite_carga,
                         htimestamp = @htimestamp
                              WHERE Id = @Id"; 
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))

@@ -20,6 +20,8 @@ el tarifario entre las 8 tables dado que no permite la importacion ni mostrar hi
 (https://gparlakov.medium.com/the-confusion-of-asp-net-configuration-with-environment-variables-c06c545ef732 )  
 La totalgastos_loc_y_extra en detail se usar solo para alojar la sumar de los extrag. 
 Se agrega calculo de los extrag_grand_total que antes se hacia en el front.  
+10_11_2023: Se solicita agregar campo de numero de contenedores al front. Se replica esto en el back. Se reusa 
+tarifonmex_id que no tenia uso y se renombra como limite_carga. Testeado con post y get.
 
 
                                 ";

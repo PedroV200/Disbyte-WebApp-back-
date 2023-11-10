@@ -75,7 +75,7 @@ public class EstimateHeaderDB
     public string pedimiento{get;set;}
     public DateTime fecha_pedimiento{get;set;}
     public string avatar_url{get;set;}
-    public int tarifonmex_id{get;set;}
+    public int limite_carga {get;set;}
     public DateTime htimestamp{get;set;}
 }
 
@@ -150,7 +150,7 @@ public class EstimateHeaderDBVista
     public string pedimiento{get;set;}
     public DateTime fecha_pedimiento{get;set;}
     public string avatar_url{get;set;}
-    public int tarifonmex_id{get;set;}
+    public int limite_carga{get;set;}
     public DateTime htimestamp{get;set;}
 
     public string carga_str{get;set;}
