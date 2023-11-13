@@ -103,7 +103,7 @@ public class TarifasMexRepository : ITarifasMexRepository
 
     public async Task<IEnumerable<TarifasMex>> GetAllAsync()
     {
-        var sql = $"SELECT * FROM tarifasmex ORDER BY abs(extract(epoch from (fecha - timestamp '{DateTime.Now.ToString()}'))) DESC";
+        var sql = $"SELECT * FROM tarifasmex ORDER BY abs(extract(epoch from (fecha - timestamp '{DateTime.Now.ToString("yyyy-MM-dd")}'))) DESC";
         using (var connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             connection.Open();

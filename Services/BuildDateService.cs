@@ -22,6 +22,7 @@ La totalgastos_loc_y_extra en detail se usar solo para alojar la sumar de los ex
 Se agrega calculo de los extrag_grand_total que antes se hacia en el front.  
 10_11_2023: Se solicita agregar campo de numero de contenedores al front. Se replica esto en el back. Se reusa 
 tarifonmex_id que no tenia uso y se renombra como limite_carga. Testeado con post y get.
+13_10_2023: Se repara bug en getall tarifasmex. La fecha usada en el query ordenado x fecha no tenia el formato correcto
 
 
                                 ";

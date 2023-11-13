@@ -78,38 +78,24 @@ public class TarifonMexService:ITarifonMexService
         misGloc.insurance_charge=misTarifas.seguro;
 
         //Gastos que varian con la carga
-        if(carga_id==misConst.carga20)
+        if(carga_id==misConst.carga20 || carga_id==misConst.carga220)
         {
             misGloc.gasto_terminal=misTarifas.terminal_1p20ft;
             misGloc.gasto_descarga_depo=misTarifas.descarga_meli_1p20ft_guad;
             misGloc.freight_charge=misTarifas.flete_1p20ft;
             misGloc.gloc_fwd=misTarifas.gloc_fwd_1p20ft;
             misGloc.flete_interno=misTarifas.fleteint_1p20ft_guad;
+            misGloc.flete_interno_doble=misTarifas.fleteint_2p20ft_guad;
             
         }
-        else if(carga_id==misConst.carga220)    // Los tipos 2*20 y 2*40 tienen un gastos definido para el  flete local 
-        {                                       // El resto consite en multiplicar x 2 los gastos de una carga simple
-            misGloc.gasto_terminal=2*misTarifas.terminal_1p20ft;
-            misGloc.gasto_descarga_depo=2*misTarifas.descarga_meli_1p20ft_guad;
-            misGloc.freight_charge=2*misTarifas.flete_1p20ft;
-            misGloc.gloc_fwd=2*misTarifas.gloc_fwd_1p20ft;
-            misGloc.flete_interno=misTarifas.fleteint_2p20ft_guad;
-        }
-        else if(carga_id==misConst.carga40)
+        else if(carga_id==misConst.carga40 || carga_id==misConst.carga240)
         {
             misGloc.gasto_terminal=misTarifas.terminal_1p40sthq;
             misGloc.gasto_descarga_depo=misTarifas.descarga_meli_1p40sthq_guad;
             misGloc.freight_charge=misTarifas.flete_1p40sthq;
             misGloc.gloc_fwd=misTarifas.gloc_fwd_1p40sthq;
             misGloc.flete_interno=misTarifas.fleteint_1p40sthq_guad;
-        }
-        else if(carga_id==misConst.carga240)
-        {
-            misGloc.gasto_terminal=2*misTarifas.terminal_1p40sthq;
-            misGloc.gasto_descarga_depo=2-misTarifas.descarga_meli_1p40sthq_guad;
-            misGloc.freight_charge=2*misTarifas.flete_1p40sthq;
-            misGloc.gloc_fwd=2*misTarifas.gloc_fwd_1p40sthq;
-            misGloc.flete_interno=misTarifas.fleteint_2p40sthq_guad;
+            misGloc.flete_interno_doble=misTarifas.fleteint_2p40sthq_guad;
         }
         else
         {
